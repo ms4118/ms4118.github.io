@@ -48,7 +48,8 @@ def noninstant(D, S, C, I, LT, P):
         return f"When the inventory level drops to {R_up}</br>units, place a replenishment order for {round_Q}."
         
     except ValueError:
-        print("Invalid input. Please enter numeric values.")
+        print(f"Invalid input. Please enter numeric values.")
+        return f"Invalid input. Please enter numeric values."
 
 
 
