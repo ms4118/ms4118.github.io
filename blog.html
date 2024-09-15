@@ -232,8 +232,6 @@
                   <py-script>
                       def on_instant(event):
                               D = float(Element("D1").element.value)
-                              if D <= 0:
-                                raise ValueError("D must be a positive number.")
                               S = float(Element("S1").element.value)
                               C = float(Element("C1").element.value)
                               I = float(Element("I1").element.value)
