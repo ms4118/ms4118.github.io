@@ -253,23 +253,42 @@
 
 
 
-
-        
         <div class="col-md-6 col-lg-4 mx-auto">
           <div class="box">
             <div class="detail-box">
               <h5>
                 Optimal Reorder Point - NON - Instantaneous Resupply
               </h5>
-              <a href="">
-                Solve Problem
-              </a>
+              <div class="">
+                  <input type="number" id="D2" placeholder="Annual demand (D) in units">
+                  <input type="number" id="S2" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" id="C2" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" id="I2" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" id="LT2" placeholder="Average lead time in time units">
+                  <input type="number" id="P2" placeholder="Replenishment rate in time units">
+                  <button id="button_noninstant">Solve Problem</button>
+                  <py-script>
+                      def on_noninstant(event):
+                              D = float(Element("D2").element.value)
+                              S = float(Element("S2").element.value)
+                              C = float(Element("C2").element.value)
+                              I = float(Element("I2").element.value)
+                              LT = float(Element("LT2").element.value)
+                              P = float(Element("P2").element.value)
+                    
+                              result = noninstant(D,S,C,I,LT,P)
+                    
+                              Element("out_noninstant").element.innerHTML = result
+                           #except ValueError:
+                              #Element("output").element.innerHTML = "Invalid input. Please enter numeric values."
+                  
+                      Element("button_noninstant").element.onclick = on_noninstant
+                    </py-script>
+                <div id="out_instant"></div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
   <!-- end blog section -->
 
