@@ -26,9 +26,7 @@ def order(D, S, C, I, LT):
 
 def noninstant(D, S, C, I, LT, P):
     try:
-        if D <= 0:
-            raise ValueError("D must be a positive number.")
-            return f"Invalid input."
+        
         # Calculate total cost and economic order quantity 
         numerator = 2 * D * S
         denominator = I * C
@@ -52,7 +50,7 @@ def noninstant(D, S, C, I, LT, P):
         
     except ValueError:
         print(f"Invalid input. Please enter numeric values.")
-        return f"Invalid input. Please enter numeric values."
+        return "Invalid input. Please enter numeric values."
 
 
 
