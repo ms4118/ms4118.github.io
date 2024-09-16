@@ -26,10 +26,6 @@ def order(D, S, C, I, LT):
 
 def noninstant(D, S, C, I, LT, P):
     try:
-        if D <= 0:
-        print("Invalid input. Please enter positive number for D")
-        return "Invalid input. Please enter positive number for D"
-
         
         # Calculate total cost and economic order quantity 
         numerator = 2 * D * S
@@ -53,8 +49,8 @@ def noninstant(D, S, C, I, LT, P):
         return f"When the inventory level drops to {R_up}</br>units, place a replenishment order for {round_Q}."
         
     except ValueError:
-        print(f"Invalid input. Please enter numeric values.")
-        #return "Invalid input. Please enter numeric values."
+        print(f"Invalid input. Please enter positive values.")
+        return "Invalid input. Please enter positive values."
 
 
 
