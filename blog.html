@@ -164,12 +164,12 @@
                                     def on_order(event_order):
                                         a = int(Element("a").element.value)
                                         b = int(Element("b").element.value)
-                                        # 调用外部 Python 文件中的函数
+                                        
                                         result = add(a,b)
-                                        # 将结果显示在页面中
+                                       
                                         Element("out_order").element.innerHTML = result
 
-                                    # 获取按钮并绑定点击事件
+                                   
                                     Element("button_order").element.onclick = on_order
                             </py-script>
                             <div id="out_order"></div>
@@ -186,10 +186,10 @@
                 Pull inventory control - single (Economic order quantity EOQ)
               </h5>
               <div class="">
-                  <input type="number" id="D" placeholder="Annual demand (D) in units">
-                  <input type="number" id="S" placeholder="Procurement cost (S) in Dollars per order">
-                  <input type="number" id="C" placeholder="Value of item (C) in Dollars per unit">
-                  <input type="number" id="I" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D" placeholder="Annual demand (D) in units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I" placeholder="Carrying cost (I) as a percent per year">
                   <button id="button_EOQ">Solve Problem</button>
                   <py-script>
                       def on_eoq(event):
@@ -223,11 +223,11 @@
                 Optimal Reorder Point - Instantaneous Resupply
               </h5>
               <div class="">
-                  <input type="number" id="D1" placeholder="Annual demand (D) in units">
-                  <input type="number" id="S1" placeholder="Procurement cost (S) in Dollars per order">
-                  <input type="number" id="C1" placeholder="Value of item (C) in Dollars per unit">
-                  <input type="number" id="I1" placeholder="Carrying cost (I) as a percent per year">
-                  <input type="number" id="LT1" placeholder="Average lead time in time units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D1" placeholder="Annual demand (D) in units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S1" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C1" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I1" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="LT1" placeholder="Average lead time in time units">
                   <button id="button_instant">Solve Problem</button>
                   <py-script>
                       def on_instant(event):
@@ -261,11 +261,11 @@
               </h5>
               <div class="">
                   <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D2" placeholder="Annual demand (D) in units">
-                  <input type="number" min="1" id="S2" placeholder="Procurement cost (S) in Dollars per order">
-                  <input type="number" min="1" id="C2" placeholder="Value of item (C) in Dollars per unit">
-                  <input type="number" min="1" id="I2" placeholder="Carrying cost (I) as a percent per year">
-                  <input type="number" min="1" id="LT2" placeholder="Average lead time in time units">
-                  <input type="number" min="1" id="P2" placeholder="Replenishment rate in time units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S2" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C2" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I2" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="LT2" placeholder="Average lead time in time units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="P2" placeholder="Replenishment rate in time units">
                   <button id="button_noninstant">Solve Problem</button>
                   <py-script>
                       def on_noninstant(event):
