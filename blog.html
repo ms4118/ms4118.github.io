@@ -270,14 +270,6 @@
                   <py-script>
                       def on_noninstant(event):
                               D = float(Element("D2").element.value)
-                              try:
-                                  D = float(Element("D").element.value)
-                                  if D <= 0:
-                                      raise ValueError("D must be a positive number.")
-                              except ValueError:
-                                  print("Invalid input. D must be a positive number.")
-                                  return "Invalid input. D must be a positive number."
-                                    
                               S = float(Element("S2").element.value)
                               C = float(Element("C2").element.value)
                               I = float(Element("I2").element.value)
