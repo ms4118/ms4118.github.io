@@ -260,12 +260,12 @@
                 Optimal Reorder Point - NON - Instantaneous Resupply
               </h5>
               <div class="">
-                  <input type="number" id="D2" placeholder="Annual demand (D) in units">
-                  <input type="number" id="S2" placeholder="Procurement cost (S) in Dollars per order">
-                  <input type="number" id="C2" placeholder="Value of item (C) in Dollars per unit">
-                  <input type="number" id="I2" placeholder="Carrying cost (I) as a percent per year">
-                  <input type="number" id="LT2" placeholder="Average lead time in time units">
-                  <input type="number" id="P2" placeholder="Replenishment rate in time units">
+                  <input type="number" min="1" id="D2" placeholder="Annual demand (D) in units">
+                  <input type="number" min="1" id="S2" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" min="1" id="C2" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" min="1" id="I2" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" min="1" id="LT2" placeholder="Average lead time in time units">
+                  <input type="number" min="1" id="P2" placeholder="Replenishment rate in time units">
                   <button id="button_noninstant">Solve Problem</button>
                   <py-script>
                       def on_noninstant(event):
