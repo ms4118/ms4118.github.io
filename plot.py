@@ -2,6 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+D = float(input("Enter Demand (D, units per year): "))  # Annual demand
+S = float(input("Enter Setup Cost (S): "))  # Cost per order
+C = float(input("Enter Cost per Unit (C): "))  # Cost per unit
+I = float(input("Enter Carrying Cost (I): "))  # Carrying cost per unit
+LT = float(input("Enter Lead Time (LT, weeks): "))  # Lead time in weeks
+
 def order(D, S, C, I, LT):
     try:
         # Calculate total cost and economic order quantity 
@@ -69,16 +75,16 @@ def plot_inventory_wave(Q_star, R_star, D, LT):
 
     # Add horizontal line for Q*
     plt.axhline(y=Q_star, color='purple', linestyle='--', label='Q*')
-    plt.text(time_points[0], Q_star + 0.1, 'Q*', ha='left', fontsize=10, color='purple')
-
+    plt.text(time_points[0], Q_star + 5, 'Q*', ha='left', fontsize=10, color='purple')
+    plt.text(time_points[0], Q_star + 0.2, f'{Q_star}', ha='left', fontsize=10, color='purple')  # Label for Q*
     # Mark the first R* point
     first_R_position = time_points[np.argmax(inventory_levels == R_star)]
-    plt.text(first_R_position, R_star + 0.1, 'R* (First)', ha='center', fontsize=10, color='orange')
-
+    plt.text(first_R_position, R_star + 5, 'R* (First)', ha='center', fontsize=10, color='orange')
+    plt.text(first_R_position, R_star + 0.2, f'{R_star}', ha='center', fontsize=10, color='orange')  # Label for first R*
     # Drop from R* to 0
     # Mark the second R* position at the second downward line
     second_R_position = first_R_position + time_to_0 + time_to_R
-    plt.text(second_R_position, R_star + 0.1, 'R* (Second)', ha='center', fontsize=10, color='orange')
+    plt.text(second_R_position, R_star + 0.3, 'R* (Second)', ha='center', fontsize=10, color='orange')
 
     # Draw arrow for Lead Time (LT)
     plt.annotate('', xy=(first_R_position + LT_days, R_star), xytext=(first_R_position, R_star),
