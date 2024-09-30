@@ -306,11 +306,10 @@
             <input type="number" id="LT1" placeholder="Average lead time in time units">
             <button id="button_instant">Solve Problem</button>
 
-            <py-script>
+            <py-script output="plot">
+              import matplotlib
               import matplotlib.pyplot as plt
               import numpy as np
-              import io
-              import base64
 
               def order(D, S, C, I, LT):
                   Q_star = (2 * D * S / I) ** 0.5
