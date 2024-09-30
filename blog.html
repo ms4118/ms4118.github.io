@@ -294,6 +294,9 @@
             </div>
           </div>
         </div>
+
+
+        
     <div class="col-md-6 col-lg-4 mx-auto">
       <div class="box">
         <div class="detail-box">
@@ -333,9 +336,6 @@
                   plt.savefig(buf, format='png')
                   plt.close()
                   buf.seek(0)
-
-                  img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-                  return f'data:image/png;base64,{img_base64}'
 
               def on_instant(event):
                   try:
