@@ -116,8 +116,8 @@ def plot_inventory_wave(Q_star, R_star, D, LT):
     plt.xlim(0, 3 * (time_to_R + time_to_0))
     plt.ylim(-10, Q_star + 10)
     plt.show()
-    print(f"When the inventory level drops to {R_up} units, place a replenishment order for {Q_up}.")
-    return f"When the inventory level drops to {R_up}</br>units, place a replenishment order for {Q_up}."
+    print(f"Hiii")
+    return f"Hiii"
 
 # Calculate Q* and R*
 Q_star, R_star = order(D, S, C, I, LT)
