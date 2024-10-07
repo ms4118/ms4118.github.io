@@ -17,10 +17,7 @@
 
   <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css"/>
   <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-  <py-env> 
-  - matplotlib 
-  </py-env>
-  
+
   <!-- bootstrap core css -->
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
 
@@ -294,76 +291,74 @@
             </div>
           </div>
         </div>
-
-
         
-    <div class="col-md-6 col-lg-4 mx-auto">
-      <div class="box">
-        <div class="detail-box">
-          <h5>Optimal Reorder Point - Instantaneous Resupply</h5>
-          <div class="">
-            <input type="number" id="D1" placeholder="Annual demand (D) in units">
-            <input type="number" id="S1" placeholder="Procurement cost (S) in Dollars per order">
-            <input type="number" id="C1" placeholder="Value of item (C) in Dollars per unit">
-            <input type="number" id="I1" placeholder="Carrying cost (I) as a percent per year">
-            <input type="number" id="LT1" placeholder="Average lead time in time units">
-            <button id="button_instant">Solve Problem</button>
-
-            <py-script output="plot">
-              import matplotlib
-              import matplotlib.pyplot as plt
-              import numpy as np
-
-              def order(D, S, C, I, LT):
-                  Q_star = (2 * D * S / I) ** 0.5
-                  R_star = D * LT
-                  return Q_star, R_star
-
-              def plot_inventory_wave(Q_star, R_star, D, LT):
-                  time = np.linspace(0, 2 * LT, 100)
-                  inventory = np.maximum(0, R_star + (D * time) - Q_star)
-
-                  plt.figure(figsize=(10, 5))
-                  plt.plot(time, inventory, label='Inventory Level')
-                  plt.axhline(y=R_star, color='r', linestyle='--', label='Reorder Point')
-                  plt.title('Inventory Level Over Time')
-                  plt.xlabel('Time')
-                  plt.ylabel('Inventory Level')
-                  plt.legend()
-                  plt.grid()
-
-                  buf = io.BytesIO()
-                  plt.savefig(buf, format='png')
-                  plt.close()
-                  buf.seek(0)
-
-              def on_instant(event):
-                  try:
-                      D = float(Element("D1").element.value)
-                      S = float(Element("S1").element.value)
-                      C = float(Element("C1").element.value)
-                      I = float(Element("I1").element.value) / 100
-                      LT = float(Element("LT1").element.value)
-
-                      Q_star, R_star = order(D, S, C, I, LT)
-                      img_data = plot_inventory_wave(Q_star, R_star, D, LT)
-                      Element("out_instant").element.innerHTML = "Plot generated!"
-                      
-                      Element("plot_image").element.src = img_data
-                      Element("plot_image").element.style.display = "block"
-
-                  except ValueError:
-                      Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
-
-              Element("button_instant").element.onclick = on_instant
-            </py-script>
-            <div id="out_instant"></div>
-            <img id="plot_image" src="" alt="Inventory Plot" style="display:none;"/>
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>Optimal Reorder Point - Instantaneous Resupply</h5>
+              <div class="">
+                <input type="number" id="D1" placeholder="Annual demand (D) in units">
+                <input type="number" id="S1" placeholder="Procurement cost (S) in Dollars per order">
+                <input type="number" id="C1" placeholder="Value of item (C) in Dollars per unit">
+                <input type="number" id="I1" placeholder="Carrying cost (I) as a percent per year">
+                <input type="number" id="LT1" placeholder="Average lead time in time units">
+                <button id="button_instant">Solve Problem</button>
+    
+                <py-script output="plot">
+                  import matplotlib
+                  import matplotlib.pyplot as plt
+                  import numpy as np
+    
+                  def order(D, S, C, I, LT):
+                      Q_star = (2 * D * S / I) ** 0.5
+                      R_star = D * LT
+                      return Q_star, R_star
+    
+                  def plot_inventory_wave(Q_star, R_star, D, LT):
+                      time = np.linspace(0, 2 * LT, 100)
+                      inventory = np.maximum(0, R_star + (D * time) - Q_star)
+    
+                      plt.figure(figsize=(10, 5))
+                      plt.plot(time, inventory, label='Inventory Level')
+                      plt.axhline(y=R_star, color='r', linestyle='--', label='Reorder Point')
+                      plt.title('Inventory Level Over Time')
+                      plt.xlabel('Time')
+                      plt.ylabel('Inventory Level')
+                      plt.legend()
+                      plt.grid()
+    
+                      buf = io.BytesIO()
+                      plt.savefig(buf, format='png')
+                      plt.close()
+                      buf.seek(0)
+    
+                  def on_instant(event):
+                      try:
+                          D = float(Element("D1").element.value)
+                          S = float(Element("S1").element.value)
+                          C = float(Element("C1").element.value)
+                          I = float(Element("I1").element.value) / 100
+                          LT = float(Element("LT1").element.value)
+    
+                          Q_star, R_star = order(D, S, C, I, LT)
+                          img_data = plot_inventory_wave(Q_star, R_star, D, LT)
+                          Element("out_instant").element.innerHTML = "Plot generated!"
+                          
+                          Element("plot_image").element.src = img_data
+                          Element("plot_image").element.style.display = "block"
+    
+                      except ValueError:
+                          Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
+    
+                  Element("button_instant").element.onclick = on_instant
+                </py-script>
+                <div id="out_instant"></div>
+                <img id="plot_image" src="" alt="Inventory Plot" style="display:none;"/>
+              </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </body>
   <!-- end blog section -->
 
