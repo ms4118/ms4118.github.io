@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <link rel="icon" href="images/fevicon.png" type="image/gif" />
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Michael GOM</title>
+
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css"/>
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet" />
+
+  <!-- font awesome style -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" />
+  <!-- Custom styles for this template -->
+  <link href="css/style.css" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="css/responsive.css" rel="stylesheet" />
+  
+</head>
+
+<body class="sub_page">
+<py-env>
+    - matplotlib
+    - numpy
+</py-env>
+  <div class="hero_area">
+    <!-- header section starts -->
+    <header class="header_section long_section px-0">
+      <nav class="navbar navbar-expand-lg custom_nav-container ">
+        <a class="navbar-brand" href="index.html">
+          <span>
+            Michael GOM
+          </span>
+        </a>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class=""> </span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+            <ul class="navbar-nav  ">
+              <li class="nav-item ">
+                <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="about.html"> About</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="furniture.html">Forecasting Logistics</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="blog.html">Inventory Management</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="contact.html">Contact Us</a>
+              </li>
+            </ul>
+          </div>
+          <div class="quote_btn-container">
+            <a href="">
+              <span>
+               Project
+              </span>
+              <i class="fa fa-user" aria-hidden="true"></i>
+            </a>
+            <form class="form-inline">
+              <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <!-- end header section -->
+  </div>
+
+
+  <!-- blog section -->
+
+  <section class="blog_section layout_padding">
+    <div class="container">
+      <div class="heading_container">
+        <h2>
+          Global Operation Management - Inventory Management 
+        </h2>
+        <p>
+           This page aims to help you solve problems from the Global operation management sector, specifically about Inventory Management.
+        </p>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Overall Service Level
+              </h5>
+              <a href="">
+                Solve Problem
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+
+        
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Weighted Average fill rate (WAFR)
+              </h5>
+              <a href="">
+                Solve Problem
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+
+        
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Push inventory control 
+              </h5>
+              <a href="">
+                Solve Problem
+              </a>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="col-md-6 col-lg-4">
+                <div class="box">
+                    <div class="detail-box">
+                        <h5>
+                            Pull inventory control - single (order quantity)
+                        </h5>
+                        <div class="">
+                            <input type="number" id="a" placeholder="input">
+                            <input type="number" id="b" placeholder="input">
+                            <button id="button_order">Solve Problem</button>
+                            <py-script>
+                                    def on_order(event_order):
+                                        a = int(Element("a").element.value)
+                                        b = int(Element("b").element.value)
+                                        
+                                        result = add(a,b)
+                                       
+                                        Element("out_order").element.innerHTML = result
+
+                                   
+                                    Element("button_order").element.onclick = on_order
+                            </py-script>
+                            <div id="out_order"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Pull inventory control - single (Economic order quantity EOQ)
+              </h5>
+              <div class="">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D" placeholder="Annual demand (D) in units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I" placeholder="Carrying cost (I) as a percent per year">
+                  <button id="button_EOQ">Solve Problem</button>
+                  <py-script>
+                      def on_eoq(event):
+                              D = float(Element("D").element.value)
+                              S = float(Element("S").element.value)
+                              C = float(Element("C").element.value)
+                              I = float(Element("I").element.value)
+                              
+                              result = eoq(D,S,C,I)
+                    
+                              Element("out_eoq").element.innerHTML = result
+                          #except ValueError:
+                              #Element("output").element.innerHTML = "Invalid input. Please enter numeric values."
+                  
+                      Element("button_EOQ").element.onclick = on_eoq
+                    </py-script>
+                <div id="out_eoq"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+        
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Optimal Reorder Point - Instantaneous Resupply
+              </h5>
+              <div class="">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D1" placeholder="Annual demand (D) in units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S1" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C1" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I1" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="LT1" placeholder="Average lead time in time units">
+                  <button id="button_instant">Solve Problem</button>
+                  <py-script>
+                      def on_instant(event):
+                              D = float(Element("D1").element.value)
+                              S = float(Element("S1").element.value)
+                              C = float(Element("C1").element.value)
+                              I = float(Element("I1").element.value)
+                              LT = float(Element("LT1").element.value)
+                              
+                              result = order(D,S,C,I,LT)
+                              result = plot_inventory_wave(Q_star, R_star, D, LT)
+                    
+                              Element("out_instant").element.innerHTML = result
+                           #except ValueError:
+                              #Element("output").element.innerHTML = "Invalid input. Please enter numeric values."
+                  
+                      Element("button_instant").element.onclick = on_instant
+                    </py-script>
+                <div id="out_instant"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>
+                Optimal Reorder Point - NON - Instantaneous Resupply
+              </h5>
+              <div class="">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="D2" placeholder="Annual demand (D) in units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="S2" placeholder="Procurement cost (S) in Dollars per order">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="C2" placeholder="Value of item (C) in Dollars per unit">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="I2" placeholder="Carrying cost (I) as a percent per year">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="LT2" placeholder="Average lead time in time units">
+                  <input type="number" onkeyup="if(this.value<0)this.value=1" onblur="if(this.value<0)this.value=1" id="P2" placeholder="Replenishment rate in time units">
+                  <button id="button_noninstant">Solve Problem</button>
+                  <py-script>
+                      def on_noninstant(event):
+                              D = float(Element("D2").element.value)
+                              S = float(Element("S2").element.value)
+                              C = float(Element("C2").element.value)
+                              I = float(Element("I2").element.value)
+                              LT = float(Element("LT2").element.value)
+                              P = float(Element("P2").element.value)
+                    
+                              result = noninstant(D,S,C,I,LT,P)
+                    
+                              Element("out_noninstant").element.innerHTML = result
+                           #except ValueError:
+                              #Element("output").element.innerHTML = "Invalid input. Please enter numeric values."
+                  
+                      Element("button_noninstant").element.onclick = on_noninstant
+                    </py-script>
+                <div id="out_noninstant"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mx-auto">
+          <div class="box">
+            <div class="detail-box">
+              <h5>Optimal Reorder Point - Instantaneous Resupply</h5>
+              <div class="">
+                <input type="number" id="D1" placeholder="Annual demand (D) in units">
+                <input type="number" id="S1" placeholder="Procurement cost (S) in Dollars per order">
+                <input type="number" id="C1" placeholder="Value of item (C) in Dollars per unit">
+                <input type="number" id="I1" placeholder="Carrying cost (I) as a percent per year">
+                <input type="number" id="LT1" placeholder="Average lead time in time units">
+                <button id="button_instant">Solve Problem</button>
+                <div id="out_instant"></div>
+                <img id="plot_image" src="" alt="Inventory Plot" style="display:none;"/>
+                <py-script>
+                  import matplotlib
+                  import matplotlib.pyplot as plt
+                  import numpy as np
+    
+                  def order(D, S, C, I, LT):
+                      Q_star = (2 * D * S / I) ** 0.5
+                      R_star = D * LT
+                      return Q_star, R_star
+    
+                  def plot_inventory_wave(Q_star, R_star, D, LT):
+                      time = np.linspace(0, 2 * LT, 100)
+                      inventory = np.maximum(0, R_star + (D * time) - Q_star)
+    
+                      plt.figure(figsize=(10, 5))
+                      plt.plot(time, inventory, label='Inventory Level')
+                      plt.axhline(y=R_star, color='r', linestyle='--', label='Reorder Point')
+                      plt.title('Inventory Level Over Time')
+                      plt.xlabel('Time')
+                      plt.ylabel('Inventory Level')
+                      plt.legend()
+                      plt.grid()
+    
+                      buf = io.BytesIO()
+                      plt.savefig(buf, format='png')
+                      plt.close()
+                      buf.seek(0)
+                      # 将字节流编码为 base64
+                      string = base64.b64encode(buf.read()).decode('utf-8')
+
+                      # 输出图像标签的 HTML 代码
+                      return "data:image/png;base64,"+ string
+    
+                  def on_instant(event):
+                      print(1111111111111)
+                      try:
+                          D = float(Element("D1").element.value)
+                          S = float(Element("S1").element.value)
+                          C = float(Element("C1").element.value)
+                          I = float(Element("I1").element.value) / 100
+                          LT = float(Element("LT1").element.value)
+    
+                          Q_star, R_star = order(D, S, C, I, LT)
+                          img_data = plot_inventory_wave(Q_star, R_star, D, LT)
+                          Element("out_instant").element.innerHTML = "Plot generated!"
+                          
+                          Element("plot_image").element.src = img_data
+                          Element("plot_image").element.style.display = "block"
+    
+                      except ValueError:
+                          Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
+    
+                  Element("button_instant").element.onclick = on_instant
+                </py-script>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+  <!-- end blog section -->
+
+
+  <!-- footer section -->
+  <footer class="footer_section">
+    <div class="container">
+      <p>
+        &copy; <span id="displayYear"></span> All Rights Reserved By
+        <a href="https://html.design/">Free Html Templates</a>
+      </p>
+    </div>
+  </footer>
+  <!-- footer section -->
+
+
+  <!-- jQery -->
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <!-- bootstrap js -->
+  <script src="js/bootstrap.js"></script>
+  <!-- custom js -->
+  <script src="js/custom.js"></script>
+  <!-- Google Map -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCh39n5U-4IoWpsVGUHWdqB6puEkhRLdmI&callback=myMap"></script>
+  <!-- End Google Map -->
+
+</body>
+
+</html>
