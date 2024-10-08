@@ -331,6 +331,11 @@
                       plt.savefig(buf, format='png')
                       plt.close()
                       buf.seek(0)
+                      # 将字节流编码为 base64
+                      string = base64.b64encode(buf.read()).decode('utf-8')
+
+                      # 输出图像标签的 HTML 代码
+                      return "data:image/png;base64,"+ string
     
                   def on_instant(event):
                       try:
