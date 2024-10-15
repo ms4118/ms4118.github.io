@@ -123,10 +123,8 @@
                                     def on_button_click(event):
                                         name = Element("variableName").element.value
                                         result = greet_user(name)
-                                        # 将结果显示在页面中
+                                    
                                         Element("out0").element.innerHTML = result
-
-                                    # 获取按钮并绑定点击事件
                                     Element("button0").element.onclick = on_button_click
                             </py-script>
                             <div id="out0"></div>
@@ -169,9 +167,7 @@
                                     def on_button_click(event):
                                         a = int(Element("a").element.value)
                                         b = int(Element("b").element.value)
-                                        # 调用外部 Python 文件中的函数
                                         result = add(a,b)
-                                        # 将结果显示在页面中
                                         Element("out1").element.innerHTML = result
 
                                     # 获取按钮并绑定点击事件
