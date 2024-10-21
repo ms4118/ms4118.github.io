@@ -45,6 +45,7 @@
 <py-script src="sma.py"></py-script>
 <py-script src="ema.py"></py-script>
 <py-script src="wma.py"></py-script>
+    
 <div class="hero_area">
     <!-- header section strats -->
     <header class="header_section long_section px-0">
@@ -133,21 +134,18 @@
 
                     def get_plot_string(data, r):
                         result = calculate_sma(data, r)
-
-                        # Predict next values
                         predicted_df = sma_predict_next_value(result)
 
-                        # Plot data
                         plt = plot_sma_data(result, r, predicted_df)
       
                         buf = io.BytesIO()
                         plt.savefig(buf, format='png')
                         plt.close()
                         buf.seek(0)
-                        # 将字节流编码为 base64
+                        #change base
                         string = base64.b64encode(buf.read()).decode('utf-8')
 
-                        # 输出图像标签的 HTML 代码
+                        # show in html
                         return "data:image/png;base64,"+ string
       
                     def on_instant(event):
@@ -159,7 +157,8 @@
                             df = pd.DataFrame(json_data)
                             df['T'] = pd.to_numeric(df['T'], errors='coerce').astype('int64')
                             df['Yt'] = pd.to_numeric(df['Yt'], errors='coerce').astype('float64') 
-      
+
+                          #error checking
                             img_data = get_plot_string(df, window_size)
                             Element("out_instant").element.innerHTML = "Plt successed."
                           
@@ -216,10 +215,8 @@
                         plt.savefig(buf, format='png')
                         plt.close()
                         buf.seek(0)
-                        # 将字节流编码为 base64
-                        string = base64.b64encode(buf.read()).decode('utf-8')
 
-                        # 输出图像标签的 HTML 代码
+                        string = base64.b64encode(buf.read()).decode('utf-8')
                         return "data:image/png;base64,"+ string
       
                     def on_instant1(event):
@@ -287,10 +284,8 @@
                         plt.savefig(buf, format='png')
                         plt.close()
                         buf.seek(0)
-                        # 将字节流编码为 base64
-                        string = base64.b64encode(buf.read()).decode('utf-8')
 
-                        # 输出图像标签的 HTML 代码
+                        string = base64.b64encode(buf.read()).decode('utf-8')
                         return "data:image/png;base64,"+ string
       
                     def on_instant2(event):
@@ -333,6 +328,11 @@
 </section>
 
 
+
+
+
+    
+
 <!-- footer section -->
 <footer class="footer_section">
     <div class="container">
@@ -344,6 +344,14 @@
 </footer>
 <!-- footer section -->
 
+
+
+
+
+
+
+
+    
 <script>
   function uploadFile(fileId, displayId, buttonId) {  
     const fileInput = document.getElementById(fileId);  
@@ -386,7 +394,7 @@ function parseCSV(csv) {
   
 function displayData(data, ElementId) {  
     const result = document.getElementById(ElementId);  
-    result.textContent = JSON.stringify(data, null, 2); // 使用缩进为2的空格来格式化JSON 
+    result.textContent = JSON.stringify(data, null, 2); 
 }
 
 function clickButtonById(buttonId) {
