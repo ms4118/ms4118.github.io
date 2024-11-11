@@ -150,14 +150,8 @@
                     
                     
                     def get_cost_and_total_result(cost_matrix, supply, demand):
-                      # 构建决策变量的系数矩阵
-                      # 每个工厂到每个商店的运输量可以看作是一个决策变量
-                      # 因此，我们有 num_factories * num_stores 个决策变量
-                      # 系数矩阵 A 和 b 用于表示供应和需求约束
                       num_factories = len(supply)
                       num_stores = len(demand)
-                    
-                      # 供应约束的系数矩阵 A_supply 和向量 b_supply
                       A_supply = []
                       for i in range(num_factories):
                         row = [0] * (num_factories * num_stores)
@@ -167,7 +161,7 @@
                       A_supply = np.array(A_supply)
                       b_supply = supply
                     
-                      # 需求约束的系数矩阵 A_demand 和向量 b_demand
+
                       A_demand = []
                       for j in range(num_stores):
                         row = [0] * (num_factories * num_stores)
@@ -177,20 +171,18 @@
                       A_demand = np.array(A_demand)
                       b_demand = demand
                     
-                      # 合并供应和需求约束
-                      A = np.vstack((A_supply, -A_demand))  # 注意：需求约束是 >=，所以这里取负号
+
+                      A = np.vstack((A_supply, -A_demand))
                       b = np.hstack((b_supply, -b_demand))
                     
-                      # 目标函数的系数向量 c
-                      c = cost_matrix.flatten()  # 将成本矩阵展平为一维数组
-                    
-                      # 求解线性规划问题
+
+                      c = cost_matrix.flatten()
                       result = linprog(c, A_ub=A, b_ub=b, method='highs')
                     
-                      # 将结果重新整形为 num_factories x num_stores 的矩阵
+                      # result in matrix
                       x = result.x.reshape((num_factories, num_stores))
                     
-                      # 输出结果
+                      # output
                       print("Optimal solution:")
                       print(x)
                       print("Optimal value (total cost):", result.fun)
