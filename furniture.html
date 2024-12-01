@@ -64,7 +64,7 @@
       <nav class="navbar navbar-expand-lg custom_nav-container ">
         <!-- <a class="navbar-brand" href="index.html">
           <span>
-            Michael GOM
+            Op-Mic GOM
           </span>
         </a> -->
         <a class="navbar-brand" href="index.html">
@@ -124,8 +124,11 @@
           Global Operation Management - Forecasting Logistics
         </h2>
         <p>
-          This page aims to help you solve problems from Global operation management sector, specifically about
-          Forecasting logistics.
+          Focuses on forecasting logistics within operations management, serving as a valuable resource to improve their forecasting skills.
+
+Provides training on various forecasting models including SWA, WMA, EMA, Regression Analysis, Holt’s Linear Trend, and Winters Seasonal Method.
+
+Each model includes detailed explanations, step-by-step instructions, and real-life examples, enabling users to apply these methods effectively to their own datasets.
         </p>
       </div>
       <div class="row section-container">
@@ -157,18 +160,15 @@
 
                 # Predict next values
                 predicted_df = sma_predict_next_value(result)
-
-                # Plot data
                 plt = plot_sma_data(result, r, predicted_df)
 
                 buf = io.BytesIO()
                 plt.savefig(buf, format='png')
                 plt.close()
                 buf.seek(0)
-                # 将字节流编码为 base64
                 string = base64.b64encode(buf.read()).decode('utf-8')
 
-                # 输出图像标签的 HTML 代码
+                # output
                 return "data:image/png;base64,"+ string
 
               def on_instant(event):
@@ -244,10 +244,9 @@
                 plt.savefig(buf, format='png')
                 plt.close()
                 buf.seek(0)
-                # 将字节流编码为 base64
                 string = base64.b64encode(buf.read()).decode('utf-8')
 
-                # 输出图像标签的 HTML 代码
+                # Output pic
                 return "data:image/png;base64,"+ string
 
               def on_instant1(event):
@@ -324,10 +323,9 @@
                 plt.savefig(buf, format='png')
                 plt.close()
                 buf.seek(0)
-                # 将字节流编码为 base64
                 string = base64.b64encode(buf.read()).decode('utf-8')
 
-                # 输出图像标签的 HTML 代码
+                # output pic
                 return "data:image/png;base64,"+ string
 
               def on_instant2(event):
@@ -404,10 +402,9 @@
                 plt.savefig(buf, format='png')
                 plt.close()
                 buf.seek(0)
-                # 将字节流编码为 base64
                 string = base64.b64encode(buf.read()).decode('utf-8')
 
-                # 输出图像标签的 HTML 代码
+                # output
                 return "data:image/png;base64,"+ string
 
               def on_instant3(event):
@@ -479,8 +476,6 @@
               def get_plot_string4(data, alpha, beta, num_forecasts):
                 Y = data['Yt'].values
                 a, b, P = holt_linear_exponential_smoothing(Y, alpha, beta)
-
-                # Get last level and trend
                 last_a = a[-1]
                 last_b = b[-1]
 
@@ -493,10 +488,9 @@
                 plt.savefig(buf, format='png')
                 plt.close()
                 buf.seek(0)
-                # 将字节流编码为 base64
                 string = base64.b64encode(buf.read()).decode('utf-8')
 
-                # 输出图像标签的 HTML 代码
+                # output
                 return "data:image/png;base64,"+ string
 
               def on_instant2(event):
@@ -604,10 +598,10 @@
                     plt.savefig(buf, format='png')
                     plt.close()
                     buf.seek(0)
-                    # 将字节流编码为 base64
+
                     string = base64.b64encode(buf.read()).decode('utf-8')
 
-                    # 输出图像标签的 HTML 代码
+                    # Output
                     return "data:image/png;base64,"+ string
       
                 def on_instant5(event):
@@ -669,7 +663,7 @@
   <footer class="footer_section">
     <div class="container">
       <p>
-        &copy; <span id="displayYear"></span> Michael
+        &copy; <span id="displayYear"></span> Op-Mic GOM
         <a href="https://html.design/">2024</a>
       </p>
     </div>
@@ -680,34 +674,34 @@
     $(function () {
      var steps= [
             {
-              element: '#step1', // 高亮的元素
+              element: '#step1', 
               intro: '<div class="tip-box"><img src="./images/intro/step1.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip',
               // position: 'bottom-right-aligned'
             },
             {
-              element: '#step2', // 高亮的元素
+              element: '#step2', 
               intro: '<div class="tip-box"><img src="./images/intro/step2.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip',
               // position: 'bottom'
             },
             {
-              element: '#step3', // 高亮的元素
+              element: '#step3', 
               intro: '<div class="tip-box"><img src="./images/intro/step3.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step4', // 高亮的元素
+              element: '#step4', 
               intro: '<div class="tip-box"><img src="./images/intro/step4.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step5', // 高亮的元素
+              element: '#step5', 
               intro: '<div class="tip-box"><img src="./images/intro/step5.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step6', // 高亮的元素
+              element: '#step6', 
               intro: '<div class="tip-box"><img src="./images/intro/step6.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
@@ -716,13 +710,10 @@
       $(".course-btn").click(function () {
         var offset = $(this).offset();
         console.log("offset:",offset,$(this).index)
-
         var index = Number($(this).data("index"))
-
         $('body').find('.step-helperLayer').remove();
 
-        // 设置可见
-        // 获取页面宽高
+        // decoration....
         var sw = $(window).width();
         var w = $(this).width();
         var h =$(this).height();
@@ -733,7 +724,7 @@
         var sanjiaox = $(`<div class="triangle-up"></div>`)
         var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
 
-        // 将子元素添加到 stepfixedDom 中
+        // stepfixedDom function
         stepfixedDom.append(stepImg);
         stepfixedDom.append(sanjiaox);
         stepfixedDom.append(closeDom);
@@ -747,56 +738,56 @@
 
 
 
-      // 引导函数
+      // parameter
       function startIntro() {
         console.log("introJs:", introJs)
         var introInstance = introJs().setOptions({
-          nextLabel: '下一步',        // 下一步按钮
-          prevLabel: '上一步',        // 上一步按钮
+          nextLabel: '下一步',      
+          prevLabel: '上一步',       
           doneLabel: '完成',
-          scrollToElement: true, // 自动滚动到当前元素
+          scrollToElement: true, 
           scrollPadding: 100,
           showStepNumbers: false,
           showBullets: false,
           steps: [
             {
-              element: '#step1', // 高亮的元素
+              element: '#step1', 
               intro: '<div class="tip-box"><img src="./images/intro/step1.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip',
               // position: 'bottom-right-aligned'
             },
             {
-              element: '#step2', // 高亮的元素
+              element: '#step2', 
               intro: '<div class="tip-box"><img src="./images/intro/step2.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip',
               // position: 'bottom'
             },
             {
-              element: '#step3', // 高亮的元素
+              element: '#step3', 
               intro: '<div class="tip-box"><img src="./images/intro/step3.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step4', // 高亮的元素
+              element: '#step4', 
               intro: '<div class="tip-box"><img src="./images/intro/step4.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step5', // 高亮的元素
+              element: '#step5',
               intro: '<div class="tip-box"><img src="./images/intro/step5.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
             {
-              element: '#step6', // 高亮的元素
+              element: '#step6', 
               intro: '<div class="tip-box"><img src="./images/intro/step6.jpg" style="width:100%;height:auto;"></div>',
               tooltipClass: 'step-tooltip'
             },
 
           ],
-          showStepNumbers: true, // 显示步骤编号
-          showProgress: true, // 显示进度条
-          exitOnEsc: true, // 按 ESC 键退出
-          exitOnOverlayClick: true // 点击遮罩层退出
+          showStepNumbers: true, 
+          showProgress: true, 
+          exitOnEsc: true, 
+          exitOnOverlayClick: true 
         })
         introInstance.start()
         introInstance.exit();
@@ -822,11 +813,11 @@
           console.error("File could not be read! Code " + e.target.error.code);
         };
 
-        // 在这里显示文件路径
-        const filePath = file.name; // 获取文件名
+        // pathway
+        const filePath = file.name; 
         const pathDisplayElement = document.getElementById(messageId);
-        pathDisplayElement.textContent = `文件路径: ${filePath}`; // 更新文件路径
-        pathDisplayElement.style.display = 'block'; // 设置 div 为 block
+        pathDisplayElement.textContent = `文件路径: ${filePath}`; 
+        pathDisplayElement.style.display = 'block'; // set div block
 
         reader.readAsText(file);
       } else {
@@ -851,7 +842,7 @@
 
     function displayData(data, ElementId) {
       const result = document.getElementById(ElementId);
-      result.textContent = JSON.stringify(data, null, 2); // 使用缩进为2的空格来格式化JSON
+      result.textContent = JSON.stringify(data, null, 2); 
     }
 
     function clickButtonById(buttonId) {
