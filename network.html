@@ -12,7 +12,7 @@
   <meta name="keywords" content="" />
   <meta name="description" content="" />
   <meta name="author" content="" />
-  <title>Michael GOM</title>
+  <title>Op-Mic GOM</title>
 
   <!-- bootstrap core css -->
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
@@ -109,8 +109,12 @@
           Global Operation Management - Forecasting Logistics
         </h2>
         <p>
-          This page aims to help you solve problems from Global operation management sector, specifically about
-          Forecasting logistics.
+          The Network Optimization page focuses on reducing & optimize  transportation costs, a key factor in logistics efficiency.
+
+It offers detailed guidelines and instructions for analyzing and optimizing users' logistics networks.
+
+The Model examines pathways and costs in the transportation of goods, helping users explore various routing options to identify the most cost-effective and efficient strategies.
+
         </p>
       </div>
 
@@ -122,9 +126,9 @@
           </h5>
           <div class="form-content">
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="rows" placeholder="num_factories " style="width: 250px;">
+              onblur="if(this.value<0)this.value=1" id="rows" placeholder="Please Input: Number of Factories here " style="width: 250px;">
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="cols" placeholder="num_stores" style="width: 250px;">
+              onblur="if(this.value<0)this.value=1" id="cols" placeholder="Please Input: Number of Stores here " style="width: 250px;">
             <button id="createMatrix" class="submit-button" onclick="openModal()">Create Input Matrix</button>
             <button id="show_data_tabel" style="display: none;">Show</button>
             <button class="submit-button" id="button_instant">Solve Problem</button>
@@ -153,14 +157,11 @@
                 return h, result.tolist()
               
               def get_cost_and_total_result(cost_matrix, supply, demand):
-                # 构建决策变量的系数矩阵
-                # 每个工厂到每个商店的运输量可以看作是一个决策变量
-                # 因此，我们有 num_factories * num_stores 个决策变量
-                # 系数矩阵 A 和 b 用于表示供应和需求约束
+                # create matrix
                 num_factories = len(supply)
                 num_stores = len(demand)
               
-                # 供应约束的系数矩阵 A_supply 和向量 b_supply
+                # constraints 
                 A_supply = []
                 for i in range(num_factories):
                   row = [0] * (num_factories * num_stores)
@@ -169,8 +170,7 @@
                   A_supply.append(row)
                 A_supply = np.array(A_supply)
                 b_supply = supply
-              
-                # 需求约束的系数矩阵 A_demand 和向量 b_demand
+
                 A_demand = []
                 for j in range(num_stores):
                   row = [0] * (num_factories * num_stores)
@@ -180,21 +180,17 @@
                 A_demand = np.array(A_demand)
                 b_demand = demand
               
-                # 合并供应和需求约束
-                A = np.vstack((A_supply, -A_demand))  # 注意：需求约束是 >=，所以这里取负号
+                A = np.vstack((A_supply, -A_demand)) 
                 b = np.hstack((b_supply, -b_demand))
+                c = cost_matrix.flatten() 
               
-                # 目标函数的系数向量 c
-                c = cost_matrix.flatten()  # 将成本矩阵展平为一维数组
-              
-                # 求解线性规划问题
+                # solveing using optimization libbrary in pyscript
                 result = linprog(c, A_ub=A, b_ub=b, method='highs')
               
                 if result.x is not None:
-                  # 将结果重新整形为 num_factories x num_stores 的矩阵
                   x = result.x.reshape((num_factories, num_stores))
                 
-                  # 输出结果
+                  # output result here
                   print("Optimal solution:")
                   print(x)
                   print("Optimal value (total cost):", result.fun)
@@ -233,7 +229,6 @@
                     Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
               
               def init_data(event):
-                # 将字符串分割成一个值的列表
                 n = int(Element("rows").element.value)
                 m = int(Element("cols").element.value)
                 comma_separated_list = Element("result").element.innerHTML.split(',')
@@ -287,10 +282,10 @@
 
   <div id="modal">
     <div class="my-modal-content">
-        <!-- 关闭图标 -->
+        <!-- . -->
         <span class="close-icon" onclick="closeModal()">×</span>
         <table id="table"></table>
-        <button class="confirm-btn" onclick="confirmTable()">确认</button>
+        <button class="confirm-btn" onclick="confirmTable()">sure</button>
     </div>
   </div>
 
@@ -299,8 +294,7 @@
   <footer class="footer_section">
     <div class="container">
       <p>
-        &copy; <span id="displayYear"></span> Michael
-        <a href="https://html.design/">2024</a>
+        &copy; <span id="displayYear"></span> 2024 Op-Mic GOM
       </p>
     </div>
   </footer>
@@ -321,7 +315,7 @@
   $(document).ready(function () {
     var steps = [
       {
-        element: '#step1', // 高亮的元素
+        element: '#step1',
         intro: '<div class="tip-box"><img src="./images/intro/step31.jpg" style="width:100%;height:auto;"></div>',
         tooltipClass: 'step-tooltip',
         // position: 'bottom-right-aligned'
@@ -336,8 +330,7 @@
 
       $('body').find('.step-helperLayer').remove();
 
-      // 设置可见
-      // 获取页面宽高
+      // decoration
       var sw = $(window).width();
       var w = $(this).width();
       var h = $(this).height();
@@ -348,7 +341,7 @@
       var sanjiaox = $(`<div class="triangle-up"></div>`)
       var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
 
-      // 将子元素添加到 stepfixedDom 中
+      // stepfixedDom
       stepfixedDom.append(stepImg);
       stepfixedDom.append(sanjiaox);
       stepfixedDom.append(closeDom);
