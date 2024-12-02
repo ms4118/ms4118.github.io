@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <link rel="icon" href="images/fevicon.png" type="image/gif" />
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+
+  <title>Op-Mic GOM</title>
+
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <script src="./js/intro.min.js"></script>
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+
+  <!-- fonts style -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet" />
+
+  <!-- font awesome style -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/introjs.min.css">
+  <!-- Custom styles for this template -->
+  <link href="css/style.css" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="css/responsive.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/common.css">
+  <py-env>
+    - numpy
+    - matplotlib
+  </py-env>
+
+</head>
+
+<body class="sub_page">
+  <py-script src="pyscripts/inventory.py"></py-script>
+  <py-script src="pyscripts/constant.py"></py-script>
+  <py-script src="pyscripts/plot.py"></py-script>
+  <div class="hero_area">
+    <!-- header section starts -->
+    <header class="header_section long_section px-0">
+      <nav class="navbar navbar-expand-lg custom_nav-container ">
+        <!-- <a class="navbar-brand" href="index.html">
+          <span>
+            Op-Mic GOM
+          </span>
+        </a> -->
+        <a class="navbar-brand" href="index.html">
+          <img class="logo-img" src="./images/logo1.jpg">
+        </a>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class=""> </span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+            <ul class="navbar-nav  ">
+              <li class="nav-item ">
+                <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <!-- <li class="nav-item">
+                <a class="nav-link" href="about.html"> About</a>
+              </li> -->
+              <li class="nav-item">
+                <a class="nav-link" href="furniture.html">Forecasting Logistics</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="inventory.html">Inventory Management</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="network.html">Network Opimization</a>
+              </li>
+            </ul>
+          </div>
+          <div class="quote_btn-container">
+            <a href="">
+              <span>
+                Project
+              </span>
+              <i class="fa fa-user" aria-hidden="true"></i>
+            </a>
+            <form class="form-inline">
+              <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <!-- end header section -->
+  </div>
+
+
+  <!-- blog section -->
+
+  <section class="blog_section layout_padding furniture_section">
+    <div class="container">
+      <div class="heading_container">
+        <h2>
+          Global Operation Management - Inventory Management
+        </h2>
+        <p>
+          Focuses on inventory management, helping users understand essential inventory control strategies within logistics.
+Provides training on various inventory management models, including EOQ, Optimal Reorder Point for Instantaneous Resupply, and Optimal Reorder Point for Non-Instantaneous Resupply.
+The tutorial provides clear explanations and hands-on applications, enabling users to effectively solve real-life inventory challenges.
+        </p>
+      </div>
+      <div class="row section-container">
+
+        <div class="detail-box">
+          <h5 class="title">
+            <span> Pull inventory control - single (Economic order quantity EOQ)</span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="D" placeholder="Please enter: Annual demand (D) in units">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="S" placeholder="Please enter: Procurement cost (S) in Dollars per order">
+
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="C" placeholder="Please enter: Value of item (C) in Dollars per unit">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="I" placeholder="Please enter: Carrying cost (I) as a percent per year">
+            <button class="submit-button" id="button_EOQ">Solve Problem</button>
+            <py-script>
+              def on_eoq(event):
+                D = float(Element("D").element.value)
+                S = float(Element("S").element.value)
+                C = float(Element("C").element.value)
+                I = float(Element("I").element.value)
+                
+                result = eoq(D,S,C,I)
+              
+                Element("out_eoq").element.innerHTML = result
+              
+              Element("button_EOQ").element.onclick = on_eoq
+            </py-script>
+          </div>
+        </div>
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+        <div class="result-box">
+          <div class="title2">OUTPUT</div>
+          <div class="result">
+            <div id="out_eoq" class="result-text"></div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title" id="step2">
+            <span>Optimal Reorder Point - Instantaneous Resupply</span>
+            <span class="course-btn" data-index="2">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="D1" placeholder="Please enter: Annual demand (D) in units">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="S1" placeholder="Please enter: Procurement cost (S) in Dollars per order">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="C1" placeholder="Please enter: Value of item (C) in Dollars per unit">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="I1" placeholder="Please enter: Carrying cost (I) as a percent per year">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="LT1" placeholder="Please enter: Average lead time in time units">
+            <button class="submit-button" id="button_instant">Solve Problem</button>
+            <py-script>
+                  def get_plot_string(Q_star, R_star, D, LT):
+                      plt = plot_inventory_wave(Q_star, R_star, D, LT)
+    
+                      buf = io.BytesIO()
+                      plt.savefig(buf, format='png')
+                      plt.close()
+                      buf.seek(0)
+                      string = base64.b64encode(buf.read()).decode('utf-8')
+
+                      # output pic
+                      return "data:image/png;base64,"+ string
+    
+                  def on_instant(event):
+
+                      try:
+                          D = float(Element("D1").element.value)
+                          S = float(Element("S1").element.value)
+                          C = float(Element("C1").element.value)
+                          I = float(Element("I1").element.value) / 100
+                          LT = float(Element("LT1").element.value)
+    
+                          Q_star, R_star = instant_order(D, S, C, I, LT)
+                          if Q_star is not None and R_star is not None:
+                            Element("instant_result").element.innerHTML = f"Q_star: {Q_star}, R_star: {R_star}"
+                            img_data = get_plot_string(Q_star, R_star, D, LT)
+                            Element("out_instant").element.innerHTML = "Plot generated!"
+                          
+                            Element("plot_image").element.src = img_data
+                            Element("plot_image").element.style.display = "block"
+    
+                      except ValueError:
+                          Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
+    
+                  Element("button_instant").element.onclick = on_instant
+            </py-script>
+            <div id="out_instant"></div>
+          </div>
+        </div>
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+
+        <div class="result-box">
+          <div class="title2">OUTPUT</div>
+          <div class="result" style="margin-bottom: 10px;">
+            <div id="instant_result" class="result-text"></div>
+          </div>
+          <div class="result-img">
+            <img class="plot-image" id="plot_image" alt="Inventory Plot" />
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title" id="step3">
+            <span>Optimal Reorder Point - NON - Instantaneous Resupply</span>
+            <span class="course-btn" data-index="3">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="D2" placeholder="Please enter: Annual demand (D) in units">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="S2" placeholder="Please enter: Procurement cost (S) in Dollars per order">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="C2" placeholder="Please enter: Value of item (C) in Dollars per unit">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="I2" placeholder="Please enter: Carrying cost (I) as a percent per year">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="LT2" placeholder="Please enter: Average lead time in time units">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="P2" placeholder="Please enter: Replenishment rate in time units">
+            <button class="submit-button" id="button_noninstant">Solve Problem</button>
+            <py-script>
+                      import math
+                      import numpy as np
+                      import matplotlib.pyplot as plt
+
+                      def noninstant1(D, S, C, I, LT, P):
+                        try:
+                            numerator = 2 * D * S
+                            denominator = I * C
+                            Q_squared = numerator / denominator
+                            Q = math.sqrt(Q_squared)
+                            
+                            Q_up = math.ceil(Q)
+                            
+                            R_square = (D / 52) * LT
+                            R_up = math.ceil(R_square)
+                    
+                            Q_square = Q_up * math.sqrt(P / (P - D / 52))
+                            round_Q = math.ceil(Q_square)
+                            max_inventory = (round_Q / P) * (P - D / 52)
+                    
+                            print(f"When the inventory level drops to {R_up} units, place a replenishment order for {round_Q}.")
+                            return round_Q, max_inventory, R_up
+                            
+                        except ValueError:
+                            Element("out_noninstant").element.innerHTML = "Invalid input. Please enter positive values."
+                            return None, None, None
+                    
+                    
+                      def plot_inventory_wave2(round_Q, max_inventory, R_up):
+                        # repeat 3 times
+                        repetitions = 3
+                        time_period = 10  # Total time for one cycle
+                        t = np.linspace(0, time_period * repetitions, 1000)
+                        inventory_levels = np.zeros_like(t)
+                    
+                        # Generate the sawtooth wave
+                        for i in range(len(t)):
+                            cycle_position = t[i] % time_period  # Position within the current cycle
+                            if cycle_position < time_period / 2:
+                                inventory_levels[i] = (max_inventory / (time_period / 2)) * cycle_position  # Linear up
+                            else:
+                                inventory_levels[i] = max_inventory - ((max_inventory / (time_period / 2)) * (cycle_position - time_period / 2))  # Linear down
+                    
+                        # Plot
+                        plt.figure(figsize=(10, 6))
+                        plt.plot(t, inventory_levels, label='Inventory Level', color='blue')
+                        
+                        # label line here
+                        plt.axhline(y=round_Q, color='green', linestyle='--', label=f'Q*: {round_Q}')
+                        plt.axhline(y=max_inventory, color='red', linestyle='--', label=f'Max Inventory: {max_inventory:.2f}')
+                        plt.axhline(y=R_up, color='orange', linestyle='--', label=f'Reordering Quantity: {R_up}')
+                        plt.ylim(0, max(round_Q, max_inventory) * 1.1)  # Enlarged to the value of Q*
+                        
+                        plt.title('Sawtooth Wave of Inventory Levels (3 Cycles)')
+                        plt.xlabel('Time')
+                        plt.ylabel('Inventory Level')
+                        plt.xlim(0, time_period * repetitions)
+                        plt.grid()
+                        plt.legend()
+
+                        plt.text(0, round_Q + 0.05 * max(round_Q, max_inventory), f'Q*: {round_Q}', color='green')
+                        plt.text(0, max_inventory + 0.05 * max(round_Q, max_inventory), f'Max Inventory: {max_inventory:.2f}', color='red')
+                        plt.text(0, R_up + 0.05 * max(round_Q, max_inventory), f'Reordering Quantity: {R_up}', color='orange')
+                        return plt
+                    
+                      def get_plot_string2(round_Q, max_inventory, R_up):
+                        plt = plot_inventory_wave2(round_Q, max_inventory, R_up)
+      
+                        buf = io.BytesIO()
+                        plt.savefig(buf, format='png')
+                        plt.close()
+                        buf.seek(0)
+                        string = base64.b64encode(buf.read()).decode('utf-8')
+
+                        # output pic
+                        return "data:image/png;base64,"+ string
+
+                      def on_noninstant(event):
+                          try:
+                              D = float(Element("D2").element.value)
+                              S = float(Element("S2").element.value)
+                              C = float(Element("C2").element.value)
+                              I = float(Element("I2").element.value)
+                              LT = float(Element("LT2").element.value)
+                              P = float(Element("P2").element.value)
+
+                              round_Q, max_inventory, R_up = noninstant1(D, S, C, I, LT, P)
+                              result = noninstant(D,S,C,I,LT,P)
+                              Element("non_result").element.innerHTML = result
+                              if round_Q is not None:
+
+                                img_data = get_plot_string2(round_Q, max_inventory, R_up)
+
+                                Element("out_noninstant").element.innerHTML = "Plot generated!"
+                          
+                                Element("plot_image_non").element.src = img_data
+                                Element("plot_image_non").element.style.display = "block"
+                    
+                          except ValueError:
+                              Element("out_noninstant").element.innerHTML = "Invalid input. Please enter numeric values."
+                  
+                      Element("button_noninstant").element.onclick = on_noninstant
+                </py-script>
+                <div id="out_noninstant"></div>
+          </div>
+        </div>
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+
+        <div class="result-box">
+          <div class="title2">OUTPUT</div>
+          <div class="result" style="margin-bottom: 10px;">
+            <div id="non_result" class="result-text"></div>
+          </div>
+          <div class="result-img">
+            <img class="plot-image" id="plot_image_non" alt="Inventory Plot" />
+          </div>
+        </div>
+      </div>
+
+    </div>
+</body>
+<!-- end blog section -->
+
+
+<!-- footer section -->
+<footer class="footer_section">
+  <div class="container">
+    <p>
+      &copy; <span id="displayYear"></span> 2024 Op-Mic GOM 
+    </p>
+  </div>
+</footer>
+<!-- footer section -->
+
+
+<!-- jQery -->
+<!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+<!-- bootstrap js -->
+<script src="js/bootstrap.js"></script>
+<!-- custom js -->
+<script src="js/custom.js"></script>
+<script>
+  $(function () {
+    var steps = [
+      {
+        element: '#step1', 
+        intro: '<div class="tip-box"><img src="./images/intro/step21.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom-right-aligned'
+      },
+      {
+        element: '#step2', 
+        intro: '<div class="tip-box"><img src="./images/intro/step22.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom'
+      },
+      {
+        element: '#step3', 
+        intro: '<div class="tip-box"><img src="./images/intro/step23.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip'
+      },
+
+    ]
+
+    $(".course-btn").click(function () {
+      var offset = $(this).offset();
+      console.log("offset:", offset, $(this).index)
+
+      var index = Number($(this).data("index"))
+
+      $('body').find('.step-helperLayer').remove();
+
+      // more decoration here
+      var sw = $(window).width();
+      var w = $(this).width();
+      var h = $(this).height();
+      $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
+      var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
+
+      var stepImg = $(`${steps[index - 1].intro}`);
+      var sanjiaox = $(`<div class="triangle-up"></div>`)
+      var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
+
+      // add stepfixedDom 
+      stepfixedDom.append(stepImg);
+      stepfixedDom.append(sanjiaox);
+      stepfixedDom.append(closeDom);
+      $('body').append(stepfixedDom)
+    })
+
+    $('body').on('click', '.step-fixed-container .close-btn', function () {
+      $('body').find('.step-helperLayer').remove();
+      $('body').find('.step-fixed-container').remove();
+    });
+  })
+</script>
+
+</body>
+
+</html>
