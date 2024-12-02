@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 
 
 def calculate_ema(data, alpha):
-  # Initialize a list for EMA values
   ema_values = []
 
   # Calculate EMA
@@ -18,8 +17,6 @@ def calculate_ema(data, alpha):
       ema = alpha * current_value + (1 - alpha) * previous_ema
       ema_values.append(ema)
 
-  # Shift EMA values for plotting
-  # None for the first entry, shift EMA values
   data['EMA'] = [None] + ema_values[:-1]
 
   return data
@@ -37,7 +34,6 @@ def plot_data_ema(data, alpha):
       marker='o',
       linestyle='-')
 
-  # Plot EMA
   plt.plot(
       data['T'],
       data['EMA'],
@@ -46,11 +42,9 @@ def plot_data_ema(data, alpha):
       marker='o',
       linestyle='-')
 
-  # Set x and y axis limits
   plt.xlim(left=0)
   plt.ylim(bottom=0)
 
-  # Label the actual values
   for i, value in enumerate(data['Yt']):
     plt.text(
         data['T'].iloc[i],
@@ -60,7 +54,6 @@ def plot_data_ema(data, alpha):
         ha='right',
         va='bottom')
 
-  # Label the EMA values
   for i, value in enumerate(data['EMA']):
     if value is not None:  # Only label EMA values that exist
       plt.text(
@@ -90,7 +83,6 @@ def main():
     print("Error: Alpha must be between 0 and 1.")
     return
 
-  # Calculate EMA
   try:
     data = pd.read_csv(file_path)
     result = calculate_ema(data, alpha)
