@@ -1,4 +1,4 @@
-/* 弹窗样式 */
+/* pop up */
 #modal {
     display: none;
     position: fixed;
@@ -17,13 +17,13 @@
     width: 50%;
     max-height: 80%;
     overflow-y: auto;
-    position: relative; /* 使关闭按钮可以定位 */
+    position: relative; 
 }
 table {
     width: 100%;
     border-collapse: collapse;
 }
-/* 去除表格的边框 */
+
 table, th, td {
     border: none;
 }
@@ -33,14 +33,14 @@ th, td {
     text-align: center;
 }
 
-/* 行号列样式 */
+
 .row-title {
     width: 120px;
     text-align: left;
     padding-left: 10px;
 }
 
-/* 确认按钮样式 */
+/* confirm button */
 .confirm-btn {
     margin-top: 10px;
     padding: 5px 10px;
@@ -55,7 +55,7 @@ th, td {
     background-color: #043050;
 }
 
-/* 关闭图标样式 */
+/* close*/
 .close-icon {
     position: absolute;
     top: 1px;
@@ -68,7 +68,7 @@ th, td {
     color: #f44336;
 }
 
-/* 输入框和按钮样式 */
+/* input*/
 .input-container {
     margin-bottom: 20px;
 }
@@ -77,7 +77,7 @@ th, td {
     margin-right: 10px;
 }
 
-/* 使单元格内的输入框样式 */
+/* cell */
 .editable-cell input {
     width: 50%;
     padding: 8px;
@@ -85,7 +85,7 @@ th, td {
     font-size: 16px;
 }
 
-/* 显示结果的区域 */
+/* output */
 #result {
     margin-top: 20px;
     font-size: 16px;
