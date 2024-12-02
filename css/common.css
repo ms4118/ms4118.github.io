@@ -98,7 +98,7 @@
   height: 0;
   border-left: 300px solid transparent;
   border-right: 300px solid transparent;
-  border-top: 255px solid transparent; /* 设置边框透明 */
+  border-top: 255px solid transparent; /* invisibal */
   position: relative;
 }
 
@@ -106,11 +106,11 @@
 content: '';
 position: absolute;
 top: -250px;
-left: -240px; /* 偏移，匹配三角形宽度 */
-width: 500px; /* 等于两边的 border-width */
-height: 55px; /* 等于 border-top 的宽度 */
-background: linear-gradient(to bottom, #043050, #286ba2); /* 渐变颜色 */
-clip-path: polygon(50% 100%, 0% 0%, 100% 0%); /* 倒三角形 */
+left: -240px; /*left */
+width: 500px; /* same*/
+height: 55px; /* same */
+background: linear-gradient(to bottom, #043050, #286ba2); /* change color */
+clip-path: polygon(50% 100%, 0% 0%, 100% 0%); /* triangle */
 }
 
 .result-box{
