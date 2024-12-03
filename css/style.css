@@ -327,8 +327,8 @@ a:focus {
 .slider_section .img-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 保证图片覆盖整个容器 */
-  transform-origin: center center; /* 设置缩放中心为图片中心 */
+  object-fit: cover; 
+  transform-origin: center center;
 }
 
 .slider_section .carousel-indicators {
