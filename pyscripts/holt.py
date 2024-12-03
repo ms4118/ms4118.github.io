@@ -9,18 +9,16 @@ def holt_linear_exponential_smoothing(data, alpha, beta):
   b = np.zeros(n)  # Trend
   P = np.zeros(n)  # Forecast
 
-  # Initialize level and trend
-  a[0] = data[0]  # First level is the first data point
-  b[0] = 0        # Initial trend is zero
+  # Initialize
+  a[0] = data[0]
+  b[0] = 0     
 
-  # Calculate level, trend, and forecast
+
   for t in range(1, n):
     a[t] = alpha * data[t] + (1 - alpha) * (a[t - 1] + b[t - 1])
     b[t] = beta * (a[t] - a[t - 1]) + (1 - beta) * b[t - 1]
     P[t] = a[t] + b[t]
-
   return a, b, P
-
 
 def forecast_future_values_holt(a_last, b_last, num_forecasts):
   forecasts = []
@@ -29,11 +27,10 @@ def forecast_future_values_holt(a_last, b_last, num_forecasts):
     forecasts.append(forecast)
   return forecasts
 
-
 def plot_results_holt(data, a, P, future_forecasts, num_forecasts):
   plt.figure(figsize=(10, 6))
 
-  # Plot actual data
+  # Plot
   plt.scatter(
       range(
           1,
@@ -50,8 +47,6 @@ def plot_results_holt(data, a, P, future_forecasts, num_forecasts):
            color='red',
            linestyle='dotted',
            label='Forecasts (Pt)')
-
-  # Plot future forecasts
   for j in range(num_forecasts):
     plt.scatter(len(data) + j + 1, future_forecasts[j], color='green')
     plt.text(
@@ -61,13 +56,12 @@ def plot_results_holt(data, a, P, future_forecasts, num_forecasts):
         fontsize=9,
         ha='center')
 
-  # Labels and title
+  # Labels
   plt.xlabel('Time (t)')
   plt.ylabel('Values (Yt, at, Pt)')
   plt.title("Holt's Linear Exponential Smoothing")
   plt.axhline(0, color='black', linewidth=0.5, ls='--')
   plt.axvline(0, color='black', linewidth=0.5, ls='--')
-
   plt.legend()
   plt.grid()
   return plt
@@ -80,35 +74,28 @@ def main():
   num_forecasts = int(
       input("How many future values do you want to forecast? "))
 
-  # Validate alpha and beta
+  # Validate
   if not (0 < alpha < 1):
     raise ValueError("Alpha must be between 0 and 1.")
   if not (0 < beta < 1):
     raise ValueError("Beta must be between 0 and 1.")
-
   try:
     data = pd.read_csv(file_path)
-
-    # Check if 'Yt' column exists
     if 'Yt' not in data.columns:
       raise ValueError("The CSV file must contain a column named 'Yt'.")
-
     Y = data['Yt'].values
     a, b, P = holt_linear_exponential_smoothing(Y, alpha, beta)
-
-    # Get last level and trend
     last_a = a[-1]
     last_b = b[-1]
 
-    # Forecast future values
+    # Forecast
     future_forecasts = forecast_future_values_holt(
         last_a, last_b, num_forecasts)
 
-    # Print future forecasts
+    # Print
     for j in range(num_forecasts):
       print(f"Forecast for P({len(Y) + j + 1}) = {future_forecasts[j]:.2f}")
 
-    # Plot results
     plt = plot_results_holt(Y, a, P, future_forecasts, num_forecasts)
     plt.show()
 
