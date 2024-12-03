@@ -22,16 +22,14 @@ def calculate_ABC(data, alpha, beta, gamma, M):
   B = [0] * n
   S = [0] * n
 
-  # calculate ABS at 0
   A0, B0, S1, mean_Y1, mean_Y2, group_size = calculate_initials(data, M)
   A[0] = A0
   B[0] = B0
   S[0] = S1
-
   mean_Y1 = round(data[:group_size].mean(), 2)
   mean_Y2 = round(data[group_size:2 * group_size].mean(), 2)
 
-  # S for group 1 (Y(1) to Y(9))
+  # S for group 1
   for t in range(1, group_size + 1):  # t = 1 to 9
     S[t - 1] = round(((data[t - 1] / mean_Y1) +
                      (data[t + group_size - 1] / mean_Y2)) / M, 2)
@@ -44,7 +42,7 @@ def calculate_ABC(data, alpha, beta, gamma, M):
     else:
       A[t - 1] = round(alpha * (data[t - 1] / S[t - 1]) +
                        (1 - alpha) * (A[t - 2] + B[t - 2]), 2)
-    print(f"A({t}) = {A[t - 1]}")  # CHeckpoint can del
+    print(f"A({t}) = {A[t - 1]}")
 
   # cal B group 1
   for t in range(1, group_size + 1):
@@ -52,9 +50,9 @@ def calculate_ABC(data, alpha, beta, gamma, M):
       B[t - 1] = round(beta * (A[t - 1] - A0) + (1 - beta) * B0, 2)
     else:
       B[t - 1] = round(beta * (A[t - 1] - A[t - 2]) + (1 - beta) * B[t - 2], 2)
-    print(f"B({t}) = {B[t - 1]}")  # Check number here can del
+    print(f"B({t}) = {B[t - 1]}")
 
-  #  S second group (Y(10) to Y(18))
+  #  S second group 
   for t in range(group_size + 1, n + 1):  # t = 10 to 18
     S[t - 1] = round(gamma * (data[t - 1] / A[t - 2]) +
                      (1 - gamma) * S[t - group_size - 1], 2)
@@ -63,7 +61,7 @@ def calculate_ABC(data, alpha, beta, gamma, M):
 
     # B group 2
     B[t - 1] = round(beta * (A[t - 1] - A[t - 2]) + (1 - beta) * B[t - 2], 2)
-    print(f"B({t}) = {B[t - 1]}")  # can del
+    print(f"B({t}) = {B[t - 1]}") 
 
   return A, B, S
 
