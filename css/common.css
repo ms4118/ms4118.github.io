@@ -98,7 +98,7 @@
   height: 0;
   border-left: 300px solid transparent;
   border-right: 300px solid transparent;
-  border-top: 255px solid transparent; /* 设置边框透明 */
+  border-top: 255px solid transparent; 
   position: relative;
 }
 
@@ -106,11 +106,11 @@
 content: '';
 position: absolute;
 top: -250px;
-left: -240px; /* 偏移，匹配三角形宽度 */
-width: 500px; /* 等于两边的 border-width */
-height: 55px; /* 等于 border-top 的宽度 */
-background: linear-gradient(to bottom, #043050, #286ba2); /* 渐变颜色 */
-clip-path: polygon(50% 100%, 0% 0%, 100% 0%); /* 倒三角形 */
+left: -240px; 
+width: 500px; 
+height: 55px; 
+background: linear-gradient(to bottom, #043050, #286ba2); 
+clip-path: polygon(50% 100%, 0% 0%, 100% 0%); 
 }
 
 .result-box{
@@ -231,8 +231,8 @@ width: 100%;
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 0 9px 9px 9px; /* 右 下 左 上 */
-  border-color: transparent transparent #fff transparent; /* 右 下 黑 左 */
+  border-width: 0 9px 9px 9px; 
+  border-color: transparent transparent #fff transparent; 
 }
 
 .step-fixed-container .close-btn{
