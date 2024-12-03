@@ -1,36 +1,26 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 def calculate_wma(data, r):
-  # Prepare a list for WMA values
   wma_values = []
 
-  # Calculate WMA for each point after the first r values
   for i in range(r - 1, len(data)):
-    weights = list(range(1, r + 1))  # Weights: 1, 2, ..., r
+    weights = list(range(1, r + 1))  
     weighted_sum = sum(data['Yt'].iloc[i - j] * weights[j] for j in range(r))
     wma = weighted_sum / sum(weights)
     wma_values.append(wma)
-
-  # Add WMA to DataFrame
   data['WMA'] = [None] * (r - 1) + wma_values  # First r-1 entries are None
-
   return data
-
 
 def predict_future_values_wma(data, r, forecast_periods):
   last_values = data['Yt'].iloc[-r:].values
-  weights = list(range(1, r + 1))  # Weights: 1, 2, ..., r
+  weights = list(range(1, r + 1))  
   future_values = []
 
   for _ in range(forecast_periods):
     weighted_sum = sum(last_values[j] * weights[j] for j in range(r))
     next_value = weighted_sum / sum(weights)
     future_values.append(next_value)
-
-    # Update last_values for next prediction
-    # Shift and append new prediction
     last_values = list(last_values[1:]) + [next_value]
 
   return future_values
@@ -39,7 +29,6 @@ def predict_future_values_wma(data, r, forecast_periods):
 def plot_data_wma(data, r, future_values):
   plt.figure(figsize=(12, 6))
 
-  # Plot actual values
   plt.plot(data['T'], data['Yt'], label='Actual Yt', color='blue', marker='o')
 
   # Plot WMA
@@ -61,11 +50,9 @@ def plot_data_wma(data, r, future_values):
       linestyle='--',
       marker='o')
 
-  # Set x and y axis limits
+
   plt.xlim(left=0)
   plt.ylim(bottom=0)
-
-  # Label the actual values
   for i, value in enumerate(data['Yt']):
     plt.text(
         data['T'].iloc[i],
@@ -74,13 +61,9 @@ def plot_data_wma(data, r, future_values):
         fontsize=9,
         ha='right',
         va='bottom')
-
-  # Label the WMA values
   for i, value in enumerate(data['WMA'].dropna()):
     plt.text(data['T'].iloc[i + r - 1], value,
              f'{value:.2f}', fontsize=9, ha='right', va='bottom')
-
-  # Label the future predictions
   for i, value in enumerate(future_values):
     plt.text(
         future_t[i],
@@ -100,7 +83,7 @@ def plot_data_wma(data, r, future_values):
 
 
 def main():
-  # Input file path and number of periods
+  # Input 
   file_path = input("Enter the path to your CSV file: ")
   r = int(input("Enter the number of periods for WMA: "))
   forecast_periods = int(
@@ -112,7 +95,6 @@ def main():
     result = calculate_wma(data, r)
     print(result)
 
-    # Predict future values
     future_values = predict_future_values_wma(result, r, forecast_periods)
     print(f"Future Predictions: {future_values}")
 
