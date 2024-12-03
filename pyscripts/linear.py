@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 def calculate_linear_regression(data):
   t = data['T'].values
   Y = data['Yt'].values
-
   mean_t = np.mean(t)
   mean_Y = np.mean(Y)
   numerator = np.sum((t - mean_t) * (Y - mean_Y))
@@ -15,9 +14,7 @@ def calculate_linear_regression(data):
   b_t = round(b_t, 1)
   a_t = mean_Y - b_t * mean_t
   a_t = round(a_t, 1)
-
   return a_t, b_t, t, Y
-
 
 def predict_linear(a_t, b_t, start_t, num_predictions):
   predictions = {}
@@ -41,8 +38,6 @@ def plot_regression_linear(t, Y, a_t, b_t, predictions):
       color='green',
       linestyle='dotted',
       label='Prediction Line')
-
-  # Plot predictions
   for t_val, pred in predictions.items():
     plt.scatter(
         t_val,
