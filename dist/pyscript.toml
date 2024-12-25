@@ -1,0 +1,5 @@
+name = "Folium"
+description = "A simple application that uses pandas and folium to draw heatmaps on a map."
+packages = [
+  "https://cdn.holoviz.org/panel/wheels/bokeh-3.5.0-py3-none-any.whl"
+]
