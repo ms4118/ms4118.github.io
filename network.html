@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Site Metas -->
+  <link rel="icon" href="images/fevicon.png" type="image/gif" />
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>Op-Mic GOM</title>
+
+  <!-- bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
+  <!-- font awesome style -->
+  <link href="css/font-awesome.min.css" rel="stylesheet" />
+  <!-- Custom styles for this template -->
+  <link href="css/style.css" rel="stylesheet" />
+  <!-- responsive style -->
+  <link href="css/responsive.css" rel="stylesheet" />
+  <!-- for splashscreen -->
+  <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="pyscripts/pyscript.css" />
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script defer src="pyscripts/pyscript.js"></script>
+  <script src="https://unpkg.com/gridjs/dist/gridjs.production.min.js"></script>
+  <link rel="stylesheet" href="css/introjs.min.css">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <script src="js/matrix.js"></script>
+  <script src="js/intro.min.js"></script>
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <py-env>
+    - scipy
+    - plotly
+    - matplotlib
+  </py-env>
+
+</head>
+
+<body class="sub_page">
+  <div class="hero_area">
+    <!-- header section strats -->
+    <header class="header_section long_section px-0">
+      <nav class="navbar navbar-expand-lg custom_nav-container ">
+        <!-- <a class="navbar-brand" href="index.html">
+          <span>
+            Michael GOM
+          </span>
+        </a> -->
+        <a class="navbar-brand" href="index.html">
+          <img class="logo-img" src="./images/logo1.jpg">
+        </a>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class=""> </span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <div class="d-flex mx-auto flex-column flex-lg-row align-items-center">
+            <ul class="navbar-nav  ">
+              <li class="nav-item ">
+                <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <!-- <li class="nav-item">
+                <a class="nav-link" href="about.html"> About</a>
+              </li> -->
+              <li class="nav-item">
+                <a class="nav-link" href="furniture.html">Forecasting Logistics</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="inventory.html">Inventory Management</a>
+              </li>
+              <li class="nav-item active">
+                <a class="nav-link" href="contact.html">Network Opimization</a>
+              </li>
+            </ul>
+          </div>
+          <div class="quote_btn-container">
+            <a href="">
+              <span>
+                Project
+              </span>
+              <i class="fa fa-user" aria-hidden="true"></i>
+            </a>
+            <form class="form-inline">
+              <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <!-- end header section -->
+  </div>
+
+  <section class="furniture_section layout_padding">
+    <div class="container">
+      <div class="heading_container">
+        <h2>
+          Global Operation Management - Forecasting Logistics
+        </h2>
+        <p>
+          The Network Optimization page focuses on reducing & optimize  transportation costs, a key factor in logistics efficiency.
+
+It offers detailed guidelines and instructions for analyzing and optimizing users' logistics networks.
+
+The Model examines pathways and costs in the transportation of goods, helping users explore various routing options to identify the most cost-effective and efficient strategies.
+
+        </p>
+      </div>
+
+      <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span> Transport problem.</span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="rows" placeholder="Please Input: Number of Factories here " style="width: 250px;">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="cols" placeholder="Please Input: Number of Stores here " style="width: 250px;">
+            <button id="createMatrix" class="submit-button" onclick="openModal()">Create Input Matrix</button>
+            <button id="show_data_tabel" style="display: none;">Show</button>
+            <button class="submit-button" id="button_instant">Solve Problem</button>
+            <div id="result" style="display: none;"></div>
+            <py-script>
+              import numpy as np
+              from scipy.optimize import linprog
+              from js import window
+              from pyodide import create_proxy
+              
+              def format_data(matrix, supply, demand, bottom_left_data=''):
+                h = ['']
+                for i in range(len(demand)):
+                  h.append(f'Store{i+1}')
+                h.append('supply')
+                index = []
+                for j in range(len(supply)):
+                  index.append(f'Factory{j+1}')
+                index.append('demand')
+              
+                result = np.column_stack((matrix, supply))
+                demand = np.append(demand, bottom_left_data)
+                result = np.vstack((result, demand))
+                result = np.column_stack((np.array(index), result))
+              
+                return h, result.tolist()
+              
+              def get_cost_and_total_result(cost_matrix, supply, demand):
+                # create matrix
+                num_factories = len(supply)
+                num_stores = len(demand)
+              
+                # constraints 
+                A_supply = []
+                for i in range(num_factories):
+                  row = [0] * (num_factories * num_stores)
+                  for j in range(num_stores):
+                    row[i * num_stores + j] = 1
+                  A_supply.append(row)
+                A_supply = np.array(A_supply)
+                b_supply = supply
+
+                A_demand = []
+                for j in range(num_stores):
+                  row = [0] * (num_factories * num_stores)
+                  for i in range(num_factories):
+                    row[i * num_stores + j] = 1
+                  A_demand.append(row)
+                A_demand = np.array(A_demand)
+                b_demand = demand
+              
+                A = np.vstack((A_supply, -A_demand)) 
+                b = np.hstack((b_supply, -b_demand))
+                c = cost_matrix.flatten() 
+              
+                # solveing using optimization libbrary in pyscript
+                result = linprog(c, A_ub=A, b_ub=b, method='highs')
+              
+                if result.x is not None:
+                  x = result.x.reshape((num_factories, num_stores))
+                
+                  # output result here
+                  print("Optimal solution:")
+                  print(x)
+                  print("Optimal value (total cost):", result.fun)
+                
+                  return x, result.fun
+                else:
+                  return None
+
+
+              def on_instant(event):
+                try:
+                    n = int(Element("rows").element.value)
+                    m = int(Element("cols").element.value)
+                    comma_separated_list = Element("result").element.innerHTML.split(',')
+                    comma_separated_list[-1] = '0'
+                    values = list(map(int, comma_separated_list))       
+                    matrix = np.array(values).reshape((n+1, m+1))
+                    cost_matrix = matrix[:n, :m]
+                    supply = matrix[:-1, -1].reshape(-1)
+                    demand = matrix[-1, :-1].reshape(-1)
+                    print(cost_matrix, supply, demand)
+                    
+                    result = get_cost_and_total_result(cost_matrix, supply, demand)
+                    if result:
+                      x, total_cost = result
+                      h, d = format_data(x, supply, demand, f'Total Cost:{total_cost}')
+                      Element("h2").element.style.display = "block"
+                      window.setTable(str(h), str(d), "out2")
+
+                      Element("out_instant").element.innerHTML = "Calculate successfully."
+                    else:
+                      Element("out_instant").element.innerHTML = "Calculate error."
+
+                except ValueError as e:
+                    print(e)
+                    Element("out_instant").element.innerHTML = "Invalid input. Please enter numeric values."
+              
+              def init_data(event):
+                n = int(Element("rows").element.value)
+                m = int(Element("cols").element.value)
+                comma_separated_list = Element("result").element.innerHTML.split(',')
+                comma_separated_list[-1] = '0'
+                values = list(map(int, comma_separated_list))       
+                matrix = np.array(values).reshape((n+1, m+1))
+                cost_matrix = matrix[:n, :m]
+                supply = matrix[:-1, -1].reshape(-1)
+                demand = matrix[-1, :-1].reshape(-1)
+
+                h, d = format_data(cost_matrix, supply, demand, f'{np.sum(demand)}/{np.sum(supply)}')
+                Element("h1").element.style.display = "block"
+                window.setTable(str(h), str(d), "out1")
+
+              Element("show_data_tabel").element.onclick = init_data
+              Element("button_instant").element.onclick =  on_instant
+            </py-script>
+            <div id="out_instant"></div>
+          </div>
+        </div>
+
+
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+
+        <div class="result-box">
+          <div class="title2">INPUT</div>
+          <div class="table-out-put ">
+            <div class="box">
+              <h5 id="h1" style="text-align: center;display: none;color: #000">Original Transportation Cost from factory to store
+              </h5>
+              <div id="out1">
+              </div>
+            </div>
+
+          </div>
+          <div class="title2">OUTPUT</div>
+          <div class="table-out-put">
+            <div class="box">
+              <h5 id="h2" style="text-align: center;display: none">Optimized Transportation Cost</h5>
+              <div id="out2">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="modal">
+    <div class="my-modal-content">
+        <!-- . -->
+        <span class="close-icon" onclick="closeModal()">×</span>
+        <table id="table"></table>
+        <button class="confirm-btn" onclick="confirmTable()">sure</button>
+    </div>
+  </div>
+
+
+  <!-- footer section -->
+  <footer class="footer_section">
+    <div class="container">
+      <p>
+        &copy; <span id="displayYear"></span> 2024 Op-Mic GOM
+      </p>
+    </div>
+  </footer>
+  <!-- footer section -->
+
+  <!-- bootstrap js -->
+  <script src="js/bootstrap.js"></script>
+
+</body>
+
+<script>
+  $(document).ready(function () {
+    var steps = [
+      {
+        element: '#step1',
+        intro: '<div class="tip-box"><img src="./images/intro/step31.png" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom-right-aligned'
+      },
+    ]
+
+    $(".course-btn").click(function () {
+      var offset = $(this).offset();
+      console.log("offset:", offset, $(this).index)
+
+      var index = Number($(this).data("index"))
+
+      $('body').find('.step-helperLayer').remove();
+
+      // decoration
+      var sw = $(window).width();
+      var w = $(this).width();
+      var h = $(this).height();
+      $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
+      var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
+
+      var stepImg = $(`${steps[index - 1].intro}`);
+      var sanjiaox = $(`<div class="triangle-up"></div>`)
+      var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
+
+      // stepfixedDom
+      stepfixedDom.append(stepImg);
+      stepfixedDom.append(sanjiaox);
+      stepfixedDom.append(closeDom);
+      $('body').append(stepfixedDom)
+    })
+
+    $('body').on('click', '.step-fixed-container .close-btn', function () {
+      $('body').find('.step-helperLayer').remove();
+      $('body').find('.step-fixed-container').remove();
+    });
+    
+  });
+  
+  
+</script>
+
+</html>
