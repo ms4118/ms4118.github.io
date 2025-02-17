@@ -68,19 +68,6 @@
               </li>
             </ul>
           </div>
-          <div class="quote_btn-container">
-            <a href="">
-              <span>
-                Project
-              </span>
-              <i class="fa fa-user" aria-hidden="true"></i>
-            </a>
-            <form class="form-inline">
-              <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
-                <i class="fa fa-search" aria-hidden="true"></i>
-              </button>
-            </form>
-          </div>
         </div>
       </nav>
     </header>
@@ -177,11 +164,11 @@ The tutorial provides clear explanations and hands-on applications, enabling use
                 cwcs = calculate_cwcs(csi, C_c)
                 
                 # Output Results
-                results = ""
-                results += f"Traditional System Cardboard Used: {(V_b * N_d) / N_r:.2f} m³\n"
-                results += f"Innovative System Cardboard Used: {V_b * N_d * (1 - R_r):.2f} m³\n"
-                results += f"Cardboard Savings Index (CSI): {csi:.2f} m³\n"
-                results += f"Carbon-Weighted Cardboard Savings (CWCS): {cwcs:.2f} kg CO₂\n"
+                result = ""
+                result += f"Traditional System Cardboard Used: {(V_b * N_d) / N_r:.2f} m³\n"
+                result += f"Innovative System Cardboard Used: {V_b * N_d * (1 - R_r):.2f} m³\n"
+                result += f"Cardboard Savings Index (CSI): {csi:.2f} m³\n"
+                result += f"Carbon-Weighted Cardboard Savings (CWCS): {cwcs:.2f} kg CO₂\n"
               
                 Element("out_eoq").element.innerHTML = result
               
