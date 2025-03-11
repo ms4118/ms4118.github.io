@@ -83,8 +83,6 @@
         <h2>
           Innovative Section - Sustainable Logistic
         </h2>
-        <p>
-        </p>
       </div>
     <section class="slider_section long_section">
       <div id="customCarousel" class="carousel slide" data-ride="carousel">
@@ -124,7 +122,7 @@
 
         <div class="detail-box">
           <h5 class="title">
-            <span>Cardboard Saving Index(CSI) & Carbon-Weighted Cardboard Savings (CWCS)</span>
+            <span> Cardboard Saving Index(CSI) & Carbon-Weighted Cardboard Savings (CWCS) </span>
             <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
           </h5>
           <div class="form-content">
@@ -136,7 +134,7 @@
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
               onblur="if(this.value<0)this.value=1" id="N_r" placeholder="Please enter: Number of reuses per package">
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="R_r" placeholder="Please enter: Reduction ratio in packaging volume (eg: 40%=0.4)">
+              onblur="if(this.value<0)this.value=1" id="R_r" placeholder="Please enter: Reduction ratio in packaging volume (40%)">
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
               onblur="if(this.value<0)this.value=1" id="C_c" placeholder="Please enter: Carbon footprint of producing 1 m³ of cardboard (kg CO₂/m³)">
             <button class="submit-button" id="button_EOQ">Solve Problem</button>
@@ -217,6 +215,58 @@
           </div>
         </div>
       </div>
+
+      <div class="row section-container">
+
+        <div class="detail-box">
+          <h5 class="title">
+            <span> Pull inventory control - single (Economic order quantity EOQ)</span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="W_b2" placeholder="Average weight of cardboard per package (kg): ">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="N_d2" placeholder="Total number of deliveries: ">
+
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="N_r2" placeholder="Number of recycling cycles: ">
+            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
+              onblur="if(this.value<0)this.value=1" id="E_r2" placeholder="Please enter: Reduction ratio in packaging volume (40%)">
+            
+            <button class="submit-button" id="button_TRC">Solve Problem</button>
+            <py-script>
+              def on_trc(event):
+                W_b = float(Element("W_b2").element.value)
+                N_d = float(Element("N_d2").element.value)
+                N_r = float(Element("N_r2").element.value)
+                E_r = float(Element("E_r2").element.value)
+                
+                summation = sum(E_r ** i for i in range(1, N_r + 1))
+
+                # Calculate TRC
+                trc = W_b * N_d * summation
+                
+                # Output Results
+                result = f"Total Recycled Cardboard (TRC): {trc:.2f} kg"
+              
+                Element("out_trc").element.innerHTML = result
+              
+              Element("button_TRC").element.onclick = on_trc
+            </py-script>
+          </div>
+        </div>
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+        <div class="result-box">
+          <div class="title2">OUTPUT</div>
+          <div class="result">
+            <div id="out_trc" class="result-text"></div>
+          </div>
+        </div>
+      </div>
+
 
     </div>
 </body>
