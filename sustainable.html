@@ -220,8 +220,8 @@
 
         <div class="detail-box">
           <h5 class="title">
-            <span> Total Recycled Cardboard (TRC)</span>
-            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+            <span> Pull inventory control - single (Economic order quantity EOQ)</span>
+            <span class="course-btn" id="step2" data-index="1">Watch Tutorial</span>
           </h5>
           <div class="form-content">
             <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
@@ -293,22 +293,16 @@
     var steps = [
       {
         element: '#step1', 
-        intro: '<div class="tip-box"><img src="./images/intro/step21.jpg" style="width:100%;height:auto;"></div>',
+        intro: '<div class="tip-box"><img src="./images/intro/step51.jpg" style="width:100%;height:auto;"></div>',
         tooltipClass: 'step-tooltip',
         // position: 'bottom-right-aligned'
       },
       {
         element: '#step2', 
-        intro: '<div class="tip-box"><img src="./images/intro/step22.jpg" style="width:100%;height:auto;"></div>',
+        intro: '<div class="tip-box"><img src="./images/intro/step52.jpg" style="width:100%;height:auto;"></div>',
         tooltipClass: 'step-tooltip',
         // position: 'bottom'
-      },
-      {
-        element: '#step3', 
-        intro: '<div class="tip-box"><img src="./images/intro/step23.jpg" style="width:100%;height:auto;"></div>',
-        tooltipClass: 'step-tooltip'
-      },
-
+      }
     ]
 
     $(".course-btn").click(function () {
@@ -323,6 +317,7 @@
       var sw = $(window).width();
       var w = $(this).width();
       var h = $(this).height();
+      console.log(w, h)
       $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
       var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
 

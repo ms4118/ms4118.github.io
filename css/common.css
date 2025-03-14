@@ -169,8 +169,6 @@ width: 100%;
   padding: 0 20px;
 }
 
-.introjs-button {}
-
 .introjs-progress {
   display: none;
 
@@ -215,10 +213,10 @@ width: 100%;
   background-color: #fff;
   border-radius: 8px;
   padding: 15px;
-  width: 500px;
+  width: 800px;
 }
 .step-fixed-container .tip-box{
-  max-height: 400px;
+  max-height: 700px;
   overflow-y: auto;
   margin-top: 20px;
 
