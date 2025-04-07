@@ -25,12 +25,51 @@
   <link href="css/style.css" rel="stylesheet" />
   <!-- responsive style -->
   <link href="css/responsive.css" rel="stylesheet" />
-
+  
+  <style>
+    .nav-button-section {
+      background-color: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      padding: 30px 0;
+    }
+    .nav-img-wrapper {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      transition: all 0.3s ease;
+    }
+    .nav-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .nav-title {
+      color: #132e57;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    .nav-link-custom {
+      text-decoration: none;
+      display: block;
+      padding: 15px;
+      transition: all 0.3s ease;
+    }
+    .nav-link-custom:hover {
+      text-decoration: none;
+    }
+    .nav-link-custom:hover .nav-img-wrapper {
+      transform: translateY(-5px);
+    }
+    .nav-link-custom:hover .nav-title {
+      color: #0d1f38;
+    }
+    </style>
 </head>
 
 <body>
 
-  <div class="hero_area">
+  <div>
     <!-- header section strats -->
     <header class="header_section long_section px-0">
       <nav class="navbar navbar-expand-lg custom_nav-container ">
@@ -118,42 +157,53 @@
             </div>
           </div>
         </div>
-        <ol class="carousel-indicators">
-          <li data-target="#customCarousel" data-slide-to="0" class="active"></li>
-          <li data-target="#customCarousel" data-slide-to="1"></li>
-          <li data-target="#customCarousel" data-slide-to="2"></li>
-          <li data-target="#customCarousel" data-slide-to="3"></li>
-        </ol>
       </div>
     </section>
     <!-- end slider section -->
-
-      <div class="container">
-        <div class="contact_nav" style="text-align: center;">
-          <a href="">
-            <i class="fa fa-phone" aria-hidden="true"></i>
-            <span>
-              Call : +01 123455678990
-            </span>
-          </a>
-          <a href="">
-            <i class="fa fa-envelope" aria-hidden="true"></i>
-            <span>
-              Email : demo@gmail.com
-            </span>
-          </a>
-          <a href="">
-            <i class="fa fa-map-marker" aria-hidden="true"></i>
-            <span>
-              Location
-            </span>
-          </a>
-        </div>
-      </div>
   </div>
 
   <!-- </section> -->
   <!-- end info_section -->
+<!-- navigation buttons section -->
+<section class="py-5 nav-button-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-3 col-sm-6 text-center">
+        <a href="sustainable.html" class="nav-link-custom">
+          <div class="nav-img-wrapper ">
+            <img src="images/home/nav_sus.png" alt="Sustainability Logistics" class="nav-img">
+          </div>
+          <h5 class="nav-title">Sustainability Logistics</h5>
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6 text-center">
+        <a href="network.html" class="nav-link-custom">
+          <div class="nav-img-wrapper ">
+            <img src="images/home/nav_net.png" alt="Network Optimization" class="nav-img">
+          </div>
+          <h5 class="nav-title">Network Optimization</h5>
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6 text-center">
+        <a href="inventory.html" class="nav-link-custom">
+          <div class="nav-img-wrapper">
+            <img src="images/home/nav_inv.png" alt="Inventory Management" class="nav-img">
+          </div>
+          <h5 class="nav-title">Inventory Management</h5>
+        </a>
+      </div>
+      <div class="col-md-3 col-sm-6 text-center">
+        <a href="furniture.html" class="nav-link-custom">
+          <div class="nav-img-wrapper">
+            <img src="images/home/nav_for.png" alt="Forecasting Logistics" class="nav-img">
+          </div>
+          <h5 class="nav-title">Forecasting Logistics</h5>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- end navigation buttons section -->
 
 
   <!-- footer section -->
