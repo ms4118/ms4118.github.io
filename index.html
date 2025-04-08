@@ -64,6 +64,27 @@
     .nav-link-custom:hover .nav-title {
       color: #0d1f38;
     }
+    /* 自定义轮播图箭头样式 */
+    .carousel-control-prev,
+    .carousel-control-next {
+      width: 50px;
+      height: 50px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .carousel-control-prev {
+      left: 20px;
+    }
+    .carousel-control-next {
+      right: 20px;
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 30px;
+      height: 30px;
+    }
     </style>
 </head>
 
@@ -111,6 +132,15 @@
     <section class="slider_section long_section">
       <div id="customCarousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
+        <!-- 添加左右箭头按钮 -->
+        <a class="carousel-control-prev" href="#customCarousel" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#customCarousel" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
           <div class="carousel-item active">
             <div class="container ">
               <div class="row">
