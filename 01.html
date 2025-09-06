@@ -38,6 +38,7 @@
 
 </head>
 
+<body class="sub_page">
   <div class="hero_area">
     <!-- header section starts -->
     <header class="header_section long_section px-0">
@@ -79,7 +80,7 @@
     <!-- end header section -->
   </div>
 
-  <!-- Blog section -->
+    <!-- Blog section -->
 <section class="blog_section layout_padding furniture_section">
     <div class="container">
       <div class="heading_container">
@@ -132,6 +133,98 @@
           </div>
         </div>
       </div>
+
+      <!-- Calculator for Storage Policy (Step 1: Finding m) -->
+      <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title" id="step1">
+            <span>Calculate Required Storage Locations (m)</span>
+            <span class="course-btn" data-index="1">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">
+            
+            <h6>Select Storage Policy:</h6>
+            <select class="input-content" id="storage_policy">
+              <option value="dedicated">Dedicated Storage Policy</option>
+              <option value="random">Random Storage Policy</option>
+            </select>
+            
+            <input class="input-content" type="number" min="1" id="product_count" placeholder="Number of products (n)" value="2">
+            <button class="submit-button" id="generate_inputs">Generate Input Fields</button>
+            
+            <div id="product_inputs">
+              <!-- Inputs will be generated here by JavaScript -->
+            </div>
+            
+            <button class="submit-button" id="calculate_m">Calculate m</button>
+            
+            <py-script>
+              # Import the math library for any calculations
+              import math
+              
+              # Function to calculate m (required storage locations)
+              def calculate_required_m(*args):
+                # Get the selected policy
+                policy = Element("storage_policy").value
+                # Get the number of products
+                n = int(Element("product_count").value)
+                
+                if policy == "dedicated":
+                  # DEDICATED STORAGE: Sum of each product's maximum inventory
+                  max_inventory_list = []
+                  for i in range(n):
+                    # Try to get the value for each product, use 0 if there's an error
+                    try:
+                      max_val = float(Element(f"max_inv_{i}").value)
+                      max_inventory_list.append(max_val)
+                    except:
+                      max_inventory_list.append(0)
+                  m = sum(max_inventory_list)
+                  formula_text = "m = Σ max(I_j) = " + " + ".join([str(int(x)) for x in max_inventory_list]) + f" = {int(m)}"
+                  
+                else:
+                  # RANDOM STORAGE: Maximum of the total inventory at any time period
+                  # For simplicity, we ask the user for the total inventory in different time periods
+                  time_period_sums = []
+                  # Let's assume we ask for 3 time periods as an example
+                  for t in range(3): # Time periods T1, T2, T3
+                    try:
+                      sum_val = float(Element(f"time_sum_{t}").value)
+                      time_period_sums.append(sum_val)
+                    except:
+                      time_period_sums.append(0)
+                  m = max(time_period_sums)
+                  formula_text = f"m = max(Σ I_j(t)) = max({time_period_sums}) = {int(m)}"
+                
+                # Display the result
+                result_html = f"""
+                <div class='result-success'>
+                  <h5>Result: m = <strong>{int(m)}</strong> storage locations required.</h5>
+                  <p><strong>Formula:</strong> {formula_text}</p>
+                </div>
+                """
+                Element("m_result").write(result_html)
+              
+              # Connect the button to the function
+              Element("calculate_m").on("click", calculate_required_m)
+            </py-script>
+            
+          </div>
+        </div>
+        <div class="triangle-box">
+          <div class="triangle"></div>
+        </div>
+        <div class="result-box">
+          <div class="title2">OUTPUT</div>
+          <div class="result">
+            <div id="m_result" class="result-text">Results will appear here...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <!-- end blog section -->
       
   <!-- footer section -->
   <footer class="footer_section">
