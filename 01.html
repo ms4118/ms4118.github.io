@@ -159,55 +159,64 @@
             <button class="submit-button" id="calculate_m">Calculate m</button>
             
             <py-script>
-              # Import the math library for any calculations
-              import math
-              
-              # Function to calculate m (required storage locations)
-              def calculate_required_m(*args):
-                # Get the selected policy
-                policy = Element("storage_policy").value
-                # Get the number of products
-                n = int(Element("product_count").value)
-                
-                if policy == "dedicated":
-                  # DEDICATED STORAGE: Sum of each product's maximum inventory
-                  max_inventory_list = []
-                  for i in range(n):
-                    # Try to get the value for each product, use 0 if there's an error
-                    try:
-                      max_val = float(Element(f"max_inv_{i}").value)
-                      max_inventory_list.append(max_val)
-                    except:
-                      max_inventory_list.append(0)
-                  m = sum(max_inventory_list)
-                  formula_text = "m = Σ max(I_j) = " + " + ".join([str(int(x)) for x in max_inventory_list]) + f" = {int(m)}"
-                  
-                else:
-                  # RANDOM STORAGE: Maximum of the total inventory at any time period
-                  # For simplicity, we ask the user for the total inventory in different time periods
-                  time_period_sums = []
-                  # Let's assume we ask for 3 time periods as an example
-                  for t in range(3): # Time periods T1, T2, T3
-                    try:
-                      sum_val = float(Element(f"time_sum_{t}").value)
-                      time_period_sums.append(sum_val)
-                    except:
-                      time_period_sums.append(0)
-                  m = max(time_period_sums)
-                  formula_text = f"m = max(Σ I_j(t)) = max({time_period_sums}) = {int(m)}"
-                
-                # Display the result
-                result_html = f"""
-                <div class='result-success'>
-                  <h5>Result: m = <strong>{int(m)}</strong> storage locations required.</h5>
-                  <p><strong>Formula:</strong> {formula_text}</p>
-                </div>
-                """
-                Element("m_result").write(result_html)
-              
-              # Connect the button to the function
-              Element("calculate_m").on("click", calculate_required_m)
-            </py-script>
+    # Function to calculate m (required storage locations)
+    def calculate_required_m(*args):
+        # Get the selected policy (dedicated or random)
+        policy = Element("storage_policy").value
+        
+        if policy == "dedicated":
+            # DEDICATED STORAGE: Sum of each product's maximum inventory
+            # m_d = Σ max(I_j) for j=1 to n
+            max_inventory_list = []
+            n = int(Element("product_count").value)
+            
+            for i in range(n):
+                # Get the value for each product's max inventory
+                try:
+                    max_val = float(Element(f"max_inv_{i}").value)
+                    max_inventory_list.append(max_val)
+                except:
+                    # If input is invalid, use 0
+                    max_inventory_list.append(0)
+            
+            # Calculate m for dedicated storage
+            m = sum(max_inventory_list)
+            
+            # Create the formula text to show the user
+            formula_text = "m = Σ max(I_j) = " + " + ".join([str(int(x)) for x in max_inventory_list]) + f" = {int(m)}"
+            
+        else:
+            # RANDOM STORAGE: Maximum of the total inventory at any time
+            # m_r = max(Σ I_j(t)) for all time periods t
+            time_period_sums = []
+            
+            # Get the total inventory for each time period (assuming 3 periods for this example)
+            for t in range(3):
+                try:
+                    sum_val = float(Element(f"time_sum_{t}").value)
+                    time_period_sums.append(sum_val)
+                except:
+                    time_period_sums.append(0)
+            
+            # Calculate m for random storage (find the maximum sum)
+            m = max(time_period_sums)
+            
+            # Create the formula text to show the user
+            formula_text = f"m = max(Σ I_j(t)) = max({time_period_sums}) = {int(m)}"
+        
+        # Display the result to the user
+        result_html = f"""
+        <div class='result-success'>
+            <h5>Result: m = <strong>{int(m)}</strong> storage locations required.</h5>
+            <p><strong>Formula:</strong> {formula_text}</p>
+            <p><strong>Policy:</strong> {'Dedicated' if policy == 'dedicated' else 'Random'} Storage</p>
+        </div>
+        """
+        Element("m_result").write(result_html)
+
+    # Connect the calculate button to the function - FIXED LINE
+    Element("calculate_m").add_event_listener("click", calculate_required_m)
+</py-script>
             
           </div>
         </div>
