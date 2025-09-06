@@ -159,8 +159,11 @@
             <button class="submit-button" id="calculate_m">Calculate m</button>
             
             <py-script>
+    from pyodide import create_proxy
+    import js
+
     # Function to calculate m (required storage locations)
-    def calculate_required_m(*args):
+    def calculate_required_m(event=None):
         # Get the selected policy (dedicated or random)
         policy = Element("storage_policy").value
         
@@ -214,8 +217,14 @@
         """
         Element("m_result").write(result_html)
 
-    # Connect the calculate button to the function - FIXED LINE
-    Element("calculate_m").add_event_listener("click", calculate_required_m)
+    # Create a proxy function to handle the event
+    def setup_event_listeners():
+        calculate_button = js.document.getElementById("calculate_m")
+        calculate_proxy = create_proxy(calculate_required_m)
+        calculate_button.addEventListener("click", calculate_proxy)
+
+    # Run the setup after the page loads
+    setup_event_listeners()
 </py-script>
             
           </div>
