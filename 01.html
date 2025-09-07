@@ -137,12 +137,12 @@
       <div class="row section-container">
         <div class="detail-box">
           <h5 class="title">
-            <span> Storage Location Calculator - Dedicated vs Random Policy</span>
+            <span> Determine Number of Storage Location - Dedicated Policy</span>
             <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
           </h5>
           <div class="form-content">
-            <p class="instruction-text">Enter product inventory data (comma separated values):</p>
-            <textarea class="input-content textarea-content" id="inventoryData" placeholder="Format: Product Name, Max Inventory Level
+            <p class="instruction-text">Input data (Use comma to separate product and inventory level!):</p>
+            <textarea class="input-content textarea-content" id="inventoryData" placeholder="Format: Product , Max Inventory Level
 Example: 
 A, 600
 B, 360
@@ -173,9 +173,7 @@ C, 500"></textarea>
                   # Calculate dedicated storage (sum of max inventory levels)
                   m_d = sum(max_levels)
                   
-                  # For random storage, we need time-series data which we don't have
-                  # So we'll just show the formula and explanation
-                  
+                
                   result_html = f"""
                   <div class="result-header">Storage Requirements Calculation</div>
                   <div class="result-detail">
@@ -183,11 +181,7 @@ C, 500"></textarea>
                     <p>m<sub>d</sub> = Σ max I<sub>j</sub>(t) = {m_d} locations</p>
                     <p class="formula">m<sub>d</sub> = Σ<sub>j=1</sub><sup>n</sup> max<sub>t</sub> I<sub>j</sub>(t)</p>
                     
-                    <p><strong>Random Storage Policy:</strong></p>
-                    <p>m<sub>r</sub> = max<sub>t</sub> Σ I<sub>j</sub>(t)</p>
-                    <p class="note">Note: For random storage policy, time-series inventory data is needed to calculate the maximum total inventory at any time t.</p>
                     
-                    <p><strong>Products analyzed:</strong> {', '.join(products)}</p>
                   </div>
                   """
                   
