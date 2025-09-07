@@ -134,99 +134,70 @@
         </div>
       </div>
 
-      <!-- Calculator for Storage Policy (Step 1: Finding m) -->
       <div class="row section-container">
         <div class="detail-box">
-          <h5 class="title" id="step1">
-            <span>Calculate Required Storage Locations (m)</span>
-            <span class="course-btn" data-index="1">Watch Tutorial</span>
+          <h5 class="title">
+            <span> Storage Location Calculator - Dedicated vs Random Policy</span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
           </h5>
           <div class="form-content">
-            
-            <h6>Select Storage Policy:</h6>
-            <select class="input-content" id="storage_policy">
-              <option value="dedicated">Dedicated Storage Policy</option>
-              <option value="random">Random Storage Policy</option>
-            </select>
-            
-            <input class="input-content" type="number" min="1" id="product_count" placeholder="Number of products (n)" value="2">
-            <button class="submit-button" id="generate_inputs">Generate Input Fields</button>
-            
-            <div id="product_inputs">
-              <!-- Inputs will be generated here by JavaScript -->
-            </div>
-            
-            <button class="submit-button" id="calculate_m">Calculate m</button>
-            
+            <p class="instruction-text">Enter product inventory data (comma separated values):</p>
+            <textarea class="input-content textarea-content" id="inventoryData" placeholder="Format: Product Name, Max Inventory Level
+Example: 
+A, 600
+B, 360
+C, 500"></textarea>
+            <button class="submit-button" id="calculateStorage">Calculate Storage Requirements</button>
             <py-script>
-    from pyodide import create_proxy
-    import js
+              import numpy as np
 
-    # Function to calculate m (required storage locations)
-    def calculate_required_m(event=None):
-        # Get the selected policy (dedicated or random)
-        policy = Element("storage_policy").value
-        
-        if policy == "dedicated":
-            # DEDICATED STORAGE: Sum of each product's maximum inventory
-            # m_d = Σ max(I_j) for j=1 to n
-            max_inventory_list = []
-            n = int(Element("product_count").value)
-            
-            for i in range(n):
-                # Get the value for each product's max inventory
+              def calculate_storage(event):
                 try:
-                    max_val = float(Element(f"max_inv_{i}").value)
-                    max_inventory_list.append(max_val)
-                except:
-                    # If input is invalid, use 0
-                    max_inventory_list.append(0)
-            
-            # Calculate m for dedicated storage
-            m = sum(max_inventory_list)
-            
-            # Create the formula text to show the user
-            formula_text = "m = Σ max(I_j) = " + " + ".join([str(int(x)) for x in max_inventory_list]) + f" = {int(m)}"
-            
-        else:
-            # RANDOM STORAGE: Maximum of the total inventory at any time
-            # m_r = max(Σ I_j(t)) for all time periods t
-            time_period_sums = []
-            
-            # Get the total inventory for each time period (assuming 3 periods for this example)
-            for t in range(3):
-                try:
-                    sum_val = float(Element(f"time_sum_{t}").value)
-                    time_period_sums.append(sum_val)
-                except:
-                    time_period_sums.append(0)
-            
-            # Calculate m for random storage (find the maximum sum)
-            m = max(time_period_sums)
-            
-            # Create the formula text to show the user
-            formula_text = f"m = max(Σ I_j(t)) = max({time_period_sums}) = {int(m)}"
-        
-        # Display the result to the user
-        result_html = f"""
-        <div class='result-success'>
-            <h5>Result: m = <strong>{int(m)}</strong> storage locations required.</h5>
-            <p><strong>Formula:</strong> {formula_text}</p>
-            <p><strong>Policy:</strong> {'Dedicated' if policy == 'dedicated' else 'Random'} Storage</p>
-        </div>
-        """
-        Element("m_result").write(result_html)
+                  data_text = Element("inventoryData").element.value
+                  lines = data_text.strip().split('\n')
+                  
+                  products = []
+                  max_levels = []
+                  
+                  for line in lines:
+                    if line.strip():
+                      parts = line.split(',')
+                      if len(parts) >= 2:
+                        products.append(parts[0].strip())
+                        max_levels.append(float(parts[1].strip()))
+                  
+                  if not max_levels:
+                    Element("storageResult").element.innerHTML = "Please enter valid data."
+                    return
+                  
+                  # Calculate dedicated storage (sum of max inventory levels)
+                  m_d = sum(max_levels)
+                  
+                  # For random storage, we need time-series data which we don't have
+                  # So we'll just show the formula and explanation
+                  
+                  result_html = f"""
+                  <div class="result-header">Storage Requirements Calculation</div>
+                  <div class="result-detail">
+                    <p><strong>Dedicated Storage Policy:</strong></p>
+                    <p>m<sub>d</sub> = Σ max I<sub>j</sub>(t) = {m_d} locations</p>
+                    <p class="formula">m<sub>d</sub> = Σ<sub>j=1</sub><sup>n</sup> max<sub>t</sub> I<sub>j</sub>(t)</p>
+                    
+                    <p><strong>Random Storage Policy:</strong></p>
+                    <p>m<sub>r</sub> = max<sub>t</sub> Σ I<sub>j</sub>(t)</p>
+                    <p class="note">Note: For random storage policy, time-series inventory data is needed to calculate the maximum total inventory at any time t.</p>
+                    
+                    <p><strong>Products analyzed:</strong> {', '.join(products)}</p>
+                  </div>
+                  """
+                  
+                  Element("storageResult").element.innerHTML = result_html
+                  
+                except Exception as e:
+                  Element("storageResult").element.innerHTML = f"Error: {str(e)}. Please check your input format."
 
-    # Create a proxy function to handle the event
-    def setup_event_listeners():
-        calculate_button = js.document.getElementById("calculate_m")
-        calculate_proxy = create_proxy(calculate_required_m)
-        calculate_button.addEventListener("click", calculate_proxy)
-
-    # Run the setup after the page loads
-    setup_event_listeners()
-</py-script>
-            
+              Element("calculateStorage").element.onclick = calculate_storage
+            </py-script>
           </div>
         </div>
         <div class="triangle-box">
@@ -235,14 +206,11 @@
         <div class="result-box">
           <div class="title2">OUTPUT</div>
           <div class="result">
-            <div id="m_result" class="result-text">Results will appear here...</div>
+            <div id="storageResult" class="result-text"></div>
           </div>
         </div>
       </div>
 
-    </div>
-  </section>
-  <!-- end blog section -->
       
   <!-- footer section -->
   <footer class="footer_section">
