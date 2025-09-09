@@ -134,64 +134,355 @@
         </div>
       </div>
 
-      <div class="row section-container">
-        <div class="detail-box">
-          <h5 class="title">
-            <span> Determine Number of Storage Location - Dedicated Policy</span>
-            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
-          </h5>
-          <div class="form-content">
-            <p class="instruction-text">Input data (Use comma to separate product and inventory level!):</p>
-            <textarea class="input-content textarea-content" id="inventoryData" placeholder="Format: Product , Max Inventory Level
-Example: 
-A, 600
-B, 360
-C, 500"></textarea>
-            <button class="submit-button" id="calculateStorage">Calculate Storage Requirements</button>
-            <py-script>
-              import numpy as np
-
-              def calculate_storage(event):
-                try:
-                  data_text = Element("inventoryData").element.value
-                  lines = data_text.strip().split('\n')
-                  
-                  products = []
-                  max_levels = []
-                  
-                  for line in lines:
-                    if line.strip():
-                      parts = line.split(',')
-                      if len(parts) >= 2:
-                        products.append(parts[0].strip())
-                        max_levels.append(float(parts[1].strip()))
-                  
-                  if not max_levels:
-                    Element("storageResult").element.innerHTML = "Please enter valid data."
-                    return
-                  
-                  # Calculate dedicated storage (sum of max inventory levels)
-                  m_d = sum(max_levels)
-                  
+    <div class="container">
+        <header>
+            <h1>Warehouse Storage Policy Calculator</h1>
+            <p class="subtitle">Calculate storage requirements for dedicated or random storage policies</p>
+        </header>
+        
+        <div class="policy-selector">
+            <div class="policy-option active" data-policy="dedicated">
+                <h3>Dedicated Storage</h3>
+                <p>Fixed locations for each product</p>
+            </div>
+            <div class="policy-option" data-policy="random">
+                <h3>Random Storage</h3>
+                <p>Dynamic allocation based on inventory levels</p>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <div id="dedicated-inputs">
+                <div class="input-group">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" placeholder="Enter product name">
+                </div>
                 
-                  result_html = f"""
-                  <div class="result-header">Storage Requirements Calculation</div>
-                  <div class="result-detail">
-                    <p><strong>Dedicated Storage Policy:</strong></p>
-                    <p>m<sub>d</sub> = Σ max I<sub>j</sub>(t) = {m_d} </p>
-                    
-                    
-                    
-                  </div>
-                  """
-                  
-                  Element("storageResult").element.innerHTML = result_html
-                  
-                except Exception as e:
-                  Element("storageResult").element.innerHTML = f"Error: {str(e)}. Please check your input format."
+                <div class="input-group">
+                    <label for="max-inventory">Maximum Inventory Level</label>
+                    <input type="number" id="max-inventory" placeholder="Enter max inventory" min="1">
+                </div>
+                
+                <button id="add-product">Add Product</button>
+                
+                <div class="product-list" id="dedicated-products">
+                    <h3>Products Added</h3>
+                    <div id="dedicated-list"></div>
+                </div>
+                
+                <button id="calculate-dedicated" style="margin-top: 20px;">Calculate Storage Requirements</button>
+            </div>
+            
+            <div id="random-inputs" style="display: none;">
+                <div class="input-group">
+                    <label for="periods">Number of Time Periods</label>
+                    <input type="number" id="periods" placeholder="Enter number of periods" min="1" value="3">
+                </div>
+                
+                <div class="input-group">
+                    <label for="random-product-name">Product Name</label>
+                    <input type="text" id="random-product-name" placeholder="Enter product name">
+                </div>
+                
+                <div class="input-group">
+                    <label>Inventory Levels by Period</label>
+                    <div class="period-inputs" id="period-inputs">
+                        <!-- Period inputs will be generated here -->
+                    </div>
+                </div>
+                
+                <button id="add-random-product">Add Product</button>
+                
+                <div class="product-list" id="random-products">
+                    <h3>Products Added</h3>
+                    <div id="random-list"></div>
+                </div>
+                
+                <button id="calculate-random" style="margin-top: 20px;">Calculate Storage Requirements</button>
+            </div>
+        </div>
+        
+        <div class="results" id="results" style="display: none;">
+            <h3>Calculation Results</h3>
+            <div id="result-content"></div>
+        </div>
+    </div>
 
-              Element("calculateStorage").element.onclick = calculate_storage
-            </py-script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Policy selection
+            const policyOptions = document.querySelectorAll('.policy-option');
+            const dedicatedInputs = document.getElementById('dedicated-inputs');
+            const randomInputs = document.getElementById('random-inputs');
+            const resultsSection = document.getElementById('results');
+            
+            policyOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    policyOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (this.dataset.policy === 'dedicated') {
+                        dedicatedInputs.style.display = 'block';
+                        randomInputs.style.display = 'none';
+                    } else {
+                        dedicatedInputs.style.display = 'none';
+                        randomInputs.style.display = 'block';
+                        generatePeriodInputs();
+                    }
+                    
+                    resultsSection.style.display = 'none';
+                });
+            });
+            
+            // Dedicated storage logic
+            const dedicatedProducts = [];
+            const addProductBtn = document.getElementById('add-product');
+            const dedicatedList = document.getElementById('dedicated-list');
+            
+            addProductBtn.addEventListener('click', function() {
+                const productName = document.getElementById('product-name').value.trim();
+                const maxInventory = document.getElementById('max-inventory').value;
+                
+                if (!productName || !maxInventory) {
+                    alert('Please enter both product name and maximum inventory level');
+                    return;
+                }
+                
+                dedicatedProducts.push({
+                    name: productName,
+                    maxInventory: parseInt(maxInventory)
+                });
+                
+                updateDedicatedList();
+                
+                // Clear inputs
+                document.getElementById('product-name').value = '';
+                document.getElementById('max-inventory').value = '';
+            });
+            
+            function updateDedicatedList() {
+                dedicatedList.innerHTML = '';
+                
+                if (dedicatedProducts.length === 0) {
+                    dedicatedList.innerHTML = '<p>No products added yet</p>';
+                    return;
+                }
+                
+                dedicatedProducts.forEach((product, index) => {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'product-item';
+                    productDiv.innerHTML = `
+                        <input type="text" value="${product.name}" readonly>
+                        <input type="number" value="${product.maxInventory}" readonly>
+                        <button class="remove-btn" data-index="${index}">Remove</button>
+                    `;
+                    dedicatedList.appendChild(productDiv);
+                });
+                
+                // Add event listeners to remove buttons
+                const removeButtons = document.querySelectorAll('.remove-btn');
+                removeButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        dedicatedProducts.splice(index, 1);
+                        updateDedicatedList();
+                    });
+                });
+            }
+            
+            document.getElementById('calculate-dedicated').addEventListener('click', function() {
+                if (dedicatedProducts.length === 0) {
+                    alert('Please add at least one product');
+                    return;
+                }
+                
+                let total = 0;
+                let formula = 'm<sub>d</sub> = ';
+                
+                dedicatedProducts.forEach((product, index) => {
+                    total += product.maxInventory;
+                    formula += product.maxInventory;
+                    if (index < dedicatedProducts.length - 1) {
+                        formula += ' + ';
+                    }
+                });
+                
+                formula += ` = ${total}`;
+                
+                displayResults(`
+                    <div class="calculation">
+                        <h4>Dedicated Storage Calculation</h4>
+                        <p>Number of storage locations required:</p>
+                        <div class="formula">${formula}</div>
+                        <p><strong>Total storage locations needed: ${total}</strong></p>
+                    </div>
+                `);
+            });
+            
+            // Random storage logic
+            const randomProducts = [];
+            const randomList = document.getElementById('random-list');
+            const periodsInput = document.getElementById('periods');
+            
+            function generatePeriodInputs() {
+                const periods = parseInt(periodsInput.value) || 3;
+                const periodInputsContainer = document.getElementById('period-inputs');
+                
+                periodInputsContainer.innerHTML = '';
+                
+                for (let i = 1; i <= periods; i++) {
+                    const periodDiv = document.createElement('div');
+                    periodDiv.className = 'period-input';
+                    periodDiv.innerHTML = `
+                        <label for="period-${i}">Period ${i}</label>
+                        <input type="number" id="period-${i}" data-period="${i}" min="0" value="0">
+                    `;
+                    periodInputsContainer.appendChild(periodDiv);
+                }
+            }
+            
+            periodsInput.addEventListener('change', generatePeriodInputs);
+            
+            document.getElementById('add-random-product').addEventListener('click', function() {
+                const productName = document.getElementById('random-product-name').value.trim();
+                const periods = parseInt(periodsInput.value) || 3;
+                
+                if (!productName) {
+                    alert('Please enter a product name');
+                    return;
+                }
+                
+                const inventoryLevels = [];
+                for (let i = 1; i <= periods; i++) {
+                    const value = document.getElementById(`period-${i}`).value;
+                    inventoryLevels.push(parseInt(value) || 0);
+                }
+                
+                randomProducts.push({
+                    name: productName,
+                    inventoryLevels: inventoryLevels
+                });
+                
+                updateRandomList();
+                
+                // Clear inputs but keep periods
+                document.getElementById('random-product-name').value = '';
+                for (let i = 1; i <= periods; i++) {
+                    document.getElementById(`period-${i}`).value = '0';
+                }
+            });
+            
+            function updateRandomList() {
+                randomList.innerHTML = '';
+                
+                if (randomProducts.length === 0) {
+                    randomList.innerHTML = '<p>No products added yet</p>';
+                    return;
+                }
+                
+                const periods = parseInt(periodsInput.value) || 3;
+                
+                // Create header row
+                const headerRow = document.createElement('div');
+                headerRow.className = 'product-item';
+                headerRow.style.fontWeight = 'bold';
+                
+                let headerHTML = '<div style="flex: 2;">Product</div>';
+                for (let i = 1; i <= periods; i++) {
+                    headerHTML += `<div>Period ${i}</div>`;
+                }
+                headerHTML += '<div>Action</div>';
+                
+                headerRow.innerHTML = headerHTML;
+                randomList.appendChild(headerRow);
+                
+                // Add product rows
+                randomProducts.forEach((product, index) => {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'product-item';
+                    
+                    let productHTML = `<div style="flex: 2;">${product.name}</div>`;
+                    product.inventoryLevels.forEach(level => {
+                        productHTML += `<div>${level}</div>`;
+                    });
+                    productHTML += `<button class="remove-btn" data-index="${index}">Remove</button>`;
+                    
+                    productDiv.innerHTML = productHTML;
+                    randomList.appendChild(productDiv);
+                });
+                
+                // Add event listeners to remove buttons
+                const removeButtons = document.querySelectorAll('.remove-btn');
+                removeButtons.forEach(button => {
+                    if (button.parentElement.parentElement !== headerRow) {
+                        button.addEventListener('click', function() {
+                            const index = parseInt(this.dataset.index);
+                            randomProducts.splice(index, 1);
+                            updateRandomList();
+                        });
+                    }
+                });
+            }
+            
+            document.getElementById('calculate-random').addEventListener('click', function() {
+                if (randomProducts.length === 0) {
+                    alert('Please add at least one product');
+                    return;
+                }
+                
+                const periods = parseInt(periodsInput.value) || 3;
+                const periodTotals = [];
+                
+                for (let i = 0; i < periods; i++) {
+                    let total = 0;
+                    randomProducts.forEach(product => {
+                        total += product.inventoryLevels[i];
+                    });
+                    periodTotals.push(total);
+                }
+                
+                const maxTotal = Math.max(...periodTotals);
+                const maxIndex = periodTotals.indexOf(maxTotal) + 1;
+                
+                let formula = 'm<sub>r</sub> = max(';
+                periodTotals.forEach((total, index) => {
+                    formula += `m<sub>${index + 1}</sub>`;
+                    if (index < periodTotals.length - 1) {
+                        formula += ', ';
+                    }
+                });
+                formula += `) = ${maxTotal}`;
+                
+                let calculationDetails = '<p>Total inventory by period:</p><ul>';
+                periodTotals.forEach((total, index) => {
+                    calculationDetails += `<li>Period ${index + 1}: ${total} units</li>`;
+                });
+                calculationDetails += `</ul><p>Maximum inventory occurs in Period ${maxIndex}</p>`;
+                
+                displayResults(`
+                    <div class="calculation">
+                        <h4>Random Storage Calculation</h4>
+                        ${calculationDetails}
+                        <div class="formula">${formula}</div>
+                        <p><strong>Storage locations needed: ${maxTotal}</strong></p>
+                    </div>
+                `);
+            });
+            
+            function displayResults(content) {
+                const resultContent = document.getElementById('result-content');
+                resultContent.innerHTML = content;
+                resultsSection.style.display = 'block';
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Initialize
+            updateDedicatedList();
+            generatePeriodInputs();
+        });
+    </script>
           </div>
         </div>
         <div class="triangle-box">
