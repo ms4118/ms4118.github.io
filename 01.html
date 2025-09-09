@@ -141,11 +141,11 @@
         </header>
         
         <div class="policy-selector">
-            <div class="policy-option active" data-policy="dedicated">
+            <div class="policy-option active" id="dedicated-option" data-policy="dedicated">
                 <h3>Dedicated Storage</h3>
                 <p>Fixed locations for each product</p>
             </div>
-            <div class="policy-option" data-policy="random">
+            <div class="policy-option" id="random-option" data-policy="random">
                 <h3>Random Storage</h3>
                 <p>Dynamic allocation based on inventory levels</p>
             </div>
@@ -222,31 +222,34 @@
     </div>
 
     <script>
+        // Wait for the DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Policy selection
-            const policyOptions = document.querySelectorAll('.policy-option');
+            const dedicatedOption = document.getElementById('dedicated-option');
+            const randomOption = document.getElementById('random-option');
             const dedicatedInputs = document.getElementById('dedicated-inputs');
             const randomInputs = document.getElementById('random-inputs');
             const inputContent = document.getElementById('input-content');
             const outputContent = document.getElementById('output-content');
             
-            policyOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    policyOptions.forEach(opt => opt.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    if (this.dataset.policy === 'dedicated') {
-                        dedicatedInputs.style.display = 'block';
-                        randomInputs.style.display = 'none';
-                    } else {
-                        dedicatedInputs.style.display = 'none';
-                        randomInputs.style.display = 'block';
-                        generatePeriodInputs();
-                    }
-                    
-                    inputContent.innerHTML = '<p>Input data will appear here after calculation</p>';
-                    outputContent.innerHTML = '<p>Calculation results will appear here</p>';
-                });
+            // Set up event listeners for policy selection
+            dedicatedOption.addEventListener('click', function() {
+                dedicatedOption.classList.add('active');
+                randomOption.classList.remove('active');
+                dedicatedInputs.style.display = 'block';
+                randomInputs.style.display = 'none';
+                inputContent.innerHTML = '<p>Input data will appear here after calculation</p>';
+                outputContent.innerHTML = '<p>Calculation results will appear here</p>';
+            });
+            
+            randomOption.addEventListener('click', function() {
+                randomOption.classList.add('active');
+                dedicatedOption.classList.remove('active');
+                dedicatedInputs.style.display = 'none';
+                randomInputs.style.display = 'block';
+                generatePeriodInputs();
+                inputContent.innerHTML = '<p>Input data will appear here after calculation</p>';
+                outputContent.innerHTML = '<p>Calculation results will appear here</p>';
             });
             
             // Dedicated storage logic
@@ -531,18 +534,7 @@
             generatePeriodInputs();
         });
     </script>
-          </div>
-        </div>
-        <div class="triangle-box">
-          <div class="triangle"></div>
-        </div>
-        <div class="result-box">
-          <div class="title2">OUTPUT</div>
-          <div class="result">
-            <div id="storageResult" class="result-text"></div>
-          </div>
-        </div>
-      </div>
+ </section>
       
   <!-- footer section -->
   <footer class="footer_section">
