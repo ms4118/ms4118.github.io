@@ -134,14 +134,12 @@
         </div>
     </div>
 
-  <div class="container">
-
-    <h1>Warehouse Management Calculators</h1>
-
-    <!-- Dedicated Policy Calculator -->
-    <section>
-      <h2>Dedicated Policy Calculator</h2>
-      <p>Enter product names and their maximum inventory levels. Add as many products as needed.</p>
+      <!-- Dedicated Policy Calculator -->
+      <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span>Dedicated Policy</span>
+          </h5>
       <table id="dedicatedTable">
         <thead>
           <tr>
@@ -161,14 +159,14 @@
       <button onclick="addRow('dedicatedTable')">Add Product</button>
       <button onclick="calculateDedicated()">Calculate Total Storage</button>
       <div id="dedicatedOutput" class="output-area"></div>
-    </section>
-
-    <hr />
+    </div>
 
     <!-- Random Policy Calculator -->
-    <section>
-      <h2>Random Policy Calculator</h2>
-      <p>Enter product names, their inventory levels, and corresponding periods. Add as many products as needed.</p>
+    <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span>Random Policy</span>
+          </h5>
       <table id="randomTable">
         <thead>
           <tr>
@@ -190,9 +188,7 @@
       <button onclick="addRow('randomTable')">Add Product</button>
       <button onclick="calculateRandom()">Calculate Total Storage</button>
       <div id="randomOutput" class="output-area"></div>
-    </section>
-
-  </div>
+    </div>
 
   <script>
     // Add new product row to specified table
@@ -347,6 +343,6 @@
     })
   </script>
 
-</body>
+</section>
 
 </html>
