@@ -134,216 +134,209 @@
         </div>
     </div>
 
-      <!-- Dedicated Policy Calculator -->
-      <div class="row section-container">
-        <div class="detail-box">
-          <h5 class="title">
-            <span>Dedicated Policy</span>
-          </h5>
-      <table id="dedicatedTable">
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Max Inventory Level</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" placeholder="Product A" /></td>
-            <td><input type="number" min="0" value="0" /></td>
-            <td><button onclick="removeRow(this, 'dedicatedTable')">Remove</button></td>
-          </tr>
-        </tbody>
-      </table>
-      <button onclick="addRow('dedicatedTable')">Add Product</button>
-      <button onclick="calculateDedicated()">Calculate Total Storage</button>
-      <div id="dedicatedOutput" class="output-area"></div>
+  <!-- Dedicated Policy -->
+  <section class="inventory-section" id="calculator-dedicated">
+    <h2>Dedicated Policy</h2>
+    <div id="products-list-dedicated">
+      <div class="product-row">
+        <label>
+          Product Name:<br />
+          <input type="text" class="product-name" placeholder="Product A" />
+        </label>
+        <label>
+          Max Inventory Level:<br />
+          <input type="number" min="0" class="max-inventory" value="0" />
+        </label>
+        <button class="remove-product-btn">Remove</button>
+      </div>
     </div>
-    <br>
+    <button id="add-dedicated-product">Add Product</button>
+    <button id="calc-dedicated">Calculate</button>
+    <div id="dedicated-output" class="output-box"></div>
+  </section>
 
-    <!-- Random Policy Calculator -->
-    <div class="row section-container">
-        <div class="detail-box">
-          <h5 class="title">
-            <span>Random Policy</span>
-          </h5>
-      <table id="randomTable">
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Inventory Level</th>
-            <th>Period</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="text" placeholder="Product A" /></td>
-            <td><input type="number" min="0" value="0" /></td>
-            <td><input type="number" min="1" value="1" /></td>
-            <td><button onclick="removeRow(this, 'randomTable')">Remove</button></td>
-          </tr>
-        </tbody>
-      </table>
-      <button onclick="addRow('randomTable')">Add Product</button>
-      <button onclick="calculateRandom()">Calculate Total Storage</button>
-      <div id="randomOutput" class="output-area"></div>
+  <!-- Random Policy -->
+  <section class="inventory-section" id="calculator-random">
+    <h2>Random Policy</h2>
+    <div id="products-list-random">
+      <div class="product-row">
+        <label>
+          Product Name:<br />
+          <input type="text" class="product-name" placeholder="Product A" />
+        </label>
+        <label>
+          Inventory Level:<br />
+          <input type="number" min="0" class="inventory-level" value="0" />
+        </label>
+        <label>
+          Period:<br />
+          <input type="number" min="1" class="period" value="1" />
+        </label>
+        <button class="remove-product-btn">Remove</button>
+      </div>
     </div>
+    <button id="add-random-product">Add Product</button>
+    <button id="calc-random">Calculate</button>
+    <div id="random-output" class="output-box"></div>
+  </section>
 
   <script>
-    // Add new product row to specified table
-    function addRow(tableId) {
-      const tableBody = document.getElementById(tableId).querySelector('tbody');
-      const firstRow = tableBody.rows[0];
+    // Add Dedicated product
+    document.getElementById('add-dedicated-product').addEventListener('click', () => {
+      const container = document.getElementById('products-list-dedicated');
+      const firstRow = container.querySelector('.product-row');
       const newRow = firstRow.cloneNode(true);
       newRow.querySelectorAll('input').forEach(input => {
         input.type === 'number' ? input.value = 0 : input.value = '';
       });
-      tableBody.appendChild(newRow);
-    }
+      container.appendChild(newRow);
+    });
 
-    // Remove a product row, but keep at least 1 row
-    function removeRow(button, tableId) {
-      const tableBody = document.getElementById(tableId).querySelector('tbody');
-      if(tableBody.rows.length > 1) {
-        button.closest('tr').remove();
-      } else {
-        alert('At least one product is required.');
+    // Add Random product
+    document.getElementById('add-random-product').addEventListener('click', () => {
+      const container = document.getElementById('products-list-random');
+      const firstRow = container.querySelector('.product-row');
+      const newRow = firstRow.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(input => {
+        input.type === 'number' ? input.value = 0 : input.value = '';
+      });
+      container.appendChild(newRow);
+    });
+
+    // Remove row buttons (delegated for both calculators)
+    document.body.addEventListener('click', e => {
+      if(e.target.classList.contains('remove-product-btn')) {
+        const section = e.target.closest('.inventory-section');
+        const container = section.querySelector('#products-list-dedicated, #products-list-random');
+        if(container && container.children.length > 1) {
+          e.target.parentElement.remove();
+        } else {
+          alert('At least one product is required.');
+        }
       }
-    }
+    });
 
-    // Dedicated Policy: Sum max inventory levels
-    function calculateDedicated() {
-      const tableBody = document.getElementById('dedicatedTable').querySelector('tbody');
+    // Calculate Dedicated
+    document.getElementById('calc-dedicated').addEventListener('click', () => {
+      const container = document.getElementById('products-list-dedicated');
       let sum = 0;
-      for(let row of tableBody.rows) {
-        const maxInvInput = row.cells[1].querySelector('input');
-        const val = parseFloat(maxInvInput.value);
-        if(isNaN(val) || val < 0) {
-          document.getElementById('dedicatedOutput').textContent = 'Please enter valid non-negative inventory levels.';
-          return;
-        }
-        sum += val;
+      let invalid = false;
+      container.querySelectorAll('.product-row').forEach(row => {
+        const val = parseFloat(row.querySelector('.max-inventory').value);
+        if(isNaN(val) || val < 0) invalid = true;
+        else sum += val;
+      });
+      const output = document.getElementById('dedicated-output');
+      if(invalid) {
+        output.textContent = 'Please enter valid non-negative inventory levels.';
+      } else {
+        output.textContent = `Total storage locations needed = ${sum}`;
       }
-      document.getElementById('dedicatedOutput').textContent = `Total storage locations needed = ${sum}`;
-    }
+    });
 
-    // Random Policy: Sum inventory levels by period and detect repeats
-    function calculateRandom() {
-      const tableBody = document.getElementById('randomTable').querySelector('tbody');
-      let periodGroups = {};
-      for(let row of tableBody.rows) {
-        const invInput = row.cells[1].querySelector('input');
-        const periodInput = row.cells[2].querySelector('input');
-        const inventory = parseFloat(invInput.value);
-        const period = parseInt(periodInput.value);
-        if(isNaN(inventory) || inventory < 0 || isNaN(period) || period < 1) {
-          document.getElementById('randomOutput').textContent = 'Please enter valid non-negative inventory levels and positive periods.';
-          return;
+    // Calculate Random
+    document.getElementById('calc-random').addEventListener('click', () => {
+      const container = document.getElementById('products-list-random');
+      let periodSums = {};
+      let invalid = false;
+      container.querySelectorAll('.product-row').forEach(row => {
+        const inventory = parseFloat(row.querySelector('.inventory-level').value);
+        const period = parseInt(row.querySelector('.period').value);
+        if(isNaN(inventory) || inventory < 0 || isNaN(period) || period < 1) invalid = true;
+        else {
+          if(!periodSums[period]) periodSums[period] = 0;
+          periodSums[period] += inventory;
         }
-        if(!periodGroups[period]) {
-          periodGroups[period] = 0;
-        }
-        periodGroups[period] += inventory;
+      });
+      const output = document.getElementById('random-output');
+      if(invalid) {
+        output.textContent = 'Please enter valid non-negative inventory levels and positive periods.';
+        return;
       }
-
-      // Sort periods in ascending order
-      const sortedPeriods = Object.keys(periodGroups).map(Number).sort((a, b) => a - b);
-
-      const seenSums = new Set();
-      let outputLines = [];
+      const sortedPeriods = Object.keys(periodSums).map(Number).sort((a,b) => a - b);
+      const seen = new Set();
+      const lines = [];
       let repeatedFound = false;
-      for(let p of sortedPeriods) {
-        const sum = periodGroups[p];
+      for(const p of sortedPeriods) {
+        const sum = periodSums[p];
         let line = `Period ${p}: sum of inventory levels = ${sum}`;
-        if(seenSums.has(sum)) {
+        if(seen.has(sum)) {
           line += ' (repeated)';
-          outputLines.push(line);
+          lines.push(line);
           repeatedFound = true;
           break;
-        } else {
-          seenSums.add(sum);
-          outputLines.push(line);
         }
+        seen.add(sum);
+        lines.push(line);
       }
-
-      const maxSum = Math.max(...Object.values(periodGroups));
-      outputLines.push(`Total storage locations needed = ${maxSum}`);
-
-      document.getElementById('randomOutput').innerHTML = outputLines.join('<br/>');
-    }
+      const maxSum = Math.max(...Object.values(periodSums));
+      lines.push(`Total storage locations needed = ${maxSum}`);
+      output.innerHTML = lines.join('<br>');
+    });
   </script>
 
-</body>
-
-  <!-- end blog section -->
+</section>
 
   <!-- footer section -->
   <footer class="footer_section">
     <div class="container">
       <p>
-        &copy; <span id="displayYear"></span> Op-Mic GOM 2025 
+        &copy; <span id="displayYear"></span> Op-Mic GOM 2025
       </p>
     </div>
   </footer>
   <!-- footer section -->
 
-  <!-- jQery -->
-  <!-- <script src="js/jquery-3.4.1.min.js"></script> -->
   <!-- bootstrap js -->
   <script src="js/bootstrap.js"></script>
-  <script>
-    $(function () {
-      var steps = [
-        {
-          element: '#step1', 
-          intro: '<div class="tip-box"><img src="./images/intro/step21.jpg" style="width:100%;height:auto;"></div>',
-          tooltipClass: 'step-tooltip',
-        },
-        {
-          element: '#step2', 
-          intro: '<div class="tip-box"><img src="./images/intro/step22.jpg" style="width:100%;height:auto;"></div>',
-          tooltipClass: 'step-tooltip',
-        },
-        {
-          element: '#step3', 
-          intro: '<div class="tip-box"><img src="./images/intro/step23.jpg" style="width:100%;height:auto;"></div>',
-          tooltipClass: 'step-tooltip'
-        },
-      ]
 
-      $(".course-btn").click(function () {
-        var offset = $(this).offset();
-        console.log("offset:", offset, $(this).index)
+</body>
 
-        var index = Number($(this).data("index"))
+<script>
+  $(document).ready(function () {
+    var steps = [
+      {
+        element: '#step1',
+        intro: '<div class="tip-box"><img src="./images/intro/step31.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom-right-aligned'
+      },
+    ]
 
-        $('body').find('.step-helperLayer').remove();
+    $(".course-btn").click(function () {
+      var offset = $(this).offset();
+      console.log("offset:", offset, $(this).index)
 
-        var sw = $(window).width();
-        var w = $(this).width();
-        var h = $(this).height();
-        $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
-        var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
+      var index = Number($(this).data("index"))
 
-        var stepImg = $(`${steps[index - 1].intro}`);
-        var sanjiaox = $(`<div class="triangle-up"></div>`)
-        var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
+      $('body').find('.step-helperLayer').remove();
 
-        stepfixedDom.append(stepImg);
-        stepfixedDom.append(sanjiaox);
-        stepfixedDom.append(closeDom);
-        $('body').append(stepfixedDom)
-      })
+      // decoration
+      var sw = $(window).width();
+      var w = $(this).width();
+      var h = $(this).height();
+      $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
+      var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
 
-      $('body').on('click', '.step-fixed-container .close-btn', function () {
-        $('body').find('.step-helperLayer').remove();
-        $('body').find('.step-fixed-container').remove();
-      });
+      var stepImg = $(`${steps[index - 1].intro}`);
+      var sanjiaox = $(`<div class="triangle-up"></div>`)
+      var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
+
+      // stepfixedDom
+      stepfixedDom.append(stepImg);
+      stepfixedDom.append(sanjiaox);
+      stepfixedDom.append(closeDom);
+      $('body').append(stepfixedDom)
     })
-  </script>
 
-</section>
+    $('body').on('click', '.step-fixed-container .close-btn', function () {
+      $('body').find('.step-helperLayer').remove();
+      $('body').find('.step-fixed-container').remove();
+    });
+    
+  });
+  
+  
+</script>
 
 </html>
