@@ -135,29 +135,77 @@
     </div>
 
   <!-- Dedicated Policy -->
-  <section class="inventory-section" id="calculator-dedicated">
-    <span>Dedicated Policy</span>
-    <div id="products-list-dedicated">
-      <div class="product-row">
-        <label>
+  <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span> Dedicated Policy </span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+          </h5>
+         <div id="products-list-dedicated">
+         <div class="product-row">
+         <label>
           Product Name:<br />
           <input type="text" class="product-name" placeholder="Product A" />
-        </label>
-        <label>
+          </label>
+          <label>
           Max Inventory Level:<br />
           <input type="number" min="0" class="max-inventory" value="0" />
-        </label>
-        <button class="remove-product-btn">Remove</button>
-      </div>
+          </label>
+         <button class="remove-product-btn">Remove</button>
+        </div>
     </div>
     <button id="add-dedicated-product">Add Product</button>
     <button id="calc-dedicated">Calculate</button>
     <div id="dedicated-output" class="output-box"></div>
-  </section>
+  <script>
+    // Add Dedicated product
+    document.getElementById('add-dedicated-product').addEventListener('click', () => {
+      const container = document.getElementById('products-list-dedicated');
+      const firstRow = container.querySelector('.product-row');
+      const newRow = firstRow.cloneNode(true);
+      newRow.querySelectorAll('input').forEach(input => {
+        input.type === 'number' ? input.value = 0 : input.value = '';
+      });
+      container.appendChild(newRow);
+    });  
+ // Remove row buttons (delegated for both calculators)
+    document.body.addEventListener('click', e => {
+      if(e.target.classList.contains('remove-product-btn')) {
+        const section = e.target.closest('.inventory-section');
+        const container = section.querySelector('#products-list-dedicated, #products-list-random');
+        if(container && container.children.length > 1) {
+          e.target.parentElement.remove();
+        } else {
+          alert('At least one product is required.');
+        }
+      }
+    });
+ // Calculate Dedicated
+    document.getElementById('calc-dedicated').addEventListener('click', () => {
+      const container = document.getElementById('products-list-dedicated');
+      let sum = 0;
+      let invalid = false;
+      container.querySelectorAll('.product-row').forEach(row => {
+        const val = parseFloat(row.querySelector('.max-inventory').value);
+        if(isNaN(val) || val < 0) invalid = true;
+        else sum += val;
+      });
+      const output = document.getElementById('dedicated-output');
+      if(invalid) {
+        output.textContent = 'Please enter valid non-negative inventory levels.';
+      } else {
+        output.textContent = `Total storage locations needed = ${sum}`;
+      }
+    });  
+    </script>
 
   <!-- Random Policy -->
-  <section class="inventory-section" id="calculator-random">
-    <span>Random Policy</span>
+  <div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span> Random Policy </span>
+            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
+          </h5>
     <div id="products-list-random">
       <div class="product-row">
         <label>
@@ -180,19 +228,9 @@
     <div id="random-output" class="output-box"></div>
   </section>
 
-  <script>
-    // Add Dedicated product
-    document.getElementById('add-dedicated-product').addEventListener('click', () => {
-      const container = document.getElementById('products-list-dedicated');
-      const firstRow = container.querySelector('.product-row');
-      const newRow = firstRow.cloneNode(true);
-      newRow.querySelectorAll('input').forEach(input => {
-        input.type === 'number' ? input.value = 0 : input.value = '';
-      });
-      container.appendChild(newRow);
-    });
 
-    // Add Random product
+  <script>
+     // Add Random product
     document.getElementById('add-random-product').addEventListener('click', () => {
       const container = document.getElementById('products-list-random');
       const firstRow = container.querySelector('.product-row');
@@ -213,24 +251,6 @@
         } else {
           alert('At least one product is required.');
         }
-      }
-    });
-
-    // Calculate Dedicated
-    document.getElementById('calc-dedicated').addEventListener('click', () => {
-      const container = document.getElementById('products-list-dedicated');
-      let sum = 0;
-      let invalid = false;
-      container.querySelectorAll('.product-row').forEach(row => {
-        const val = parseFloat(row.querySelector('.max-inventory').value);
-        if(isNaN(val) || val < 0) invalid = true;
-        else sum += val;
-      });
-      const output = document.getElementById('dedicated-output');
-      if(invalid) {
-        output.textContent = 'Please enter valid non-negative inventory levels.';
-      } else {
-        output.textContent = `Total storage locations needed = ${sum}`;
       }
     });
 
