@@ -133,42 +133,273 @@
           </div>
         </div>
     </div>
-<section class="section">
     <div class="container">
-      <h1 class="title">Warehouse Storage Location Calculator</h1>
-      <div class="box">
-        <div id="products"></div>
-        <button class="button is-primary" id="addProduct">Add Product</button>
-        <button class="button is-link" id="calculateButton">Calculate</button>
-      </div>
-      <div class="output box">
-        <div id="output"></div>
-      </div>
-      <div class="graph-area box">
-        <div id="graphs"></div>
-      </div>
+        <div class="header">
+            <h1>Global Operation Management - Warehouse Storage Management</h1>
+        </div>
+
+        <div class="section-header">
+            Warehouse Storage Location Calculator - Dedicated vs Random Policy
+        </div>
+
+        <div class="tutorial-section">
+            <strong>Watch Tutorial</strong><br>
+            This calculator determines the optimal number of storage locations required for your warehouse using both Dedicated Storage Policy and Random Storage Policy based on inventory levels and replenishment cycles.
+        </div>
+
+        <div class="problem-section">
+            <strong>Solve Problem</strong><br><br>
+            
+            <div id="products-container">
+                <div class="product-inputs" id="product-0">
+                    <div class="input-row">
+                        <span class="input-label">Product Name:</span>
+                        <input type="text" id="name-0" placeholder="Product A" value="Product A">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Beginning Inventory:</span>
+                        <input type="number" id="begin-0" placeholder="600" value="600">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Minimum Inventory:</span>
+                        <input type="number" id="min-0" placeholder="100" value="100">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Maximum Inventory:</span>
+                        <input type="number" id="max-0" placeholder="600" value="600">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Replenishment Cycle:</span>
+                        <input type="number" id="cycle-0" placeholder="4" value="4">
+                    </div>
+                    <button class="remove-btn" onclick="removeProduct(0)" id="remove-0">Remove Product</button>
+                </div>
+            </div>
+
+            <button class="add-product-btn" id="add_product_btn">Add Product</button>
+            <button class="calculate-btn" id="calculate_btn">Calculate Storage Locations</button>
+        </div>
+
+        <div class="section-header">OUTPUT</div>
+        
+        <div class="output-section">
+            <div id="calculation_output">Click "Calculate Storage Locations" to see results.</div>
+        </div>
+
+        <div class="graph-container">
+            <img id="plot_image" style="display: none;">
+        </div>
     </div>
-  </section>
-  <py-script>
+
+    <py-script>
+import math
+import numpy as np
 import matplotlib.pyplot as plt
-import io, base64
-from js import document
+import io
+import base64
+from js import document, window
 
-products = []
+# Global variables
+product_count = 1
+products_data = []
 
-# Add new product row dynamically
-def add_product_row(*args):
-    idx = len(products)
-    row_id = f'product-row-{idx}'
-    html = f'''
-    <div class="product-row" id="{row_id}">
-      <input class="input" style="width:120px" placeholder="Product Name" id="name-{idx}">
-      <input class="input" type="number" style="width:140px" placeholder="Beginning Inv." id="begin-{idx}">
-      <input class="input" type="number" style="width:140px" placeholder="Minimum Inv." id="min-{idx}">
-      <input class="input" type="number" style="width:140px" placeholder="Maximum Inv." id="max-{idx}">
-      <input class="input" type="number" style="width:140px" placeholder="Replenishment Cycle" id="cycle-{idx}">
-      <button class="remove-btn button is-danger is-light" onclick="this.parentNode.remove();">Remove</button>
+def add_product(event=None):
+    global product_count
+    
+    container = document.getElementById("products-container")
+    
+    # Create new product input section
+    new_product_html = f'''
+    <div class="product-inputs" id="product-{product_count}">
+        <div class="input-row">
+            <span class="input-label">Product Name:</span>
+            <input type="text" id="name-{product_count}" placeholder="Product {chr(65 + product_count)}" value="Product {chr(65 + product_count)}">
+        </div>
+        <div class="input-row">
+            <span class="input-label">Beginning Inventory:</span>
+            <input type="number" id="begin-{product_count}" placeholder="360" value="360">
+        </div>
+        <div class="input-row">
+            <span class="input-label">Minimum Inventory:</span>
+            <input type="number" id="min-{product_count}" placeholder="60" value="60">
+        </div>
+        <div class="input-row">
+            <span class="input-label">Maximum Inventory:</span>
+            <input type="number" id="max-{product_count}" placeholder="360" value="360">
+        </div>
+        <div class="input-row">
+            <span class="input-label">Replenishment Cycle:</span>
+            <input type="number" id="cycle-{product_count}" placeholder="3" value="3">
+        </div>
+        <button class="remove-btn" onclick="removeProduct({product_count})" id="remove-{product_count}">Remove Product</button>
     </div>
+    '''
+    
+    container.insertAdjacentHTML('beforeend', new_product_html)
+    product_count += 1
+
+def remove_product_js(product_id):
+    element = document.getElementById(f"product-{product_id}")
+    if element:
+        element.remove()
+
+def collect_product_data():
+    products = []
+    container = document.getElementById("products-container")
+    product_divs = container.getElementsByClassName("product-inputs")
+    
+    for div in product_divs:
+        div_id = div.id.split('-')[1]
+        
+        name_element = document.getElementById(f"name-{div_id}")
+        begin_element = document.getElementById(f"begin-{div_id}")
+        min_element = document.getElementById(f"min-{div_id}")
+        max_element = document.getElementById(f"max-{div_id}")
+        cycle_element = document.getElementById(f"cycle-{div_id}")
+        
+        if all([name_element, begin_element, min_element, max_element, cycle_element]):
+            try:
+                product = {
+                    'name': name_element.value or f"Product {len(products) + 1}",
+                    'begin': float(begin_element.value),
+                    'min': float(min_element.value),
+                    'max': float(max_element.value),
+                    'cycle': int(cycle_element.value)
+                }
+                products.append(product)
+            except ValueError:
+                continue
+    
+    return products
+
+def calculate_storage_policies(products):
+    if not products:
+        return None, None
+    
+    # Dedicated Storage Policy: sum of maximum inventory levels
+    dedicated = sum(product['max'] for product in products)
+    
+    # Random Storage Policy: simulate inventory levels over time
+    # Find the maximum simultaneous inventory requirement
+    max_cycle = max(product['cycle'] for product in products)
+    time_periods = max_cycle * 2  # Simulate for 2 full cycles
+    
+    max_simultaneous = 0
+    for t in range(time_periods):
+        total_inventory = 0
+        for product in products:
+            cycle = product['cycle']
+            # Calculate inventory at time t for this product
+            cycle_position = t % cycle
+            if cycle_position == 0:  # Beginning of cycle
+                inventory = product['begin']
+            else:
+                # Linear decrease from beginning to minimum
+                decrease_rate = (product['begin'] - product['min']) / cycle
+                inventory = product['begin'] - (decrease_rate * cycle_position)
+                inventory = max(inventory, product['min'])
+            total_inventory += inventory
+        
+        max_simultaneous = max(max_simultaneous, total_inventory)
+    
+    random_policy = int(math.ceil(max_simultaneous))
+    
+    return dedicated, random_policy
+
+def create_inventory_plot(products):
+    fig, axes = plt.subplots(len(products), 1, figsize=(10, 3 * len(products)))
+    if len(products) == 1:
+        axes = [axes]
+    
+    for i, product in enumerate(products):
+        time_periods = product['cycle'] * 3  # Show 3 cycles
+        times = list(range(time_periods + 1))
+        inventory_levels = []
+        
+        for t in times:
+            cycle_position = t % product['cycle']
+            if cycle_position == 0:  # Beginning of cycle
+                inventory = product['begin']
+            else:
+                # Linear decrease from beginning to minimum
+                decrease_rate = (product['begin'] - product['min']) / product['cycle']
+                inventory = product['begin'] - (decrease_rate * cycle_position)
+                inventory = max(inventory, product['min'])
+            inventory_levels.append(inventory)
+        
+        axes[i].plot(times, inventory_levels, 'b-', linewidth=2, label=f"{product['name']} Inventory")
+        axes[i].axhline(y=product['max'], color='r', linestyle='--', alpha=0.7, label='Maximum Level')
+        axes[i].axhline(y=product['min'], color='g', linestyle='--', alpha=0.7, label='Minimum Level')
+        axes[i].axhline(y=product['begin'], color='orange', linestyle=':', alpha=0.7, label='Beginning Level')
+        
+        axes[i].set_title(f'{product["name"]} - Inventory Level Over Time')
+        axes[i].set_xlabel('Time Period')
+        axes[i].set_ylabel('Inventory Level')
+        axes[i].legend()
+        axes[i].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    
+    # Convert plot to base64 string for embedding
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', dpi=100)
+    plt.close()
+    buffer.seek(0)
+    plot_data = buffer.read()
+    buffer.close()
+    
+    plot_url = "data:image/png;base64," + base64.b64encode(plot_data).decode('utf-8')
+    return plot_url
+
+def calculate_and_display(event=None):
+    products = collect_product_data()
+    
+    if not products:
+        document.getElementById("calculation_output").innerHTML = """
+        <div class="result-text" style="color: #e74c3c;">
+            Error: Please enter valid product information for at least one product.
+        </div>
+        """
+        return
+    
+    dedicated, random_policy = calculate_storage_policies(products)
+    
+    if dedicated is None:
+        document.getElementById("calculation_output").innerHTML = """
+        <div class="result-text" style="color: #e74c3c;">
+            Error: Could not calculate storage requirements. Please check your inputs.
+        </div>
+        """
+        return
+    
+    # Calculate savings
+    savings = dedicated - random_policy
+    savings_percent = (savings / dedicated) * 100 if dedicated > 0 else 0
+    
+    output_html = f"""
+    <div class="result-text">
+        <strong>Storage Location Requirements:</strong><br><br>
+        Dedicated Storage Policy = <span style="color: #e74c3c;">{dedicated}</span> locations<br>
+        Random Storage Policy = <span style="color: #27ae60;">{random_policy}</span> locations<br><br>
+        <span style="color: #3498db;">Space Savings: {savings} locations ({savings_percent:.1f}%)</span>
+    </div>
+    """
+    
+    document.getElementById("calculation_output").innerHTML = output_html
+    
+    # Generate and display plot
+    plot_url = create_inventory_plot(products)
+    plot_img = document.getElementById("plot_image")
+    plot_img.src = plot_url
+    plot_img.style.display = "block"
+
+# Event handlers
+document.getElementById("add_product_btn").addEventListener("click", add_product)
+document.getElementById("calculate_btn").addEventListener("click", calculate_and_display)
+
+# Make remove function available globally
+window.removeProduct = remove_product_js
+    </py-script>
  
   <!-- footer section -->
   <footer class="footer_section">
