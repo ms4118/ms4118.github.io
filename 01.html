@@ -133,170 +133,43 @@
           </div>
         </div>
     </div>
-
-  <!-- Dedicated Policy -->
-  <div class="row section-container">
-        <div class="detail-box">
-          <h5 class="title">
-            <span> Dedicated Policy </span>
-            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
-          </h5>
-         <div id="products-list-dedicated">
-         <div class="product-row">
-         <label>
-          Product Name:<br />
-          <input type="text" class="product-name" placeholder="Product A" />
-          </label>
-          <label>
-          Max Inventory Level:<br />
-          <input type="number" min="0" class="max-inventory" value="0" />
-          </label>
-         <button class="remove-product-btn">Remove</button>
-        </div>
-    </div>
-    <button id="add-dedicated-product">Add Product</button>
-    <button id="calc-dedicated">Calculate</button>
-    <div id="dedicated-output" class="output-box"></div>
-  <script>
-    // Add Dedicated product
-    document.getElementById('add-dedicated-product').addEventListener('click', () => {
-      const container = document.getElementById('products-list-dedicated');
-      const firstRow = container.querySelector('.product-row');
-      const newRow = firstRow.cloneNode(true);
-      newRow.querySelectorAll('input').forEach(input => {
-        input.type === 'number' ? input.value = 0 : input.value = '';
-      });
-      container.appendChild(newRow);
-    });  
- // Remove row buttons (delegated for both calculators)
-    document.body.addEventListener('click', e => {
-      if(e.target.classList.contains('remove-product-btn')) {
-        const section = e.target.closest('.inventory-section');
-        const container = section.querySelector('#products-list-dedicated, #products-list-random');
-        if(container && container.children.length > 1) {
-          e.target.parentElement.remove();
-        } else {
-          alert('At least one product is required.');
-        }
-      }
-    });
- // Calculate Dedicated
-    document.getElementById('calc-dedicated').addEventListener('click', () => {
-      const container = document.getElementById('products-list-dedicated');
-      let sum = 0;
-      let invalid = false;
-      container.querySelectorAll('.product-row').forEach(row => {
-        const val = parseFloat(row.querySelector('.max-inventory').value);
-        if(isNaN(val) || val < 0) invalid = true;
-        else sum += val;
-      });
-      const output = document.getElementById('dedicated-output');
-      if(invalid) {
-        output.textContent = 'Please enter valid non-negative inventory levels.';
-      } else {
-        output.textContent = `Total storage locations needed = ${sum}`;
-      }
-    });  
-    </script>
-
-  <!-- Random Policy -->
-  <div class="row section-container">
-        <div class="detail-box">
-          <h5 class="title">
-            <span> Random Policy </span>
-            <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
-          </h5>
-    <div id="products-list-random">
-      <div class="product-row">
-        <label>
-          Product Name:<br />
-          <input type="text" class="product-name" placeholder="Product A" />
-        </label>
-        <label>
-          Inventory Level:<br />
-          <input type="number" min="0" class="inventory-level" value="0" />
-        </label>
-        <label>
-          Period:<br />
-          <input type="number" min="1" class="period" value="1" />
-        </label>
-        <button class="remove-product-btn">Remove</button>
+<section class="section">
+    <div class="container">
+      <h1 class="title">Warehouse Storage Location Calculator</h1>
+      <div class="box">
+        <div id="products"></div>
+        <button class="button is-primary" id="addProduct">Add Product</button>
+        <button class="button is-link" id="calculateButton">Calculate</button>
+      </div>
+      <div class="output box">
+        <div id="output"></div>
+      </div>
+      <div class="graph-area box">
+        <div id="graphs"></div>
       </div>
     </div>
-    <button id="add-random-product">Add Product</button>
-    <button id="calc-random">Calculate</button>
-    <div id="random-output" class="output-box"></div>
   </section>
+  <py-script>
+import matplotlib.pyplot as plt
+import io, base64
+from js import document
 
+products = []
 
-  <script>
-     // Add Random product
-    document.getElementById('add-random-product').addEventListener('click', () => {
-      const container = document.getElementById('products-list-random');
-      const firstRow = container.querySelector('.product-row');
-      const newRow = firstRow.cloneNode(true);
-      newRow.querySelectorAll('input').forEach(input => {
-        input.type === 'number' ? input.value = 0 : input.value = '';
-      });
-      container.appendChild(newRow);
-    });
-
-    // Remove row buttons (delegated for both calculators)
-    document.body.addEventListener('click', e => {
-      if(e.target.classList.contains('remove-product-btn')) {
-        const section = e.target.closest('.inventory-section');
-        const container = section.querySelector('#products-list-dedicated, #products-list-random');
-        if(container && container.children.length > 1) {
-          e.target.parentElement.remove();
-        } else {
-          alert('At least one product is required.');
-        }
-      }
-    });
-
-    // Calculate Random
-    document.getElementById('calc-random').addEventListener('click', () => {
-      const container = document.getElementById('products-list-random');
-      let periodSums = {};
-      let invalid = false;
-      container.querySelectorAll('.product-row').forEach(row => {
-        const inventory = parseFloat(row.querySelector('.inventory-level').value);
-        const period = parseInt(row.querySelector('.period').value);
-        if(isNaN(inventory) || inventory < 0 || isNaN(period) || period < 1) invalid = true;
-        else {
-          if(!periodSums[period]) periodSums[period] = 0;
-          periodSums[period] += inventory;
-        }
-      });
-      const output = document.getElementById('random-output');
-      if(invalid) {
-        output.textContent = 'Please enter valid non-negative inventory levels and positive periods.';
-        return;
-      }
-      const sortedPeriods = Object.keys(periodSums).map(Number).sort((a,b) => a - b);
-      const seen = new Set();
-      const lines = [];
-      let repeatedFound = false;
-      for(const p of sortedPeriods) {
-        const sum = periodSums[p];
-        let line = `Period ${p}: sum of inventory levels = ${sum}`;
-        if(seen.has(sum)) {
-          line += ' (repeated)';
-          lines.push(line);
-          repeatedFound = true;
-          break;
-        }
-        seen.add(sum);
-        lines.push(line);
-      }
-      const maxSum = Math.max(...Object.values(periodSums));
-      lines.push(`Total storage locations needed = ${maxSum}`);
-      output.innerHTML = lines.join('<br>');
-    });
-  </script>
-
-</section>
-
+# Add new product row dynamically
+def add_product_row(*args):
+    idx = len(products)
+    row_id = f'product-row-{idx}'
+    html = f'''
+    <div class="product-row" id="{row_id}">
+      <input class="input" style="width:120px" placeholder="Product Name" id="name-{idx}">
+      <input class="input" type="number" style="width:140px" placeholder="Beginning Inv." id="begin-{idx}">
+      <input class="input" type="number" style="width:140px" placeholder="Minimum Inv." id="min-{idx}">
+      <input class="input" type="number" style="width:140px" placeholder="Maximum Inv." id="max-{idx}">
+      <input class="input" type="number" style="width:140px" placeholder="Replenishment Cycle" id="cycle-{idx}">
+      <button class="remove-btn button is-danger is-light" onclick="this.parentNode.remove();">Remove</button>
+    </div>
+ 
   <!-- footer section -->
   <footer class="footer_section">
     <div class="container">
