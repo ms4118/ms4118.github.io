@@ -135,7 +135,7 @@
     </div>
     <div class="container">
         <div class="header">
-            <h1>Global Operation Management - Warehouse Storage Management</h1>
+            <h1>GLOBAL OPERATION MANAGEMENT - WAREHOUSE MANAGEMENT</h1>
         </div>
 
         <div class="section-header">
@@ -172,12 +172,12 @@
                         <span class="input-label">Replenishment Cycle:</span>
                         <input type="number" id="cycle-0" placeholder="4" value="4">
                     </div>
-                    <button class="remove-btn" onclick="removeProduct(0)" id="remove-0">Remove Product</button>
+                    <button class="btn btn-danger" onclick="removeProduct(0)" id="remove-0">Remove Product</button>
                 </div>
             </div>
 
-            <button class="add-product-btn" id="add_product_btn">Add Product</button>
-            <button class="calculate-btn" id="calculate_btn">Calculate Storage Locations</button>
+            <button class="btn btn-primary" id="add_product_btn" onclick="addProduct()">Add Product</button>
+            <button class="btn btn-secondary" id="calculate_btn" onclick="calculateStorage()">Calculate Storage Locations</button>
         </div>
 
         <div class="section-header">OUTPUT</div>
@@ -187,219 +187,255 @@
         </div>
 
         <div class="graph-container">
-            <img id="plot_image" style="display: none;">
+            <canvas id="inventoryChart" width="800" height="400" style="display: none; max-width: 100%;"></canvas>
+        </div>
+
+        <div class="footer">
+            © Op-Mic GOM 2025
         </div>
     </div>
 
-    <py-script>
-import math
-import numpy as np
-import matplotlib.pyplot as plt
-import io
-import base64
-from js import document, window
+    <script>
+        let productCount = 1;
 
-# Global variables
-product_count = 1
-products_data = []
+        function addProduct() {
+            const container = document.getElementById("products-container");
+            const newProductHtml = `
+                <div class="product-inputs" id="product-${productCount}">
+                    <div class="input-row">
+                        <span class="input-label">Product Name:</span>
+                        <input type="text" id="name-${productCount}" placeholder="Product ${String.fromCharCode(65 + productCount)}" value="Product ${String.fromCharCode(65 + productCount)}">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Beginning Inventory:</span>
+                        <input type="number" id="begin-${productCount}" placeholder="360" value="360">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Minimum Inventory:</span>
+                        <input type="number" id="min-${productCount}" placeholder="60" value="60">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Maximum Inventory:</span>
+                        <input type="number" id="max-${productCount}" placeholder="360" value="360">
+                    </div>
+                    <div class="input-row">
+                        <span class="input-label">Replenishment Cycle:</span>
+                        <input type="number" id="cycle-${productCount}" placeholder="3" value="3">
+                    </div>
+                    <button class="btn btn-danger" onclick="removeProduct(${productCount})" id="remove-${productCount}">Remove Product</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', newProductHtml);
+            productCount++;
+        }
 
-def add_product(event=None):
-    global product_count
-    
-    container = document.getElementById("products-container")
-    
-    # Create new product input section
-    new_product_html = f'''
-    <div class="product-inputs" id="product-{product_count}">
-        <div class="input-row">
-            <span class="input-label">Product Name:</span>
-            <input type="text" id="name-{product_count}" placeholder="Product {chr(65 + product_count)}" value="Product {chr(65 + product_count)}">
-        </div>
-        <div class="input-row">
-            <span class="input-label">Beginning Inventory:</span>
-            <input type="number" id="begin-{product_count}" placeholder="360" value="360">
-        </div>
-        <div class="input-row">
-            <span class="input-label">Minimum Inventory:</span>
-            <input type="number" id="min-{product_count}" placeholder="60" value="60">
-        </div>
-        <div class="input-row">
-            <span class="input-label">Maximum Inventory:</span>
-            <input type="number" id="max-{product_count}" placeholder="360" value="360">
-        </div>
-        <div class="input-row">
-            <span class="input-label">Replenishment Cycle:</span>
-            <input type="number" id="cycle-{product_count}" placeholder="3" value="3">
-        </div>
-        <button class="remove-btn" onclick="removeProduct({product_count})" id="remove-{product_count}">Remove Product</button>
-    </div>
-    '''
-    
-    container.insertAdjacentHTML('beforeend', new_product_html)
-    product_count += 1
+        function removeProduct(productId) {
+            const element = document.getElementById(`product-${productId}`);
+            if (element) {
+                element.remove();
+            }
+        }
 
-def remove_product_js(product_id):
-    element = document.getElementById(f"product-{product_id}")
-    if element:
-        element.remove()
-
-def collect_product_data():
-    products = []
-    container = document.getElementById("products-container")
-    product_divs = container.getElementsByClassName("product-inputs")
-    
-    for div in product_divs:
-        div_id = div.id.split('-')[1]
-        
-        name_element = document.getElementById(f"name-{div_id}")
-        begin_element = document.getElementById(f"begin-{div_id}")
-        min_element = document.getElementById(f"min-{div_id}")
-        max_element = document.getElementById(f"max-{div_id}")
-        cycle_element = document.getElementById(f"cycle-{div_id}")
-        
-        if all([name_element, begin_element, min_element, max_element, cycle_element]):
-            try:
-                product = {
-                    'name': name_element.value or f"Product {len(products) + 1}",
-                    'begin': float(begin_element.value),
-                    'min': float(min_element.value),
-                    'max': float(max_element.value),
-                    'cycle': int(cycle_element.value)
+        function collectProductData() {
+            const products = [];
+            const container = document.getElementById("products-container");
+            const productDivs = container.getElementsByClassName("product-inputs");
+            
+            for (let div of productDivs) {
+                const divId = div.id.split('-')[1];
+                
+                const nameElement = document.getElementById(`name-${divId}`);
+                const beginElement = document.getElementById(`begin-${divId}`);
+                const minElement = document.getElementById(`min-${divId}`);
+                const maxElement = document.getElementById(`max-${divId}`);
+                const cycleElement = document.getElementById(`cycle-${divId}`);
+                
+                if (nameElement && beginElement && minElement && maxElement && cycleElement) {
+                    try {
+                        const product = {
+                            name: nameElement.value || `Product ${products.length + 1}`,
+                            begin: parseFloat(beginElement.value),
+                            min: parseFloat(minElement.value),
+                            max: parseFloat(maxElement.value),
+                            cycle: parseInt(cycleElement.value)
+                        };
+                        
+                        if (!isNaN(product.begin) && !isNaN(product.min) && !isNaN(product.max) && !isNaN(product.cycle)) {
+                            products.push(product);
+                        }
+                    } catch (error) {
+                        continue;
+                    }
                 }
-                products.append(product)
-            except ValueError:
-                continue
-    
-    return products
+            }
+            
+            return products;
+        }
 
-def calculate_storage_policies(products):
-    if not products:
-        return None, None
-    
-    # Dedicated Storage Policy: sum of maximum inventory levels
-    dedicated = sum(product['max'] for product in products)
-    
-    # Random Storage Policy: simulate inventory levels over time
-    # Find the maximum simultaneous inventory requirement
-    max_cycle = max(product['cycle'] for product in products)
-    time_periods = max_cycle * 2  # Simulate for 2 full cycles
-    
-    max_simultaneous = 0
-    for t in range(time_periods):
-        total_inventory = 0
-        for product in products:
-            cycle = product['cycle']
-            # Calculate inventory at time t for this product
-            cycle_position = t % cycle
-            if cycle_position == 0:  # Beginning of cycle
-                inventory = product['begin']
-            else:
-                # Linear decrease from beginning to minimum
-                decrease_rate = (product['begin'] - product['min']) / cycle
-                inventory = product['begin'] - (decrease_rate * cycle_position)
-                inventory = max(inventory, product['min'])
-            total_inventory += inventory
-        
-        max_simultaneous = max(max_simultaneous, total_inventory)
-    
-    random_policy = int(math.ceil(max_simultaneous))
-    
-    return dedicated, random_policy
+        function calculateStoragePolicies(products) {
+            if (!products || products.length === 0) {
+                return [null, null];
+            }
+            
+            // Dedicated Storage Policy: sum of maximum inventory levels
+            const dedicated = products.reduce((sum, product) => sum + product.max, 0);
+            
+            // Random Storage Policy: simulate inventory levels over time
+            const maxCycle = Math.max(...products.map(p => p.cycle));
+            const timePeriods = maxCycle * 2;
+            
+            let maxSimultaneous = 0;
+            for (let t = 0; t < timePeriods; t++) {
+                let totalInventory = 0;
+                for (let product of products) {
+                    const cycle = product.cycle;
+                    const cyclePosition = t % cycle;
+                    let inventory;
+                    
+                    if (cyclePosition === 0) {
+                        inventory = product.begin;
+                    } else {
+                        const decreaseRate = (product.begin - product.min) / cycle;
+                        inventory = product.begin - (decreaseRate * cyclePosition);
+                        inventory = Math.max(inventory, product.min);
+                    }
+                    totalInventory += inventory;
+                }
+                maxSimultaneous = Math.max(maxSimultaneous, totalInventory);
+            }
+            
+            const randomPolicy = Math.ceil(maxSimultaneous);
+            return [dedicated, randomPolicy];
+        }
 
-def create_inventory_plot(products):
-    fig, axes = plt.subplots(len(products), 1, figsize=(10, 3 * len(products)))
-    if len(products) == 1:
-        axes = [axes]
-    
-    for i, product in enumerate(products):
-        time_periods = product['cycle'] * 3  # Show 3 cycles
-        times = list(range(time_periods + 1))
-        inventory_levels = []
-        
-        for t in times:
-            cycle_position = t % product['cycle']
-            if cycle_position == 0:  # Beginning of cycle
-                inventory = product['begin']
-            else:
-                # Linear decrease from beginning to minimum
-                decrease_rate = (product['begin'] - product['min']) / product['cycle']
-                inventory = product['begin'] - (decrease_rate * cycle_position)
-                inventory = max(inventory, product['min'])
-            inventory_levels.append(inventory)
-        
-        axes[i].plot(times, inventory_levels, 'b-', linewidth=2, label=f"{product['name']} Inventory")
-        axes[i].axhline(y=product['max'], color='r', linestyle='--', alpha=0.7, label='Maximum Level')
-        axes[i].axhline(y=product['min'], color='g', linestyle='--', alpha=0.7, label='Minimum Level')
-        axes[i].axhline(y=product['begin'], color='orange', linestyle=':', alpha=0.7, label='Beginning Level')
-        
-        axes[i].set_title(f'{product["name"]} - Inventory Level Over Time')
-        axes[i].set_xlabel('Time Period')
-        axes[i].set_ylabel('Inventory Level')
-        axes[i].legend()
-        axes[i].grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    
-    # Convert plot to base64 string for embedding
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png', dpi=100)
-    plt.close()
-    buffer.seek(0)
-    plot_data = buffer.read()
-    buffer.close()
-    
-    plot_url = "data:image/png;base64," + base64.b64encode(plot_data).decode('utf-8')
-    return plot_url
+        function drawInventoryChart(products) {
+            const canvas = document.getElementById('inventoryChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!products || products.length === 0) {
+                canvas.style.display = 'none';
+                return;
+            }
+            
+            canvas.style.display = 'block';
+            
+            const colors = ['#3498db', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6'];
+            const margin = 60;
+            const chartWidth = canvas.width - 2 * margin;
+            const chartHeight = canvas.height - 2 * margin;
+            
+            // Find max values for scaling
+            const maxTime = Math.max(...products.map(p => p.cycle * 3));
+            const maxInventory = Math.max(...products.map(p => p.max));
+            
+            // Draw axes
+            ctx.beginPath();
+            ctx.moveTo(margin, margin);
+            ctx.lineTo(margin, margin + chartHeight);
+            ctx.lineTo(margin + chartWidth, margin + chartHeight);
+            ctx.strokeStyle = '#333';
+            ctx.stroke();
+            
+            // Draw labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Time Period', margin + chartWidth / 2, canvas.height - 10);
+            
+            ctx.save();
+            ctx.translate(15, margin + chartHeight / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Inventory Level', 0, 0);
+            ctx.restore();
+            
+            // Draw products
+            products.forEach((product, index) => {
+                const color = colors[index % colors.length];
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                const timePeriods = product.cycle * 3;
+                
+                for (let t = 0; t <= timePeriods; t++) {
+                    const cyclePosition = t % product.cycle;
+                    let inventory;
+                    
+                    if (cyclePosition === 0) {
+                        inventory = product.begin;
+                    } else {
+                        const decreaseRate = (product.begin - product.min) / product.cycle;
+                        inventory = product.begin - (decreaseRate * cyclePosition);
+                        inventory = Math.max(inventory, product.min);
+                    }
+                    
+                    const x = margin + (t / maxTime) * chartWidth;
+                    const y = margin + chartHeight - (inventory / maxInventory) * chartHeight;
+                    
+                    if (t === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                
+                // Draw legend
+                ctx.fillStyle = color;
+                ctx.fillRect(margin + chartWidth + 10, margin + index * 20, 15, 15);
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(product.name, margin + chartWidth + 30, margin + index * 20 + 12);
+            });
+        }
 
-def calculate_and_display(event=None):
-    products = collect_product_data()
-    
-    if not products:
-        document.getElementById("calculation_output").innerHTML = """
-        <div class="result-text" style="color: #e74c3c;">
-            Error: Please enter valid product information for at least one product.
-        </div>
-        """
-        return
-    
-    dedicated, random_policy = calculate_storage_policies(products)
-    
-    if dedicated is None:
-        document.getElementById("calculation_output").innerHTML = """
-        <div class="result-text" style="color: #e74c3c;">
-            Error: Could not calculate storage requirements. Please check your inputs.
-        </div>
-        """
-        return
-    
-    # Calculate savings
-    savings = dedicated - random_policy
-    savings_percent = (savings / dedicated) * 100 if dedicated > 0 else 0
-    
-    output_html = f"""
-    <div class="result-text">
-        <strong>Storage Location Requirements:</strong><br><br>
-        Dedicated Storage Policy = <span style="color: #e74c3c;">{dedicated}</span> locations<br>
-        Random Storage Policy = <span style="color: #27ae60;">{random_policy}</span> locations<br><br>
-        <span style="color: #3498db;">Space Savings: {savings} locations ({savings_percent:.1f}%)</span>
-    </div>
-    """
-    
-    document.getElementById("calculation_output").innerHTML = output_html
-    
-    # Generate and display plot
-    plot_url = create_inventory_plot(products)
-    plot_img = document.getElementById("plot_image")
-    plot_img.src = plot_url
-    plot_img.style.display = "block"
+        function calculateStorage() {
+            const products = collectProductData();
+            
+            if (!products || products.length === 0) {
+                document.getElementById("calculation_output").innerHTML = `
+                    <div class="result-text" style="color: #e74c3c;">
+                        Error: Please enter valid product information for at least one product.
+                    </div>
+                `;
+                return;
+            }
+            
+            const [dedicated, randomPolicy] = calculateStoragePolicies(products);
+            
+            if (dedicated === null) {
+                document.getElementById("calculation_output").innerHTML = `
+                    <div class="result-text" style="color: #e74c3c;">
+                        Error: Could not calculate storage requirements. Please check your inputs.
+                    </div>
+                `;
+                return;
+            }
+            
+            // Calculate savings
+            const savings = dedicated - randomPolicy;
+            const savingsPercent = dedicated > 0 ? (savings / dedicated * 100) : 0;
+            
+            const outputHtml = `
+                <div class="result-text">
+                    <strong>Storage Location Requirements:</strong><br><br>
+                    Dedicated Storage Policy = <span style="color: #e74c3c;">${dedicated}</span> locations<br>
+                    Random Storage Policy = <span style="color: #27ae60;">${randomPolicy}</span> locations<br><br>
+                    <span style="color: #3498db;">Space Savings: ${savings} locations (${savingsPercent.toFixed(1)}%)</span>
+                </div>
+            `;
+            
+            document.getElementById("calculation_output").innerHTML = outputHtml;
+            
+            // Draw chart
+            drawInventoryChart(products);
+        }
+    </script>
 
-# Event handlers
-document.getElementById("add_product_btn").addEventListener("click", add_product)
-document.getElementById("calculate_btn").addEventListener("click", calculate_and_display)
-
-# Make remove function available globally
-window.removeProduct = remove_product_js
-    </py-script>
  
   <!-- footer section -->
   <footer class="footer_section">
