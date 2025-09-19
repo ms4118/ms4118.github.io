@@ -133,310 +133,150 @@
           </div>
         </div>
     </div>
-    <div class="container">
-        <div class="header">
-            <h1>GLOBAL OPERATION MANAGEMENT - WAREHOUSE MANAGEMENT</h1>
-        </div>
 
-        <div class="section-header">
-            Warehouse Storage Location Calculator - Dedicated vs Random Policy
-        </div>
+  <title>Warehouse Storage Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table { border-collapse: collapse; margin-bottom: 1em; }
+    th, td { border: 1px solid #ccc; padding: 0.5em; }
+    input[type='number'] { width: 80px; }
+    .output { background: #f9f9f9; padding: 1em; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Warehouse Storage Calculator</h1>
+  <form id="inventoryForm">
+    <table>
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Beginning Inventory</th>
+          <th>Minimum Inventory</th>
+          <th>Maximum Inventory</th>
+          <th>Replenishment Cycle (days)</th>
+        </tr>
+      </thead>
+      <tbody id="productRows">
+        <tr>
+          <td><input type="text" name="productName" required></td>
+          <td><input type="number" name="beginInventory" required></td>
+          <td><input type="number" name="minInventory" required></td>
+          <td><input type="number" name="maxInventory" required></td>
+          <td><input type="number" name="cycle" required></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" onclick="addRow()">Add Product</button>
+    <button type="submit">Calculate</button>
+  </form>
 
-        <div class="tutorial-section">
-            <strong>Watch Tutorial</strong><br>
-            This calculator determines the optimal number of storage locations required for your warehouse using both Dedicated Storage Policy and Random Storage Policy based on inventory levels and replenishment cycles.
-        </div>
+  <div class="output" id="results"></div>
 
-        <div class="problem-section">
-            <strong>Solve Problem</strong><br><br>
-            
-            <div id="products-container">
-                <div class="product-inputs" id="product-0">
-                    <div class="input-row">
-                        <span class="input-label">Product Name:</span>
-                        <input type="text" id="name-0" placeholder="Product A" value="Product A">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Beginning Inventory:</span>
-                        <input type="number" id="begin-0" placeholder="600" value="600">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Minimum Inventory:</span>
-                        <input type="number" id="min-0" placeholder="100" value="100">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Maximum Inventory:</span>
-                        <input type="number" id="max-0" placeholder="600" value="600">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Replenishment Cycle:</span>
-                        <input type="number" id="cycle-0" placeholder="4" value="4">
-                    </div>
-                    <button class="btn btn-danger" onclick="removeProduct(0)" id="remove-0">Remove Product</button>
-                </div>
-            </div>
+  <script>
+        function addRow() {
+      const tbody = document.getElementById('productRows');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><input type="text" name="productName" required></td>
+        <td><input type="number" name="beginInventory" required></td>
+        <td><input type="number" name="minInventory" required></td>
+        <td><input type="number" name="maxInventory" required></td>
+        <td><input type="number" name="cycle" required></td>
+      `;
+      tbody.appendChild(row);
+    }
+document.getElementById('inventoryForm').onsubmit = function(e) {
+  e.preventDefault();
+  const rows = document.querySelectorAll('#productRows tr');
+  let products = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    products.push({
+      name: inputs[0].value,
+      begin: Number(inputs[1].value),
+      min: Number(inputs[2].value),
+      max: Number(inputs[3].value),
+      cycle: Number(inputs[4].value)
+    });
+  });
 
-            <button class="btn btn-primary" id="add_product_btn" onclick="addProduct()">Add Product</button>
-            <button class="btn btn-secondary" id="calculate_btn" onclick="calculateStorage()">Calculate Storage Locations</button>
-        </div>
+  // Dedicated Storage calculation (sum of max inventory)
+  let dedicatedTotal = 0;
+  let steps = '<h2>Calculation Steps</h2>';
+  steps += '<strong>Dedicated Storage:</strong><br>';
+  products.forEach(p => {
+    steps += `${p.name}: Max Inventory = ${p.max}<br>`;
+    dedicatedTotal += p.max;
+  });
+  steps += `Total Dedicated Storage = ${dedicatedTotal}<br><br>`;
 
-        <div class="section-header">OUTPUT</div>
-        
-        <div class="output-section">
-            <div id="calculation_output">Click "Calculate Storage Locations" to see results.</div>
-        </div>
+  // Random Storage calculation with conditional half-time calculation
+  const minCycle = Math.min(...products.map(p => p.cycle));
 
-        <div class="graph-container">
-            <canvas id="inventoryChart" width="800" height="400" style="display: none; max-width: 100%;"></canvas>
-        </div>
+  // Determine if any product has begin inventory != max inventory to include half cycles
+  const useHalfSteps = products.some(p => p.begin !== p.max);
 
-        <div class="footer">
-            © Op-Mic GOM 2025
-        </div>
-    </div>
+  // Create time points array with different spacing based on above condition
+  const timePoints = [];
+  const maxTime = minCycle * products.length;  // enough time before repeating
 
-    <script>
-        let productCount = 1;
+  if (useHalfSteps) {
+    for(let t = 1; t <= maxTime; t += 0.5) {
+      timePoints.push(t);
+    }
+  } else {
+    for(let t = 1; t <= maxTime; t += 1) {
+      timePoints.push(t);
+    }
+  }
 
-        function addProduct() {
-            const container = document.getElementById("products-container");
-            const newProductHtml = `
-                <div class="product-inputs" id="product-${productCount}">
-                    <div class="input-row">
-                        <span class="input-label">Product Name:</span>
-                        <input type="text" id="name-${productCount}" placeholder="Product ${String.fromCharCode(65 + productCount)}" value="Product ${String.fromCharCode(65 + productCount)}">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Beginning Inventory:</span>
-                        <input type="number" id="begin-${productCount}" placeholder="360" value="360">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Minimum Inventory:</span>
-                        <input type="number" id="min-${productCount}" placeholder="60" value="60">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Maximum Inventory:</span>
-                        <input type="number" id="max-${productCount}" placeholder="360" value="360">
-                    </div>
-                    <div class="input-row">
-                        <span class="input-label">Replenishment Cycle:</span>
-                        <input type="number" id="cycle-${productCount}" placeholder="3" value="3">
-                    </div>
-                    <button class="btn btn-danger" onclick="removeProduct(${productCount})" id="remove-${productCount}">Remove Product</button>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', newProductHtml);
-            productCount++;
+  steps += '<strong>Random Storage calculation (based on time points):</strong><br>';
+
+  let maxRandomStorage = 0;
+  let maxTimePoint = 0;
+
+  timePoints.forEach(t => {
+    let totalInventory = 0;
+    products.forEach(p => {
+      const cyclePos = t % p.cycle;
+      let inventoryAtT;
+
+      if(p.cycle === minCycle) {
+        // For shortest cycle product handle even/half points by begin vs max inventory
+        if(Number.isInteger(t)) {
+          inventoryAtT = p.begin;
+        } else {
+          inventoryAtT = p.max;
         }
-
-        function removeProduct(productId) {
-            const element = document.getElementById(`product-${productId}`);
-            if (element) {
-                element.remove();
-            }
+      } else {
+        // For others interpolate or average as before
+        if(cyclePos === 0) {
+          inventoryAtT = p.begin;
+        } else if (cyclePos === p.cycle / 2) {
+          inventoryAtT = (p.min + p.max) / 2;
+        } else {
+          // Approximate average if not at exact half or start
+          inventoryAtT = (p.min + p.max) / 2;
         }
+      }
+      totalInventory += inventoryAtT;
+      steps += `${p.name} at t=${t.toFixed(1)} inventory: ${inventoryAtT}<br>`;
+    });
+    steps += `Sum at t=${t.toFixed(1)} = ${totalInventory}<br><br>`;
+    if(totalInventory > maxRandomStorage) {
+      maxRandomStorage = totalInventory;
+      maxTimePoint = t;
+    }
+  });
 
-        function collectProductData() {
-            const products = [];
-            const container = document.getElementById("products-container");
-            const productDivs = container.getElementsByClassName("product-inputs");
-            
-            for (let div of productDivs) {
-                const divId = div.id.split('-')[1];
-                
-                const nameElement = document.getElementById(`name-${divId}`);
-                const beginElement = document.getElementById(`begin-${divId}`);
-                const minElement = document.getElementById(`min-${divId}`);
-                const maxElement = document.getElementById(`max-${divId}`);
-                const cycleElement = document.getElementById(`cycle-${divId}`);
-                
-                if (nameElement && beginElement && minElement && maxElement && cycleElement) {
-                    try {
-                        const product = {
-                            name: nameElement.value || `Product ${products.length + 1}`,
-                            begin: parseFloat(beginElement.value),
-                            min: parseFloat(minElement.value),
-                            max: parseFloat(maxElement.value),
-                            cycle: parseInt(cycleElement.value)
-                        };
-                        
-                        if (!isNaN(product.begin) && !isNaN(product.min) && !isNaN(product.max) && !isNaN(product.cycle)) {
-                            products.push(product);
-                        }
-                    } catch (error) {
-                        continue;
-                    }
-                }
-            }
-            
-            return products;
-        }
+  steps += `<strong>Maximum Random Storage of ${maxRandomStorage} at t=${maxTimePoint}</strong><br>`;
 
-        function calculateStoragePolicies(products) {
-            if (!products || products.length === 0) {
-                return [null, null];
-            }
-            
-            // Dedicated Storage Policy: sum of maximum inventory levels
-            const dedicated = products.reduce((sum, product) => sum + product.max, 0);
-            
-            // Random Storage Policy: simulate inventory levels over time
-            const maxCycle = Math.max(...products.map(p => p.cycle));
-            const timePeriods = maxCycle * 2;
-            
-            let maxSimultaneous = 0;
-            for (let t = 0; t < timePeriods; t++) {
-                let totalInventory = 0;
-                for (let product of products) {
-                    const cycle = product.cycle;
-                    const cyclePosition = t % cycle;
-                    let inventory;
-                    
-                    if (cyclePosition === 0) {
-                        inventory = product.begin;
-                    } else {
-                        const decreaseRate = (product.begin - product.min) / cycle;
-                        inventory = product.begin - (decreaseRate * cyclePosition);
-                        inventory = Math.max(inventory, product.min);
-                    }
-                    totalInventory += inventory;
-                }
-                maxSimultaneous = Math.max(maxSimultaneous, totalInventory);
-            }
-            
-            const randomPolicy = Math.ceil(maxSimultaneous);
-            return [dedicated, randomPolicy];
-        }
+  document.getElementById('results').innerHTML = steps;
+};
 
-        function drawInventoryChart(products) {
-            const canvas = document.getElementById('inventoryChart');
-            const ctx = canvas.getContext('2d');
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            if (!products || products.length === 0) {
-                canvas.style.display = 'none';
-                return;
-            }
-            
-            canvas.style.display = 'block';
-            
-            const colors = ['#3498db', '#e74c3c', '#27ae60', '#f39c12', '#9b59b6'];
-            const margin = 60;
-            const chartWidth = canvas.width - 2 * margin;
-            const chartHeight = canvas.height - 2 * margin;
-            
-            // Find max values for scaling
-            const maxTime = Math.max(...products.map(p => p.cycle * 3));
-            const maxInventory = Math.max(...products.map(p => p.max));
-            
-            // Draw axes
-            ctx.beginPath();
-            ctx.moveTo(margin, margin);
-            ctx.lineTo(margin, margin + chartHeight);
-            ctx.lineTo(margin + chartWidth, margin + chartHeight);
-            ctx.strokeStyle = '#333';
-            ctx.stroke();
-            
-            // Draw labels
-            ctx.fillStyle = '#333';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Time Period', margin + chartWidth / 2, canvas.height - 10);
-            
-            ctx.save();
-            ctx.translate(15, margin + chartHeight / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Inventory Level', 0, 0);
-            ctx.restore();
-            
-            // Draw products
-            products.forEach((product, index) => {
-                const color = colors[index % colors.length];
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                
-                ctx.beginPath();
-                const timePeriods = product.cycle * 3;
-                
-                for (let t = 0; t <= timePeriods; t++) {
-                    const cyclePosition = t % product.cycle;
-                    let inventory;
-                    
-                    if (cyclePosition === 0) {
-                        inventory = product.begin;
-                    } else {
-                        const decreaseRate = (product.begin - product.min) / product.cycle;
-                        inventory = product.begin - (decreaseRate * cyclePosition);
-                        inventory = Math.max(inventory, product.min);
-                    }
-                    
-                    const x = margin + (t / maxTime) * chartWidth;
-                    const y = margin + chartHeight - (inventory / maxInventory) * chartHeight;
-                    
-                    if (t === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                ctx.stroke();
-                
-                // Draw legend
-                ctx.fillStyle = color;
-                ctx.fillRect(margin + chartWidth + 10, margin + index * 20, 15, 15);
-                ctx.fillStyle = '#333';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(product.name, margin + chartWidth + 30, margin + index * 20 + 12);
-            });
-        }
 
-        function calculateStorage() {
-            const products = collectProductData();
-            
-            if (!products || products.length === 0) {
-                document.getElementById("calculation_output").innerHTML = `
-                    <div class="result-text" style="color: #e74c3c;">
-                        Error: Please enter valid product information for at least one product.
-                    </div>
-                `;
-                return;
-            }
-            
-            const [dedicated, randomPolicy] = calculateStoragePolicies(products);
-            
-            if (dedicated === null) {
-                document.getElementById("calculation_output").innerHTML = `
-                    <div class="result-text" style="color: #e74c3c;">
-                        Error: Could not calculate storage requirements. Please check your inputs.
-                    </div>
-                `;
-                return;
-            }
-            
-            // Calculate savings
-            const savings = dedicated - randomPolicy;
-            const savingsPercent = dedicated > 0 ? (savings / dedicated * 100) : 0;
-            
-            const outputHtml = `
-                <div class="result-text">
-                    <strong>Storage Location Requirements:</strong><br><br>
-                    Dedicated Storage Policy = <span style="color: #e74c3c;">${dedicated}</span> locations<br>
-                    Random Storage Policy = <span style="color: #27ae60;">${randomPolicy}</span> locations<br><br>
-                    <span style="color: #3498db;">Space Savings: ${savings} locations (${savingsPercent.toFixed(1)}%)</span>
-                </div>
-            `;
-            
-            document.getElementById("calculation_output").innerHTML = outputHtml;
-            
-            // Draw chart
-            drawInventoryChart(products);
-        }
-    </script>
+</script>
 
- 
   <!-- footer section -->
   <footer class="footer_section">
     <div class="container">
