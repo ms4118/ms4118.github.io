@@ -134,17 +134,7 @@
         </div>
     </div>
 
-  <title>Warehouse Storage Calculator</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    table { border-collapse: collapse; margin-bottom: 1em; }
-    th, td { border: 1px solid #ccc; padding: 0.5em; }
-    input[type='number'] { width: 80px; }
-    .output { background: #f9f9f9; padding: 1em; border: 1px solid #ddd; }
-  </style>
-</head>
-<body>
-  <h1>Warehouse Storage Calculator</h1>
+ <h1>Warehouse Storage Calculator</h1>
   <form id="inventoryForm">
     <table>
       <thead>
@@ -153,12 +143,12 @@
           <th>Beginning Inventory</th>
           <th>Minimum Inventory</th>
           <th>Maximum Inventory</th>
-          <th>Replenishment Cycle (days)</th>
+          <th>Replenishment Cycle</th>
         </tr>
       </thead>
       <tbody id="productRows">
         <tr>
-          <td><input type="text" name="productName" required></td>
+          <td><input name="productName" required></td>
           <td><input type="number" name="beginInventory" required></td>
           <td><input type="number" name="minInventory" required></td>
           <td><input type="number" name="maxInventory" required></td>
@@ -170,14 +160,14 @@
     <button type="submit">Calculate</button>
   </form>
 
-  <div class="output" id="results"></div>
+  <div id="results" class="output"></div>
 
   <script>
-        function addRow() {
+    function addRow() {
       const tbody = document.getElementById('productRows');
       const row = document.createElement('tr');
       row.innerHTML = `
-        <td><input type="text" name="productName" required></td>
+        <td><input name="productName" required></td>
         <td><input type="number" name="beginInventory" required></td>
         <td><input type="number" name="minInventory" required></td>
         <td><input type="number" name="maxInventory" required></td>
@@ -185,97 +175,66 @@
       `;
       tbody.appendChild(row);
     }
-document.getElementById('inventoryForm').onsubmit = function(e) {
-  e.preventDefault();
-  const rows = document.querySelectorAll('#productRows tr');
-  let products = [];
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll('input');
-    products.push({
-      name: inputs[0].value,
-      begin: Number(inputs[1].value),
-      min: Number(inputs[2].value),
-      max: Number(inputs[3].value),
-      cycle: Number(inputs[4].value)
-    });
-  });
 
-  // Dedicated Storage calculation (sum of max inventory)
-  let dedicatedTotal = 0;
-  let steps = '<h2>Calculation Steps</h2>';
-  steps += '<strong>Dedicated Storage:</strong><br>';
-  products.forEach(p => {
-    steps += `${p.name}: Max Inventory = ${p.max}<br>`;
-    dedicatedTotal += p.max;
-  });
-  steps += `Total Dedicated Storage = ${dedicatedTotal}<br><br>`;
+    document.getElementById('inventoryForm').onsubmit = function(e) {
+      e.preventDefault();
+      const rows = document.querySelectorAll('#productRows tr');
+      const products = [];
 
-  // Random Storage calculation with conditional half-time calculation
-  const minCycle = Math.min(...products.map(p => p.cycle));
+      rows.forEach(r => {
+        const [nameEl, beginEl, minEl, maxEl, cycleEl] = r.querySelectorAll('input');
+        const p = {
+          name: nameEl.value,
+          begin: +beginEl.value,
+          min: +minEl.value,
+          max: +maxEl.value,
+          cycle: +cycleEl.value
+        };
+        // compute shift
+        p.shift = ((p.begin - p.min) / (p.max - p.min)) * p.cycle;
+        products.push(p);
+      });
 
-  // Determine if any product has begin inventory != max inventory to include half cycles
-  const useHalfSteps = products.some(p => p.begin !== p.max);
+      let output = '<h2>Calculation Steps</h2>';
+      // Dedicated Storage
+      const dedicated = products.reduce((sum,p)=> sum + p.max, 0);
+      output += '<strong>Dedicated Storage:</strong><br>';
+      products.forEach(p => {
+        output += `${p.name}: ${p.max}<br>`;
+      });
+      output += `Total = ${dedicated}<br><br>`;
 
-  // Create time points array with different spacing based on above condition
-  const timePoints = [];
-  const maxTime = minCycle * products.length;  // enough time before repeating
+      // Random Storage
+      const minCycle = Math.min(...products.map(p=>p.cycle));
+      const maxTime = minCycle * products.length;
+      const step = products.some(p=>p.begin!==p.max)?0.5:1;
+      let bestSum = 0, bestT = 1;
 
-  if (useHalfSteps) {
-    for(let t = 1; t <= maxTime; t += 0.5) {
-      timePoints.push(t);
-    }
-  } else {
-    for(let t = 1; t <= maxTime; t += 1) {
-      timePoints.push(t);
-    }
-  }
-
-  steps += '<strong>Random Storage calculation (based on time points):</strong><br>';
-
-  let maxRandomStorage = 0;
-  let maxTimePoint = 0;
-
-  timePoints.forEach(t => {
-    let totalInventory = 0;
-    products.forEach(p => {
-      const cyclePos = t % p.cycle;
-      let inventoryAtT;
-
-      if(p.cycle === minCycle) {
-        // For shortest cycle product handle even/half points by begin vs max inventory
-        if(Number.isInteger(t)) {
-          inventoryAtT = p.begin;
-        } else {
-          inventoryAtT = p.max;
-        }
-      } else {
-        // For others interpolate or average as before
-        if(cyclePos === 0) {
-          inventoryAtT = p.begin;
-        } else if (cyclePos === p.cycle / 2) {
-          inventoryAtT = (p.min + p.max) / 2;
-        } else {
-          // Approximate average if not at exact half or start
-          inventoryAtT = (p.min + p.max) / 2;
+      output += '<strong>Random Storage:</strong><br>';
+      for(let t=1; t<=maxTime; t+=step) {
+        let sumInv = 0;
+        products.forEach(p => {
+          let tPrime = ((t - p.shift - 1) % p.cycle + p.cycle) % p.cycle + 1;
+          let inv;
+          // if tPrime ≤ 1, inventory = beginning (replenished)
+          if (tPrime <= 1) inv = p.begin;
+          else {
+            const slope = (p.max - p.min) / p.cycle;
+            inv = p.max - slope * (tPrime - 1);
+          }
+          sumInv += inv;
+          output += `${p.name} @t=${t.toFixed(1)} (t'=${tPrime.toFixed(1)}): ${inv.toFixed(1)}<br>`;
+        });
+        output += `Sum @t=${t.toFixed(1)} = ${sumInv.toFixed(1)}<br><br>`;
+        if (sumInv > bestSum) {
+          bestSum = sumInv;
+          bestT = t;
         }
       }
-      totalInventory += inventoryAtT;
-      steps += `${p.name} at t=${t.toFixed(1)} inventory: ${inventoryAtT}<br>`;
-    });
-    steps += `Sum at t=${t.toFixed(1)} = ${totalInventory}<br><br>`;
-    if(totalInventory > maxRandomStorage) {
-      maxRandomStorage = totalInventory;
-      maxTimePoint = t;
-    }
-  });
-
-  steps += `<strong>Maximum Random Storage of ${maxRandomStorage} at t=${maxTimePoint}</strong><br>`;
-
-  document.getElementById('results').innerHTML = steps;
-};
-
-
-</script>
+      output += `<strong>Max Random Storage = ${bestSum.toFixed(1)} @t=${bestT.toFixed(1)}</strong>`;
+      document.getElementById('results').innerHTML = output;
+    };
+  </script>
 
   <!-- footer section -->
   <footer class="footer_section">
