@@ -217,7 +217,7 @@
           let tPrime = ((t - p.shift - 1) % p.cycle + p.cycle) % p.cycle + 1;
           let inv;
           // if tPrime ≤ 1, inventory = beginning (replenished)
-          if (tPrime <= 1) inv = p.begin;
+          if (tPrime < 1) inv = p.begin;
           else {
             const slope = (p.max - p.min) / p.cycle;
             inv = p.max - slope * (tPrime - 1);
