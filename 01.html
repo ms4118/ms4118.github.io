@@ -134,31 +134,36 @@
         </div>
     </div>
 
- <h1>Warehouse Storage Calculator</h1>
-  <form id="inventoryForm">
-    <table>
-      <thead>
-        <tr>
+<div class="row section-container">
+        <div class="detail-box">
+          <h5 class="title">
+            <span>Sizing of Storage Zone</span>
+            <span id="step2" class="course-btn" data-index="2">Watch Tutorial</span>
+          </h5>
+          <div class="form-content">  
+          <table>
+          <thead>
+          <tr>
           <th>Product Name</th>
           <th>Beginning Inventory</th>
           <th>Minimum Inventory</th>
           <th>Maximum Inventory</th>
           <th>Replenishment Cycle</th>
-        </tr>
-      </thead>
-      <tbody id="productRows">
-        <tr>
+         </tr>
+         </thead>
+         <tbody id="productRows">
+         <tr>
           <td><input name="productName" required></td>
           <td><input type="text" name="beginInventory" required></td>
           <td><input type="text" name="minInventory" required></td>
           <td><input type="text" name="maxInventory" required></td>
           <td><input type="text" name="cycle" required></td>
-        </tr>
-      </tbody>
-    </table>
-    <button type="button" onclick="addRow()">Add Product</button>
-    <button type="submit">Calculate</button>
-  </form>
+          </tr>
+         </tbody>
+         </table>
+         <button type="button" onclick="addRow()">Add Product</button>
+         <button type="submit">Calculate</button>
+        </div>
 
   <div id="results" class="output"></div>
 
