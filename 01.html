@@ -149,10 +149,10 @@
       <tbody id="productRows">
         <tr>
           <td><input name="productName" required></td>
-          <td><input type="number" name="beginInventory" required></td>
-          <td><input type="number" name="minInventory" required></td>
-          <td><input type="number" name="maxInventory" required></td>
-          <td><input type="number" name="cycle" required></td>
+          <td><input type="text" name="beginInventory" required></td>
+          <td><input type="text" name="minInventory" required></td>
+          <td><input type="text" name="maxInventory" required></td>
+          <td><input type="text" name="cycle" required></td>
         </tr>
       </tbody>
     </table>
@@ -163,15 +163,18 @@
   <div id="results" class="output"></div>
 
   <script>
+    function isValidNumber(value) {
+  return !isNaN(value) && !isNaN(parseFloat(value)) && isFinite(value);
+}
     function addRow() {
       const tbody = document.getElementById('productRows');
       const row = document.createElement('tr');
       row.innerHTML = `
         <td><input name="productName" required></td>
-        <td><input type="number" name="beginInventory" required></td>
-        <td><input type="number" name="minInventory" required></td>
-        <td><input type="number" name="maxInventory" required></td>
-        <td><input type="number" name="cycle" required></td>
+        <td><input type="text" name="beginInventory" required></td>
+        <td><input type="text" name="minInventory" required></td>
+        <td><input type="text" name="maxInventory" required></td>
+        <td><input type="text" name="cycle" required></td>
       `;
       tbody.appendChild(row);
     }
@@ -182,14 +185,23 @@
       const products = [];
 
       rows.forEach(r => {
-        const [nameEl, beginEl, minEl, maxEl, cycleEl] = r.querySelectorAll('input');
-        const p = {
-          name: nameEl.value,
-          begin: +beginEl.value,
-          min: +minEl.value,
-          max: +maxEl.value,
-          cycle: +cycleEl.value
-        };
+  const [nameEl, beginEl, minEl, maxEl, cycleEl] = r.querySelectorAll('input');
+  
+  // Validate numeric inputs
+  if (!isValidNumber(beginEl.value) || !isValidNumber(minEl.value) || 
+      !isValidNumber(maxEl.value) || !isValidNumber(cycleEl.value)) {
+    alert('Please enter valid numbers for all inventory values');
+    return;
+  }
+  
+  const p = {
+    name: nameEl.value,
+    begin: parseFloat(beginEl.value),
+    min: parseFloat(minEl.value),
+    max: parseFloat(maxEl.value),
+    cycle: parseFloat(cycleEl.value)
+  };
+
         // compute shift
         p.shift = ((p.begin - p.min) / (p.max - p.min)) * p.cycle;
         products.push(p);
