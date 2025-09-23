@@ -219,7 +219,9 @@
       // Random Storage
       const minCycle = Math.min(...products.map(p=>p.cycle));
       const maxTime = minCycle * products.length;
-      const step = products.some(p=>p.begin!==p.max)?0.5:1;
+      const allCyclesSame = products.every(p => p.cycle === products[0].cycle);
+      const step = allCyclesSame ? 1 : 0.5;
+
       let bestSum = 0, bestT = 1;
 
       output += '<strong>Random Storage:</strong><br>';
