@@ -137,7 +137,7 @@
 <div class="row section-container">
         <div class="detail-box">
           <h5 class="title">
-            <span>Sizing of Storage Zone</span>
+            <span>Determine Number of Storage Location (m)</span>
             <span id="step2" class="course-btn" data-index="2">Watch Tutorial</span>
           </h5>
          <form id="inventoryForm"> 
@@ -254,6 +254,104 @@
       document.getElementById('results').innerHTML = output;
     };
   </script>
+
+<!-- Inputs for Layout Parameters -->
+<div style="margin-top:30px;">
+  <h3>Warehouse Layout Visualizer</h3>
+  <label>
+    Main aisles (fixed): 
+    <input type="number" id="aisleInput" value="3" min="1" readonly>
+  </label>
+  <label>
+    nx (number of columns): 
+    <input type="number" id="nxInput" min="1" value="8" onchange="drawLayout()">
+  </label>
+  <label>
+    ny (locations per column): 
+    <input type="number" id="nyInput" min="1" value="10" onchange="drawLayout()">
+  </label>
+  <button onclick="drawLayout()">Update Layout</button>
+  <br><br>
+  <canvas id="warehouseLayout" width="850" height="500" style="border:1px solid #666;"></canvas>
+</div>
+
+<script>
+function drawLayout() {
+  const aisles = parseInt(document.getElementById('aisleInput').value, 10);
+  const nx = parseInt(document.getElementById('nxInput').value, 10);
+  const ny = parseInt(document.getElementById('nyInput').value, 10);
+
+  const canvas = document.getElementById('warehouseLayout');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const marginLeft = 90, marginTop = 60;
+  const cellWidth = Math.min(50, (canvas.width - marginLeft*2) / (nx + 2));
+  const cellHeight = Math.min(40, (canvas.height - marginTop*2) / (ny + 2));
+  const aisleSpacing = 40;
+
+  // Draw Receiving Zone
+  ctx.fillStyle = "#eaeaea";
+  ctx.fillRect(marginLeft - 60, marginTop, 50, ny * cellHeight);
+  ctx.fillStyle = "#333";
+  ctx.font = "15px Arial";
+  ctx.fillText("Receiving", marginLeft - 54, marginTop + (ny * cellHeight)/2);
+
+  // Draw Shipping Zone
+  ctx.fillStyle = "#eaeaea";
+  ctx.fillRect(marginLeft + (nx+1) * cellWidth + aisleSpacing, marginTop, 70, ny * cellHeight);
+  ctx.fillStyle = "#333";
+  ctx.font = "15px Arial";
+  ctx.fillText("Shipping", marginLeft + (nx+1) * cellWidth + aisleSpacing + 5, marginTop + (ny * cellHeight)/2);
+
+  // Draw Storage Grid and numbering
+  for (let col = 1; col <= nx; col++) {
+    for (let row = 1; row <= ny; row++) {
+      ctx.strokeRect(marginLeft + col * cellWidth, marginTop + row * cellHeight, cellWidth, cellHeight);
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#005edc";
+      ctx.fillText(row, marginLeft + col * cellWidth + 5, marginTop + row * cellHeight + 18);
+    }
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#c00";
+    ctx.fillText(col, marginLeft + col * cellWidth + cellWidth/2 - 6, marginTop + (ny + 1) * cellHeight + 16);
+  }
+
+  // Draw aisles name underneath the grid
+  for (let a = 0; a < aisles; a++) {
+    const aisleY = marginTop + (ny + 1) * cellHeight + 50 + a*30;
+    ctx.font = "17px Arial";
+    ctx.fillStyle = "#d5531c";
+    ctx.fillText(`Aisle ${a+1}`, marginLeft + cellWidth, aisleY);
+  }
+
+  // Title
+  ctx.font = "23px Arial";
+  ctx.fillStyle = "#e93914";
+  ctx.fillText("This is a vertical layout", canvas.width/2 - 130, marginTop - 25);
+
+  // Arrow indicators for Lx, Ly
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(marginLeft, marginTop - 8);
+  ctx.lineTo(marginLeft + nx * cellWidth, marginTop - 8);
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.font = "15px Arial";
+  ctx.fillStyle = "#333";
+  ctx.fillText("Lx", marginLeft + nx*cellWidth/2 - 10, marginTop - 15);
+
+  ctx.beginPath();
+  ctx.moveTo(marginLeft - 8, marginTop);
+  ctx.lineTo(marginLeft - 8, marginTop + ny * cellHeight);
+  ctx.stroke();
+  ctx.fillText("Ly", marginLeft - 35, marginTop + (ny*cellHeight)/2);
+  ctx.restore();
+}
+window.onload = drawLayout;
+</script>
+
 
   <!-- footer section -->
   <footer class="footer_section">
