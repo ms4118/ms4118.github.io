@@ -256,260 +256,266 @@
   </script>
 
 <!-- Inputs for Layout Parameters -->
-<div style="margin-top:30px;">
-  <h3>Warehouse Storage Zone Visualizer</h3>
-  <label>
-    Orientation: 
-    <select id="orientationInput" onchange="drawStorageZone()">
-      <option value="Vertical">Vertical</option>
-      <option value="Horizontal">Horizontal</option>
-    </select>
-  </label>
-  <label>
-    Main aisles: 
-    <select id="mainAislesInput" onchange="drawStorageZone()">
-      <option value="1">1</option>
-      <option value="3" selected>3</option>
-    </select>
-  </label>
-  <label>
-    Aisles: 
-    <input type="number" id="aislesInput" min="1" value="4" onchange="drawStorageZone()">
-  </label>
-  <label>
-    Columns (nx): 
-    <input type="number" id="nxInput" min="1" value="6" onchange="drawStorageZone()">
-  </label>
-  <label>
-    Locations per column (ny): 
-    <input type="number" id="nyInput" min="1" value="4" onchange="drawStorageZone()">
-  </label>
-  <button onclick="drawStorageZone()">Update Layout</button>
-  <br><br>
-  <canvas id="zoneCanvas" width="950" height="570" style="border:1px solid #444;background:#ffffff;"></canvas>
-</div>
-<script>
-function drawStorageZone() {
-  const orientation = document.getElementById('orientationInput').value;
-  const mainAisles = parseInt(document.getElementById('mainAislesInput').value, 10);
-  const numAisles = parseInt(document.getElementById('aislesInput').value, 10);
-  const nx = parseInt(document.getElementById('nxInput').value, 10);
-  const ny = parseInt(document.getElementById('nyInput').value, 10);
+<head>
+    <meta charset="UTF-8">
+    <title>Warehouse Storage Zone Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 180px;
+        }
+        canvas {
+            border: 1px solid #555;
+            margin-top: 20px;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h2>Warehouse Storage Zone Visualizer</h2>
+    <form id="warehouseForm">
+        <div class="input-group">
+            <label for="alpha">Box size (α):</label>
+            <input type="number" id="alpha" value="40" min="1" step="1" required>
+        </div>
+        <div class="input-group">
+            <label for="wx">Sub aisle width (wx):</label>
+            <input type="number" id="wx" value="20" min="1" step="1" required>
+        </div>
+        <div class="input-group">
+            <label for="wy">Main aisle width (wy):</label>
+            <input type="number" id="wy" value="40" min="1" step="1" required>
+        </div>
+        <div class="input-group">
+            <label for="nx">Boxes horizontally (nx, even):</label>
+            <input type="number" id="nx" value="8" min="2" step="2" required>
+        </div>
+        <div class="input-group">
+            <label for="ny">Boxes vertically (ny):</label>
+            <input type="number" id="ny" value="10" min="1" step="1" required>
+        </div>
+        <div class="input-group">
+            <label for="aisleCount">No. of main aisles:</label>
+            <select id="aisleCount">
+                <option value="1">1</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <button type="submit">Visualize</button>
+    </form>
+    <canvas id="warehouseCanvas" width="900" height="600"></canvas>
 
-  const canvas = document.getElementById('zoneCanvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    <script>
+        document.getElementById('warehouseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            drawWarehouse();
+        });
 
-  // Fill canvas with white background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function drawWarehouse() {
+            // Get inputs
+            let alpha = parseInt(document.getElementById('alpha').value, 10);
+            let wx = parseInt(document.getElementById('wx').value, 10);
+            let wy = parseInt(document.getElementById('wy').value, 10);
+            let nx = parseInt(document.getElementById('nx').value, 10);
+            let ny = parseInt(document.getElementById('ny').value, 10);
+            let aisleCount = parseInt(document.getElementById('aisleCount').value, 10);
 
-  const marginX = 80, marginY = 50;
-  const warehouseWidth = canvas.width - 2 * marginX;
-  const warehouseHeight = canvas.height - 2 * marginY;
+            if (nx % 2 !== 0) {
+                alert("nx must be even.");
+                return;
+            }
 
-  // Draw warehouse perimeter (black border)
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(marginX, marginY, warehouseWidth, warehouseHeight);
+            // Prepare canvas
+            const canvas = document.getElementById('warehouseCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Calculate storage area dimensions
-  const storageMargin = 40;
-  const storageX = marginX + storageMargin;
-  const storageY = marginY + storageMargin;
-  const storageWidth = warehouseWidth - 2 * storageMargin;
-  const storageHeight = warehouseHeight - 2 * storageMargin;
+            // Compute number of sub-aisles
+            const subAisleCount = nx / 2;
 
-  // Space for main aisles and aisles
-  const mainAisleSize = 36, aisleSize = 28;
-  let blockCols, blockRows;
-  let colPerAisle, rowPerMainAisle;
+            // Compute number of columns (nx) and rows (ny)
+            // Layout: [wall][box][box][sub aisle][box][box][sub aisle]...[box][box][wall]
+            // The width: nx * alpha + (subAisleCount) * wx
 
-  if (orientation === "Vertical") {
-    blockCols = numAisles;
-    blockRows = mainAisles;
-    colPerAisle = Math.floor(nx / blockCols);
+            // Main aisle(s) logic
+            let mainAislePositions = [];
+            if (aisleCount === 1) {
+                mainAislePositions.push(0.5); // middle (normalized)
+            } else {
+                mainAislePositions.push(0.0);  // top
+                mainAislePositions.push(0.5);  // middle
+                mainAislePositions.push(1.0);  // bottom
+            }
 
-    // Handle different main aisle counts
-    if (mainAisles === 1) {
-      // Single main aisle in the middle
-      rowPerMainAisle = ny; // All rows in one block
-    } else {
-      // 3 main aisles: top, middle, bottom
-      rowPerMainAisle = Math.floor(ny / blockRows);
-    }
+            // For vertical lines, we split ny into two blocks separated by the middle main aisle
+            // If ny is even, split equally; if odd, the lower half gets the extra box
+            let nyUpper = Math.floor(ny / 2);
+            let nyLower = ny - nyUpper;
 
-    // Calculate cell sizes
-    const totalAisleSpace = (blockCols - 1) * aisleSize;
-    const totalMainAisleSpace = (blockRows - 1) * mainAisleSize;
-    const cellW = (storageWidth - totalAisleSpace) / nx;
-    const cellH = (storageHeight - totalMainAisleSpace) / ny;
+            // Draw size calculation
+            const totalWarehouseWidth =
+                nx * alpha +
+                (subAisleCount) * wx; // Storage width
 
-    // Draw storage locations (grid cells)
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    for (let col = 0; col < nx; col++) {
-      for (let row = 0; row < ny; row++) {
-        let aisleOffset = Math.floor(col / colPerAisle) * aisleSize;
-        let mainAisleOffset;
+            const totalMainAisleHeight = mainAislePositions.length * wy;
+            const totalStorageHeight = ny * alpha;
 
-        if (mainAisles === 1) {
-          // No main aisle offset for storage locations
-          mainAisleOffset = 0;
-        } else {
-          // Calculate offset for 3 main aisles
-          mainAisleOffset = Math.floor(row / rowPerMainAisle) * mainAisleSize;
+            const totalWarehouseHeight = totalStorageHeight + totalMainAisleHeight;
+
+            // Center warehouse on canvas
+            const canvasMargin = 60;
+            const offsetX = (canvas.width - totalWarehouseWidth) / 2;
+            const offsetY = (canvas.height - totalWarehouseHeight) / 2;
+
+            // Draw boundary
+            ctx.save();
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(offsetX, offsetY, totalWarehouseWidth, totalWarehouseHeight);
+            ctx.restore();
+
+            // Draw main aisle(s)
+            let aisleYs = [];
+            let startY = offsetY;
+            for (let i = 0; i < mainAislePositions.length; i++) {
+                let pos = mainAislePositions[i];
+                let y = offsetY + pos * (totalStorageHeight + ((mainAislePositions.length - 1) * wy));
+                aisleYs.push(y);
+                ctx.fillStyle = "#e0e0e0";
+                ctx.fillRect(offsetX, y, totalWarehouseWidth, wy);
+            }
+
+            // Draw sub-aisles (vertical), also mark in red
+            let col = 0;
+            for (let s = 0; s < subAisleCount; s++) {
+                let xSub = offsetX + ((col + 2) * alpha) + (s * wx) + (s * 2 * alpha);
+                ctx.save();
+                ctx.fillStyle = "rgba(255,0,0,0.2)";
+                ctx.fillRect(xSub, offsetY, wx, totalWarehouseHeight);
+                ctx.restore();
+                col += 2;
+            }
+
+            // Draw boxes
+            col = 0;
+            for (let bx = 0; bx < nx; bx++) {
+                // Compute x position of this box column
+                let aisleBefore = Math.floor(bx / 2);
+                let boxX = offsetX + bx * alpha + aisleBefore * wx;
+
+                // Draw upper part (from wall to main aisle above/below)
+                let yUpper = offsetY;
+                let boxesUpper = 0;
+                let mainAisleFound = false;
+
+                // Determine how many boxes before main aisle, and after
+                // The general plan: for each main aisle, compute where it is and how many boxes are above/below for each section
+                if (aisleCount === 1) {
+                    // Only one main aisle in the center
+                    boxesUpper = nyUpper;
+                } else {
+                    // Three main aisles: top, middle, bottom
+                    // Top aisle (no boxes), then upper boxes, middle aisle, lower boxes, bottom aisle (no boxes)
+                    boxesUpper = Math.floor(ny / 2);
+                }
+
+                // Draw upper boxes
+                for (let by = 0; by < boxesUpper; by++) {
+                    let boxY = offsetY + by * alpha;
+                    ctx.save();
+                    ctx.fillStyle = "#b3e5fc";
+                    ctx.strokeStyle = "#0288d1";
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(boxX, boxY, alpha, alpha);
+                    ctx.strokeRect(boxX, boxY, alpha, alpha);
+                    ctx.restore();
+                }
+
+                // Draw lower boxes
+                // Lower boxes start after main aisle of width `wy`
+                let offset_m = nyUpper * alpha + wy;
+                let lowerBoxes = ny - boxesUpper;
+                if (aisleCount === 3) {
+                    // If three main aisles, distribute differently:
+                    // top aisle, upper boxes, middle aisle, lower boxes, bottom aisle
+                    // Account for space and only draw between aisles
+                    // top aisle: wy at offsetY (skip drawing)
+                    // upper part: upperRows, starts at offsetY+wy
+                    // middle aisle: wy
+                    // lower part: lowerRows, starts after main+middle aisle(s)
+                    // bottom aisle: wy at end (skip drawing)
+                    let upperRows = Math.floor(ny/2);
+                    let lowerRows = ny - upperRows;
+                    // Upper part:
+                    for (let by = 0; by < upperRows; by++) {
+                        let boxY = offsetY + wy + by * alpha;
+                        ctx.save();
+                        ctx.fillStyle = "#b3e5fc";
+                        ctx.strokeStyle = "#0288d1";
+                        ctx.lineWidth = 2;
+                        ctx.fillRect(boxX, boxY, alpha, alpha);
+                        ctx.strokeRect(boxX, boxY, alpha, alpha);
+                        ctx.restore();
+                    }
+                    // Lower part:
+                    for (let by = 0; by < lowerRows; by++) {
+                        let boxY = offsetY + wy + upperRows * alpha + wy + by * alpha;
+                        ctx.save();
+                        ctx.fillStyle = "#b3e5fc";
+                        ctx.strokeStyle = "#0288d1";
+                        ctx.lineWidth = 2;
+                        ctx.fillRect(boxX, boxY, alpha, alpha);
+                        ctx.strokeRect(boxX, boxY, alpha, alpha);
+                        ctx.restore();
+                    }
+                } else {
+                    // Standard two region (upper & lower) split by middle aisle
+                    for (let by = 0; by < lowerBoxes; by++) {
+                        let boxY = offsetY + boxesUpper * alpha + wy + by * alpha;
+                        ctx.save();
+                        ctx.fillStyle = "#b3e5fc";
+                        ctx.strokeStyle = "#0288d1";
+                        ctx.lineWidth = 2;
+                        ctx.fillRect(boxX, boxY, alpha, alpha);
+                        ctx.strokeRect(boxX, boxY, alpha, alpha);
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // Draw Entry (left side)
+            ctx.save();
+            ctx.fillStyle = "green";
+            ctx.beginPath();
+            ctx.moveTo(offsetX-40, offsetY + totalWarehouseHeight/2 - 15);
+            ctx.lineTo(offsetX-10, offsetY + totalWarehouseHeight/2);
+            ctx.lineTo(offsetX-40, offsetY + totalWarehouseHeight/2 + 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            // Draw Exit (right side)
+            ctx.save();
+            ctx.fillStyle = "green";
+            ctx.beginPath();
+            ctx.moveTo(offsetX + totalWarehouseWidth + 40, offsetY + totalWarehouseHeight/2 - 15);
+            ctx.lineTo(offsetX + totalWarehouseWidth + 10, offsetY + totalWarehouseHeight/2);
+            ctx.lineTo(offsetX + totalWarehouseWidth + 40, offsetY + totalWarehouseHeight/2 + 15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
         }
 
-        const x = storageX + col * cellW + aisleOffset;
-        const y = storageY + row * cellH + mainAisleOffset;
-
-        ctx.strokeRect(x, y, cellW, cellH);
-      }
-    }
-
-    // Draw main aisles (horizontal)
-    ctx.fillStyle = '#f0f0f0';
-
-    if (mainAisles === 1) {
-      // Single main aisle connecting entry to exit (horizontal center)
-      const centerY = marginY + warehouseHeight / 2 - mainAisleSize / 2;
-      ctx.fillRect(marginX, centerY, warehouseWidth, mainAisleSize);
-    } else {
-      // 3 main aisles: one connects entry-exit, others at top and bottom
-      for (let m = 1; m < blockRows; m++) {
-        let y = storageY + m * rowPerMainAisle * cellH + (m-1)*mainAisleSize;
-        if (m === 1) {
-          // Middle main aisle extends to warehouse walls (connects entry-exit)
-          ctx.fillRect(marginX, y, warehouseWidth, mainAisleSize);
-        } else {
-          // Other main aisles only within storage area
-          ctx.fillRect(storageX, y, storageWidth, mainAisleSize);
-        }
-      }
-    }
-
-    // Draw aisles (vertical)
-    ctx.fillStyle = '#f8f8f8';
-    for (let a = 1; a < blockCols; a++) {
-      let x = storageX + a * colPerAisle * cellW + (a-1)*aisleSize;
-      ctx.fillRect(x, storageY, aisleSize, storageHeight);
-    }
-
-  } else {
-    // Horizontal orientation
-    blockRows = numAisles;
-    blockCols = mainAisles;
-    rowPerAisle = Math.floor(ny / blockRows);
-
-    // Handle different main aisle counts
-    if (mainAisles === 1) {
-      // Single main aisle in the middle
-      colPerMainAisle = nx; // All columns in one block
-    } else {
-      // 3 main aisles: left, center, right
-      colPerMainAisle = Math.floor(nx / blockCols);
-    }
-
-    const totalAisleSpace = (blockRows - 1) * aisleSize;
-    const totalMainAisleSpace = (blockCols - 1) * mainAisleSize;
-    const cellH = (storageHeight - totalAisleSpace) / ny;
-    const cellW = (storageWidth - totalMainAisleSpace) / nx;
-
-    // Draw storage locations
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1;
-    for (let row = 0; row < ny; row++) {
-      for (let col = 0; col < nx; col++) {
-        let aisleOffset = Math.floor(row / rowPerAisle) * aisleSize;
-        let mainAisleOffset;
-
-        if (mainAisles === 1) {
-          mainAisleOffset = 0;
-        } else {
-          mainAisleOffset = Math.floor(col / colPerMainAisle) * mainAisleSize;
-        }
-
-        const x = storageX + col * cellW + mainAisleOffset;
-        const y = storageY + row * cellH + aisleOffset;
-
-        ctx.strokeRect(x, y, cellW, cellH);
-      }
-    }
-
-    // Draw main aisles (vertical)
-    ctx.fillStyle = '#f0f0f0';
-
-    if (mainAisles === 1) {
-      // Single main aisle connecting entry to exit (vertical center)
-      const centerX = marginX + warehouseWidth / 2 - mainAisleSize / 2;
-      ctx.fillRect(centerX, marginY, mainAisleSize, warehouseHeight);
-    } else {
-      // 3 main aisles
-      for (let m = 1; m < blockCols; m++) {
-        let x = storageX + m * colPerMainAisle * cellW + (m-1)*mainAisleSize;
-        if (m === 1) {
-          // Middle main aisle extends to warehouse walls (connects entry-exit)
-          ctx.fillRect(x, marginY, mainAisleSize, warehouseHeight);
-        } else {
-          // Other main aisles only within storage area
-          ctx.fillRect(x, storageY, mainAisleSize, storageHeight);
-        }
-      }
-    }
-
-    // Draw aisles (horizontal)
-    ctx.fillStyle = '#f8f8f8';
-    for (let a = 1; a < blockRows; a++) {
-      let y = storageY + a * rowPerAisle * cellH + (a-1)*aisleSize;
-      ctx.fillRect(storageX, y, storageWidth, aisleSize);
-    }
-  }
-
-  // Draw entry/exit arrows (green)
-  ctx.fillStyle = '#22c55e';
-  ctx.strokeStyle = '#22c55e';
-  const arrowSize = 25;
-
-  // Left entry arrow
-  const leftArrowX = marginX - arrowSize - 10;
-  const leftArrowY = marginY + warehouseHeight/2;
-  drawArrow(ctx, leftArrowX, leftArrowY, leftArrowX + arrowSize, leftArrowY, arrowSize/3);
-
-  // Right exit arrow  
-  const rightArrowX = marginX + warehouseWidth + 10;
-  const rightArrowY = marginY + warehouseHeight/2;
-  drawArrow(ctx, rightArrowX, rightArrowY, rightArrowX + arrowSize, rightArrowY, arrowSize/3);
-
-  // Title
-  ctx.font = "18px Arial";
-  ctx.fillStyle = "#e93914";
-  ctx.textAlign = "center";
-  ctx.fillText("Storage Zone Layout: " + orientation, canvas.width/2, marginY - 15);
-  ctx.textAlign = "left";
-}
-
-function drawArrow(ctx, fromX, fromY, toX, toY, headSize) {
-  const angle = Math.atan2(toY - fromY, toX - fromX);
-
-  // Draw arrow line
-  ctx.beginPath();
-  ctx.moveTo(fromX, fromY);
-  ctx.lineTo(toX, toY);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Draw arrow head
-  ctx.beginPath();
-  ctx.moveTo(toX, toY);
-  ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
-  ctx.moveTo(toX, toY);
-  ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
-  ctx.stroke();
-}
-
-window.onload = drawStorageZone;
-</script>
+        // Draw default warehouse at load
+        window.onload = drawWarehouse;
+    </script>
+</body>
 
 
   <!-- footer section -->
