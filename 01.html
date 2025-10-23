@@ -259,174 +259,302 @@
 <div class="row section-container">
         <div class="detail-box">
           <h5 class="title">
-            <span>Warehouse Storage Zone Visualizer</span>
+            <span>Warehouse Storage Zone Visualizer (in metre)</span>
           </h5>
     <style>
         body { font-family: Arial, sans-serif; }
         .input-group { margin: 10px 0; }
         label { display: inline-block; width: 180px; }
         canvas { border: 1px solid #333; margin-top: 20px; background: #fff; }
+        .scale-control { margin-top: 15px; margin-bottom: 15px; }
+        .scale-control label { display: inline-block; width: 200px; margin-right: 10px; }
+        .scale-control input[type="range"] { width: 200px; }
+        .scale-value { display: inline-block; min-width: 60px; }
     </style>
   <body>
-    <form id="warehouseForm">
-        <div class="input-group">
-            <label for="alpha">Box size (α):</label>
-            <input type="number" id="alpha" value="40" min="1" required>
-        </div>
-        <div class="input-group">
-            <label for="wx">Sub-aisle width (wx):</label>
-            <input type="number" id="wx" value="30" min="1" required>
-        </div>
-        <div class="input-group">
-            <label for="wy">Main aisle width (wy):</label>
-            <input type="number" id="wy" value="50" min="1" required>
-        </div>
-        <div class="input-group">
-            <label for="nx">Boxes horizontally (nx, even):</label>
-            <input type="number" id="nx" value="8" min="2" step="2" required>
-        </div>
-        <div class="input-group">
-            <label for="ny">Boxes vertically (ny):</label>
-            <input type="number" id="ny" value="10" min="1" required>
-        </div>
-        <div class="input-group">
-            <label for="aisleCount">No. of main aisles:</label>
-            <select id="aisleCount">
-                <option value="1">1</option>
-                <option value="3">3</option>
-            </select>
-        </div>
-        <button type="submit">Visualize</button>
-    </form>
+  <form id="warehouseForm">
+    <div class="input-group">
+      <label for="alpha">Box width (α<sub>x</sub>):</label>
+      <input type="number" id="alpha" value="1.05" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="alphay">Box height factor (α<sub>y</sub>):</label>
+      <input type="number" id="alphay" value="1.05" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="wx">Sub-aisle width (w<sub>x</sub>):</label>
+      <input type="number" id="wx" value="3.5" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="wy">Main aisle width (w<sub>y</sub>):</label>
+      <input type="number" id="wy" value="4" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="nz">Height of the box (<i>n<sub>z</sub></i>):</label>
+      <input type="number" id="nz" value="4" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="m">Number of storage location (<i>m</i>):</label>
+      <input type="number" id="m" value="780" step="any" min="0.01" required>
+    </div>
+    <div class="input-group">
+      <label for="aisleCount">No. of main aisles:</label>
+      <select id="aisleCount">
+        <option value="1">1</option>
+        <option value="3">3</option>
+      </select>
+    </div>
+    <button type="submit">Visualize & Calculate</button>
+  </form>
+  
+  <!-- Scale Factor Control -->
+  <div class="scale-control">
+    <label for="scaleFactor">Display Scale (pixels per meter):</label>
+    <input type="range" id="scaleFactor" min="20" max="200" value="100" step="10">
+    <span class="scale-value"><span id="scaleValue">100</span>px/m</span>
+  </div>
+  
+  <div id="optimalResults" class="outputdiv"></div>
 
-    <canvas id="warehouseCanvas" width="900" height="600"></canvas>
+  <!-- Zoom Controls -->
+  <div class="zoom-controls">
+    <button id="zoomInBtn">+</button>
+    <button id="zoomOutBtn">-</button>
+  </div>
 
-    <script>
-    document.getElementById('warehouseForm').addEventListener('submit', e => {
-        e.preventDefault();
-        drawWarehouse();
-    });
+  <canvas id="warehouseCanvas" width="900" height="600"></canvas>
 
-    function drawWarehouse() {
-        // Read inputs
-        const alpha = +document.getElementById('alpha').value;
-        const wx = +document.getElementById('wx').value;
-        const wy = +document.getElementById('wy').value;
-        const nx = +document.getElementById('nx').value;
-        const ny = +document.getElementById('ny').value;
-        const aisleCount = +document.getElementById('aisleCount').value;
+<script>
+// SCALE FACTOR - METERS TO PIXELS CONVERSION
+const PIXELS_PER_METER = 100; // Base conversion rate
 
-        if (nx % 2 !== 0) {
-            alert('nx must be even');
-            return;
-        }
+// Zoom variables
+let zoomLevel = 1;
+let scaleFactor = 100; // Current scale factor
+const maxZoom = 3;
+const minZoom = 0.5;
+const zoomStep = 0.1;
 
-        const canvas = document.getElementById('warehouseCanvas');
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Store current parameters for redrawing
+let currentParams = {
+  alpha: 0,
+  alphay: 0,
+  wx: 0,
+  wy: 0,
+  nx: 0,
+  ny: 0,
+  aisleCount: 0,
+  nz: 0
+};
 
-        // Calculate warehouse dimensions
-        const groups = nx / 2;                 // number of (column+sub+column) groups
-        const totalBoxWidth = groups * 2 * alpha;
-        const totalSubWidth = groups * wx;
-        const W = totalBoxWidth + totalSubWidth;
+// Helper function to convert meters to pixels
+function metersToPixels(meters) {
+  return meters * scaleFactor;
+}
 
-        const upperRows = Math.floor(ny / 2);
-        const lowerRows = ny - upperRows;
-        const mainAisles = aisleCount;
-        const H = ny * alpha + mainAisles * wy;
+// Scale factor slider control
+document.getElementById('scaleFactor').addEventListener('input', function(e) {
+  scaleFactor = parseFloat(e.target.value);
+  document.getElementById('scaleValue').textContent = scaleFactor;
+  redrawWarehouse();
+});
 
-        // Centering offsets
-        const offsetX = (canvas.width - W) / 2;
-        const offsetY = (canvas.height - H) / 2;
+function calculateOptimals(alpha, alphay, wx, wy, nz, m) {
+  // n'_y = sqrt( 2m(alpha + wx/2) / (alphay * nz) )
+  const numeratorY = 2 * m * (alpha + wx / 2);
+  const denominatorY = alphay * nz;
+  let nOptY = Math.sqrt(numeratorY / denominatorY);
 
-        // Draw boundary
-        ctx.save();
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(offsetX, offsetY, W, H);
-        ctx.restore();
+  // n'_x = sqrt( m * alphay / (2 * nz * (alpha + wx/2)) )
+  const numeratorX = m * alphay;
+  const denominatorX = 2 * nz * (alpha + wx / 2);
+  let nOptX = Math.sqrt(numeratorX / denominatorX);
 
-        // Draw main aisles
-        const mainLabels = [];
-        if (aisleCount === 1) {
-            const y = offsetY + upperRows * alpha;
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(offsetX, y, W, wy);
-            mainLabels.push({ text: 'main aisle', x: offsetX + W/2, y: y + wy/2 });
-        } else {
-            // top
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(offsetX, offsetY, W, wy);
-            mainLabels.push({ text: 'main aisle 1', x: offsetX + W/2, y: offsetY + wy/2 });
-            // middle
-            const y2 = offsetY + wy + upperRows * alpha;
-            ctx.fillRect(offsetX, y2, W, wy);
-            mainLabels.push({ text: 'main aisle 2', x: offsetX + W/2, y: y2 + wy/2 });
-            // bottom
-            const y3 = offsetY + wy + upperRows * alpha + wy + lowerRows * alpha;
-            ctx.fillRect(offsetX, y3, W, wy);
-            mainLabels.push({ text: 'main aisle 3', x: offsetX + W/2, y: y3 + wy/2 });
-        }
+  // Round for display and visualization
+  nOptY = Math.max(1, Math.ceil(nOptY));  // Changed to Math.ceil to round up
+  nOptX = Math.max(2, 2 * Math.round(nOptX / 2)); // Keep as Math.round to round off (even only)
 
-        // Draw each group: [colA]–(sub aisle)–[colB]
-        const subLabels = [];
-        for (let g = 0; g < groups; g++) {
-            const groupX = offsetX + g * (2*alpha + wx);
+  return { nOptX, nOptY };
+}
 
-            // Column A
-            drawColumn(groupX);
-
-            // Column B
-            drawColumn(groupX + alpha + wx);
-        }
-
-        // Label main aisles
-        ctx.save();
-        ctx.font = '18px Arial';
-        ctx.fillStyle = '#333';
-        ctx.textAlign = 'center';
-        for (let m of mainLabels) {
-            ctx.fillText(m.text, m.x, m.y + 6);
-        }
-        ctx.restore();
-
-        // Draw a single column of ny boxes at x
-        function drawColumn(x) {
-            if (aisleCount === 1) {
-                // upper
-                for (let r = 0; r < upperRows; r++) {
-                    drawBox(x, offsetY + r*alpha);
-                }
-                // lower
-                for (let r = 0; r < lowerRows; r++) {
-                    drawBox(x, offsetY + upperRows*alpha + wy + r*alpha);
-                }
-            } else {
-                // after top aisle
-                for (let r = 0; r < upperRows; r++) {
-                    drawBox(x, offsetY + wy + r*alpha);
-                }
-                // after middle aisle
-                for (let r = 0; r < lowerRows; r++) {
-                    drawBox(x, offsetY + wy + upperRows*alpha + wy + r*alpha);
-                }
-            }
-        }
-
-        function drawBox(x, y) {
-            ctx.save();
-            ctx.fillStyle = '#fff';
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(x, y, alpha, alpha);
-            ctx.restore();
-        }
+// Zoom button functionality
+document.getElementById('zoomInBtn').addEventListener('click', function() {
+    if (zoomLevel < maxZoom) {
+        zoomLevel += zoomStep;
+        zoomLevel = Math.round(zoomLevel * 100) / 100; // Fix floating point issues
+        redrawWarehouse();
     }
+});
 
-    // initial draw
-    window.onload = drawWarehouse;
-    </script>
+document.getElementById('zoomOutBtn').addEventListener('click', function() {
+    if (zoomLevel > minZoom) {
+        zoomLevel -= zoomStep;
+        zoomLevel = Math.round(zoomLevel * 100) / 100; // Fix floating point issues
+        redrawWarehouse();
+    }
+});
+
+function redrawWarehouse() {
+    drawWarehouse(currentParams.alpha, currentParams.alphay, currentParams.wx, currentParams.wy, currentParams.nz, currentParams.nx, currentParams.ny, currentParams.aisleCount);
+}
+
+document.getElementById('warehouseForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const alpha = parseFloat(document.getElementById('alpha').value);
+  const alphay = parseFloat(document.getElementById('alphay').value);
+  const wx = parseFloat(document.getElementById('wx').value);
+  const wy = parseFloat(document.getElementById('wy').value);
+  const nz = parseFloat(document.getElementById('nz').value);
+  const m = parseFloat(document.getElementById('m').value);
+  const aisleCount = parseInt(document.getElementById('aisleCount').value);
+
+  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+
+  // Store parameters for zoom redrawing
+  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount };
+  zoomLevel = 1; // Reset zoom level
+
+  document.getElementById('optimalResults').innerHTML =
+    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
+     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}`;
+
+  drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount);
+});
+
+function drawWarehouse(alpha, alphay, wx, wy, nz, nx, ny, aisleCount) {
+  const canvas = document.getElementById('warehouseCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Convert all measurements from meters to pixels
+  const alphaPixels = metersToPixels(alpha);
+  const alphayPixels = metersToPixels(alphay);
+  const wxPixels = metersToPixels(wx);
+  const wyPixels = metersToPixels(wy);
+
+  // Calculate warehouse dimensions
+  const groups = nx / 2;
+  const totalBoxWidth = groups * 2 * alphaPixels;
+  const totalSubWidth = groups * wxPixels;
+  const W = totalBoxWidth + totalSubWidth;
+
+  const upperRows = Math.floor(ny / 2);
+  const lowerRows = ny - upperRows;
+  const mainAisles = aisleCount;
+
+  const H = ny * alphayPixels + mainAisles * wyPixels;
+
+  // Centering offsets
+  const offsetX = (canvas.width - W) / 2;
+  const offsetY = (canvas.height - H) / 2;
+
+  // Apply zoom transformation
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.scale(zoomLevel, zoomLevel);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
+  // Draw boundary
+  ctx.save();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(offsetX, offsetY, W, H);
+  ctx.restore();
+
+  // Draw main aisles (same pattern as your logic)
+  const mainLabels = [];
+  if (aisleCount === 1) {
+    const y = offsetY + upperRows * alphayPixels;
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(offsetX, y, W, wyPixels);
+    mainLabels.push({ text: 'main aisle', x: offsetX + W / 2, y: y + wyPixels / 2 });
+  } else {
+    // 3-aisle mode: top, middle, bottom
+    // Top aisle
+    ctx.fillStyle = '#e0e0e0';
+    ctx.fillRect(offsetX, offsetY, W, wyPixels);
+    mainLabels.push({ text: 'main aisle 1', x: offsetX + W / 2, y: offsetY + wyPixels / 2 });
+    // Middle aisle
+    const y2 = offsetY + wyPixels + upperRows * alphayPixels;
+    ctx.fillRect(offsetX, y2, W, wyPixels);
+    mainLabels.push({ text: 'main aisle 2', x: offsetX + W / 2, y: y2 + wyPixels / 2 });
+    // Bottom aisle
+    const y3 = offsetY + wyPixels + upperRows * alphayPixels + wyPixels + lowerRows * alphayPixels;
+    ctx.fillRect(offsetX, y3, W, wyPixels);
+    mainLabels.push({ text: 'main aisle 3', x: offsetX + W / 2, y: y3 + wyPixels / 2 });
+  }
+
+  // Draw each group (columns, sub-aisle, columns)
+  for (let g = 0; g < groups; g++) {
+    const groupX = offsetX + g * (2 * alphaPixels + wxPixels);
+    // Column A
+    drawColumn(ctx, groupX, alphaPixels, alphayPixels, nx, ny, wyPixels, aisleCount, offsetY, upperRows, lowerRows);
+    // Sub-aisle isn't drawn (empty gap)
+    // Column B
+    drawColumn(ctx, groupX + alphaPixels + wxPixels, alphaPixels, alphayPixels, nx, ny, wyPixels, aisleCount, offsetY, upperRows, lowerRows);
+  }
+
+  // Draw main aisle labels
+  ctx.save();
+  ctx.font = '18px Arial';
+  ctx.fillStyle = '#333';
+  ctx.textAlign = 'center';
+  for (let m of mainLabels) ctx.fillText(m.text, m.x, m.y + 6);
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function drawColumn(ctx, x, alphaPixels, alphayPixels, nx, ny, wyPixels, aisleCount, offsetY, upperRows, lowerRows) {
+  if (aisleCount === 1) {
+    // upper
+    for (let r = 0; r < upperRows; r++)
+      drawBox(ctx, x, offsetY + r * alphayPixels, alphaPixels, alphayPixels);
+    // lower
+    for (let r = 0; r < lowerRows; r++)
+      drawBox(ctx, x, offsetY + upperRows * alphayPixels + wyPixels + r * alphayPixels, alphaPixels, alphayPixels);
+  } else {
+    // 3 main aisles: top/bottom/middle
+    // after top aisle
+    for (let r = 0; r < upperRows; r++)
+      drawBox(ctx, x, offsetY + wyPixels + r * alphayPixels, alphaPixels, alphayPixels);
+    // after middle aisle
+    for (let r = 0; r < lowerRows; r++)
+      drawBox(ctx, x, offsetY + wyPixels + upperRows * alphayPixels + wyPixels + r * alphayPixels, alphaPixels, alphayPixels);
+  }
+}
+
+function drawBox(ctx, x, y, alphaPixels, alphayPixels) {
+  ctx.save();
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x, y, alphaPixels, alphayPixels);
+  ctx.restore();
+}
+
+// Initial draw
+window.onload = function() {
+  // Use default sample values from DOM
+  const alpha = parseFloat(document.getElementById('alpha').value);
+  const alphay = parseFloat(document.getElementById('alphay').value);
+  const wx = parseFloat(document.getElementById('wx').value);
+  const wy = parseFloat(document.getElementById('wy').value);
+  const nz = parseFloat(document.getElementById('nz').value);
+  const m = parseFloat(document.getElementById('m').value);
+  const aisleCount = parseInt(document.getElementById('aisleCount').value);
+
+  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+
+  // Store parameters for zoom redrawing
+  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount };
+
+  document.getElementById('optimalResults').innerHTML =
+    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
+     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}`;
+  drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount);
+};
+</script>
 </body>
 
   <!-- footer section -->
