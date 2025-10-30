@@ -360,21 +360,60 @@ document.getElementById('scaleFactor').addEventListener('input', function(e) {
 });
 
 function calculateOptimals(alpha, alphay, wx, wy, nz, m) {
-  // n'_y = sqrt( 2m(alpha + wx/2) / (alphay * nz) )
+  // Calculate exact optimal values
   const numeratorY = 2 * m * (alpha + wx / 2);
   const denominatorY = alphay * nz;
   let nOptY = Math.sqrt(numeratorY / denominatorY);
 
-  // n'_x = sqrt( m * alphay / (2 * nz * (alpha + wx/2)) )
   const numeratorX = m * alphay;
   const denominatorX = 2 * nz * (alpha + wx / 2);
   let nOptX = Math.sqrt(numeratorX / denominatorX);
 
-  // Round for display and visualization
-  nOptY = Math.max(1, Math.ceil(nOptY));  // Changed to Math.ceil to round up
-  nOptX = Math.max(2, 2 * Math.round(nOptX / 2)); // Keep as Math.round to round off (even only)
+  // Calculate floor and ceiling for search range
+  const nyFloor = Math.max(1, Math.floor(nOptY));
+  const nyCeil = Math.max(1, Math.ceil(nOptY));
+  const nxFloorEven = Math.max(2, 2 * Math.floor(nOptX / 2));
+  const nxCeilEven = Math.max(2, 2 * Math.ceil(nOptX / 2));
 
-  return { nOptX, nOptY };
+  // Search for the best combination that:
+  // 1. Satisfies nx * ny * nz >= m
+  // 2. Minimizes excess (product - m) to reduce waste
+  // 3. nx must be even
+  const candidates = [];
+
+  // Search in a reasonable range around optimal values
+  for (let ny = Math.max(1, nyFloor - 2); ny <= nyCeil + 10; ny++) {
+    for (let nx = nxFloorEven; nx <= nxCeilEven + 10; nx += 2) {  // Step by 2 for even values
+      const product = nx * ny * nz;
+      if (product >= m) {
+        const excess = product - m;
+        candidates.push({ nx, ny, product, excess });
+      }
+    }
+  }
+
+  let finalNx, finalNy;
+
+  if (candidates.length === 0) {
+    // Fallback: if no combination found, increase values until constraint is met
+    finalNy = nyCeil;
+    finalNx = nxCeilEven;
+
+    while (finalNx * finalNy * nz < m) {
+      if ((finalNx + 2) * finalNy * nz >= m) {
+        finalNx += 2;
+      } else {
+        finalNy += 1;
+      }
+    }
+  } else {
+    // Sort by excess (ascending) to minimize waste
+    candidates.sort((a, b) => a.excess - b.excess);
+    finalNx = candidates[0].nx;
+    finalNy = candidates[0].ny;
+  }
+
+  return { nOptX: finalNx, nOptY: finalNy };
 }
 
 // Zoom button functionality
