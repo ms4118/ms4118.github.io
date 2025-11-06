@@ -304,6 +304,24 @@
         <option value="3">3</option>
       </select>
     </div>
+    <!-- NEW: Aspect Ratio Control -->
+    <div class="input-group">
+      <label for="aspectRatio">Warehouse Shape (Width/Height Ratio):</label>
+      <select id="aspectRatio">
+        <option value="auto">Auto (Current Formula)</option>
+        <option value="0.6">Vertical Rectangle (Narrow) - 0.6</option>
+        <option value="0.8">Vertical Rectangle - 0.8</option>
+        <option value="1.0">Square - 1.0</option>
+        <option value="1.3">Horizontal Rectangle - 1.3</option>
+        <option value="1.8">Horizontal Rectangle (Wide) - 1.8</option>
+        <option value="custom">Custom Ratio</option>
+      </select>
+    </div>
+    <!-- Custom ratio input (hidden by default) -->
+    <div class="input-group" id="customRatioDiv" style="display:none;">
+      <label for="customRatio">Enter custom ratio:</label>
+      <input type="number" id="customRatio" value="1.0" step="0.1" min="0.1" required>
+    </div>
     <button type="submit">Visualize & Calculate</button>
   </form>
   
@@ -344,7 +362,9 @@ let currentParams = {
   nx: 0,
   ny: 0,
   aisleCount: 0,
-  nz: 0
+  nz: 0,
+  aspectRatio: 'auto',
+  achievedRatio: 0
 };
 
 // Helper function to convert meters to pixels
@@ -359,61 +379,119 @@ document.getElementById('scaleFactor').addEventListener('input', function(e) {
   redrawWarehouse();
 });
 
-function calculateOptimals(alpha, alphay, wx, wy, nz, m) {
-  // Calculate exact optimal values
-  const numeratorY = 2 * m * (alpha + wx / 2);
-  const denominatorY = alphay * nz;
-  let nOptY = Math.sqrt(numeratorY / denominatorY);
-
-  const numeratorX = m * alphay;
-  const denominatorX = 2 * nz * (alpha + wx / 2);
-  let nOptX = Math.sqrt(numeratorX / denominatorX);
-
-  // Calculate floor and ceiling for search range
-  const nyFloor = Math.max(1, Math.floor(nOptY));
-  const nyCeil = Math.max(1, Math.ceil(nOptY));
-  const nxFloorEven = Math.max(2, 2 * Math.floor(nOptX / 2));
-  const nxCeilEven = Math.max(2, 2 * Math.ceil(nOptX / 2));
-
-  // Search for the best combination that:
-  // 1. Satisfies nx * ny * nz >= m
-  // 2. Minimizes excess (product - m) to reduce waste
-  // 3. nx must be even
-  const candidates = [];
-
-  // Search in a reasonable range around optimal values
-  for (let ny = Math.max(1, nyFloor - 2); ny <= nyCeil + 10; ny++) {
-    for (let nx = nxFloorEven; nx <= nxCeilEven + 10; nx += 2) {  // Step by 2 for even values
-      const product = nx * ny * nz;
-      if (product >= m) {
-        const excess = product - m;
-        candidates.push({ nx, ny, product, excess });
-      }
-    }
-  }
-
-  let finalNx, finalNy;
-
-  if (candidates.length === 0) {
-    // Fallback: if no combination found, increase values until constraint is met
-    finalNy = nyCeil;
-    finalNx = nxCeilEven;
-
-    while (finalNx * finalNy * nz < m) {
-      if ((finalNx + 2) * finalNy * nz >= m) {
-        finalNx += 2;
-      } else {
-        finalNy += 1;
-      }
-    }
+// Show/hide custom ratio input
+document.getElementById('aspectRatio').addEventListener('change', function(e) {
+  const customDiv = document.getElementById('customRatioDiv');
+  if (e.target.value === 'custom') {
+    customDiv.style.display = 'block';
   } else {
-    // Sort by excess (ascending) to minimize waste
-    candidates.sort((a, b) => a.excess - b.excess);
-    finalNx = candidates[0].nx;
-    finalNy = candidates[0].ny;
+    customDiv.style.display = 'none';
   }
+});
 
-  return { nOptX: finalNx, nOptY: finalNy };
+function calculateOptimals(alpha, alphay, wx, wy, nz, m, aisleCount, targetRatio) {
+  // If targetRatio is 'auto', use the original formula
+  if (targetRatio === 'auto' || !targetRatio) {
+    const numeratorY = 2 * m * (alpha + wx / 2);
+    const denominatorY = alphay * nz;
+    let nOptY = Math.sqrt(numeratorY / denominatorY);
+
+    const numeratorX = m * alphay;
+    const denominatorX = 2 * nz * (alpha + wx / 2);
+    let nOptX = Math.sqrt(numeratorX / denominatorX);
+
+    const nyFloor = Math.max(1, Math.floor(nOptY));
+    const nyCeil = Math.max(1, Math.ceil(nOptY));
+    const nxFloorEven = Math.max(2, 2 * Math.floor(nOptX / 2));
+    const nxCeilEven = Math.max(2, 2 * Math.ceil(nOptX / 2));
+
+    const candidates = [];
+
+    for (let ny = Math.max(1, nyFloor - 2); ny <= nyCeil + 10; ny++) {
+      for (let nx = nxFloorEven; nx <= nxCeilEven + 10; nx += 2) {
+        const product = nx * ny * nz;
+        if (product >= m) {
+          const excess = product - m;
+          candidates.push({ nx, ny, product, excess });
+        }
+      }
+    }
+
+    let finalNx, finalNy;
+
+    if (candidates.length === 0) {
+      finalNy = nyCeil;
+      finalNx = nxCeilEven;
+
+      while (finalNx * finalNy * nz < m) {
+        if ((finalNx + 2) * finalNy * nz >= m) {
+          finalNx += 2;
+        } else {
+          finalNy += 1;
+        }
+      }
+    } else {
+      candidates.sort((a, b) => a.excess - b.excess);
+      finalNx = candidates[0].nx;
+      finalNy = candidates[0].ny;
+    }
+
+    // Calculate achieved ratio
+    const groups = finalNx / 2;
+    const totalBoxWidth = groups * 2 * alpha;
+    const totalSubWidth = groups * wx;
+    const W = totalBoxWidth + totalSubWidth;
+    const H = finalNy * alphay + aisleCount * wy;
+    const achievedRatio = W / H;
+
+    return { nOptX: finalNx, nOptY: finalNy, achievedRatio: achievedRatio };
+  } else {
+    // Use aspect ratio search method
+    targetRatio = parseFloat(targetRatio);
+    let bestCombination = null;
+    let bestRatioDifference = Infinity;
+
+    // Start with rough estimates
+    const numeratorY = 2 * m * (alpha + wx / 2);
+    const denominatorY = alphay * nz;
+    let nOptY_init = Math.sqrt(numeratorY / denominatorY);
+
+    const numeratorX = m * alphay;
+    const denominatorX = 2 * nz * (alpha + wx / 2);
+    let nOptX_init = Math.sqrt(numeratorX / denominatorX);
+
+    // Expand search range
+    const searchRangeX = Math.max(10, Math.ceil(nOptX_init / 2));
+    const searchRangeY = Math.max(20, Math.ceil(nOptY_init));
+
+    // Search within reasonable bounds
+    for (let ny = Math.max(1, Math.floor(nOptY_init) - 5); ny <= Math.ceil(nOptY_init) + searchRangeY; ny++) {
+      for (let nx = 2; nx <= Math.ceil(nOptX_init) + searchRangeX; nx += 2) {
+        if (nx * ny * nz >= m) {
+          // Calculate actual warehouse dimensions
+          const groups = nx / 2;
+          const totalBoxWidth = groups * 2 * alpha;
+          const totalSubWidth = groups * wx;
+          const W = totalBoxWidth + totalSubWidth;
+          const H = ny * alphay + aisleCount * wy;
+          const actualRatio = W / H;
+          const ratioDiff = Math.abs(actualRatio - targetRatio);
+
+          if (ratioDiff < bestRatioDifference) {
+            bestRatioDifference = ratioDiff;
+            bestCombination = { nx, ny, ratio: actualRatio, excess: nx * ny * nz - m };
+          }
+        }
+      }
+    }
+
+    if (bestCombination) {
+      return { nOptX: bestCombination.nx, nOptY: bestCombination.ny, achievedRatio: bestCombination.ratio };
+    } else {
+      // Fallback to auto if no solution found
+      return calculateOptimals(alpha, alphay, wx, wy, nz, m, aisleCount, 'auto');
+    }
+  }
 }
 
 // Zoom button functionality
@@ -446,17 +524,22 @@ document.getElementById('warehouseForm').addEventListener('submit', function(e) 
   const nz = parseFloat(document.getElementById('nz').value);
   const m = parseFloat(document.getElementById('m').value);
   const aisleCount = parseInt(document.getElementById('aisleCount').value);
+  
+  let aspectRatio = document.getElementById('aspectRatio').value;
+  if (aspectRatio === 'custom') {
+    aspectRatio = document.getElementById('customRatio').value;
+  }
 
-  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+  const { nOptX, nOptY, achievedRatio } = calculateOptimals(alpha, alphay, wx, wy, nz, m, aisleCount, aspectRatio);
 
   // Store parameters for zoom redrawing
-  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount };
+  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount, aspectRatio, achievedRatio };
   zoomLevel = 1; // Reset zoom level
 
-  document.getElementById('optimalResults').innerHTML =
-    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
-     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}`;
-
+  document.getElementById('optimalResults').innerHTML = `
+    <b>Optimal Vertical n<sub>y</sub>:</b> ${nOptY}<br>
+    <b>Optimal Horizontal n<sub>x</sub>:</b> ${nOptX}<br>
+`;
   drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount);
 });
 
@@ -500,7 +583,7 @@ function drawWarehouse(alpha, alphay, wx, wy, nz, nx, ny, aisleCount) {
   ctx.strokeRect(offsetX, offsetY, W, H);
   ctx.restore();
 
-  // Draw main aisles (same pattern as your logic)
+  // Draw main aisles
   const mainLabels = [];
   if (aisleCount === 1) {
     const y = offsetY + upperRows * alphayPixels;
@@ -583,18 +666,20 @@ window.onload = function() {
   const m = parseFloat(document.getElementById('m').value);
   const aisleCount = parseInt(document.getElementById('aisleCount').value);
 
-  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+  const { nOptX, nOptY, achievedRatio } = calculateOptimals(alpha, alphay, wx, wy, nz, m, aisleCount, 'auto');
 
   // Store parameters for zoom redrawing
-  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount };
+  currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount, aspectRatio: 'auto', achievedRatio };
 
-  document.getElementById('optimalResults').innerHTML =
-    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
-     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}`;
+  document.getElementById('optimalResults').innerHTML = `
+    <b>Optimal Vertical n<sub>y</sub>:</b> ${nOptY}<br>
+    <b>Optimal Horizontal n<sub>x</sub>:</b> ${nOptX}<br>
+`;
   drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount);
 };
 </script>
 </body>
+
 
   <!-- footer section -->
   <footer class="footer_section">
