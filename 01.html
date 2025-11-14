@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <!-- Basic -->
   <meta charset="utf-8" />
@@ -259,6 +258,7 @@
         <div class="detail-box">
           <h5 class="title">
             <span>Warehouse Storage Zone Visualizer (in metre)</span>
+            <span id="step2" class="course-btn" data-index="2">Watch Tutorial</span>
           </h5>
     <style>
         body { font-family: Arial, sans-serif; }
@@ -276,11 +276,11 @@
   <body>
   <form id="warehouseForm">
     <div class="input-group">
-      <label for="alpha">Box width (α<sub>x</sub>):</label>
+      <label for="alpha">Inventory width (α<sub>x</sub>):</label>
       <input type="number" id="alpha" value="1.05" step="any" min="0.01" required>
     </div>
     <div class="input-group">
-      <label for="alphay">Box height factor (α<sub>y</sub>):</label>
+      <label for="alphay">Inventory length (α<sub>y</sub>):</label>
       <input type="number" id="alphay" value="1.05" step="any" min="0.01" required>
     </div>
     <div class="input-group">
@@ -292,7 +292,7 @@
       <input type="number" id="wy" value="4" step="any" min="0.01" required>
     </div>
     <div class="input-group">
-      <label for="nz">Height of the box (<i>n<sub>z</sub></i>):</label>
+      <label for="nz">Inventory Height (<i>n<sub>z</sub></i>):</label>
       <input type="number" id="nz" value="4" step="any" min="0.01" required>
     </div>
     <div class="input-group">
@@ -312,11 +312,15 @@
       <label><strong>Layout Orientation:</strong></label>
       <label>
         <input type="radio" name="orientation" value="vertical" checked>
-        Vertical Rectangle (n'y > n'x, main aisle runs horizontally)
+        Vertical
       </label>
       <label>
         <input type="radio" name="orientation" value="horizontal">
-        Horizontal Rectangle (n'x > n'y, main aisle runs vertically)
+        Horizontal
+      </label>
+      <label>
+        <input type="radio" name="orientation" value="square">
+        Square
       </label>
     </div>
     
@@ -325,7 +329,7 @@
   
   <!-- Scale Factor Control -->
   <div class="scale-control">
-    <label for="scaleFactor">Display Scale (pixels per meter):</label>
+    <label for="scaleFactor">Display Scale (px/m):</label>
     <input type="range" id="scaleFactor" min="20" max="200" value="100" step="10">
     <span class="scale-value"><span id="scaleValue">100</span>px/m</span>
   </div>
@@ -375,6 +379,64 @@ document.getElementById('scaleFactor').addEventListener('input', function(e) {
   document.getElementById('scaleValue').textContent = scaleFactor;
   redrawWarehouse();
 });
+
+function calculateSquareLayout(alpha, alphay, wx, wy, nz, m) {
+  // Step 1: Calculate exact optimal n'y and n'x using standard formulas
+  const numeratorY = 2 * m * (alpha + wx / 2);
+  const denominatorY = alphay * nz;
+  let nOptY_exact = Math.sqrt(numeratorY / denominatorY);
+
+  const numeratorX = m * alphay;
+  const denominatorX = 2 * nz * (alpha + wx / 2);
+  let nOptX_exact = Math.sqrt(numeratorX / denominatorX);
+
+  // Step 2: Round the exact values to get displayed values (like vertical layout shows)
+  let nOptY_display = Math.round(nOptY_exact);
+  let nOptX_display = Math.round(nOptX_exact);
+
+  // Step 3: Calculate average using DISPLAYED (rounded) values
+  const average = (nOptY_display + nOptX_display) / 2;
+
+  // Step 4: Initialize square layout
+  let squareNy = Math.floor(average);
+  let squareNx = Math.ceil(average);
+
+  // Ensure n'x is even
+  if (squareNx % 2 !== 0) {
+    squareNx = Math.ceil(squareNx / 2) * 2;
+  }
+
+  // Step 5: Count sub-aisles (equals n'x / 2)
+  const subAisles = squareNx / 2;
+
+  // Step 6: Calculate adjustment (half of sub-aisles, rounded to nearest even, preferring up)
+  let adjustment = subAisles / 2;
+  adjustment = Math.ceil(adjustment / 2) * 2;
+
+  // Step 7: Apply adjustments to maintain the sum
+  squareNy = squareNy + adjustment;
+  squareNx = squareNx - adjustment;
+
+  // Ensure n'x remains even and positive
+  if (squareNx % 2 !== 0) {
+    squareNx = Math.ceil(squareNx / 2) * 2;
+  }
+  if (squareNx < 2) {
+    squareNx = 2;
+  }
+
+  // Step 8: Verify the constraint is met (nx * ny * nz >= m)
+  // If not, adjust both values while trying to maintain balance
+  while (squareNx * squareNy * nz < m) {
+    if (squareNy <= squareNx) {
+      squareNy += 1;
+    } else {
+      squareNx += 2; // Keep n'x even
+    }
+  }
+
+  return { nOptX: squareNx, nOptY: squareNy };
+}
 
 function calculateOptimals(alpha, alphay, wx, wy, nz, m) {
   // Calculate exact optimal values
@@ -430,6 +492,65 @@ function calculateOptimals(alpha, alphay, wx, wy, nz, m) {
     finalNy = candidates[0].ny;
   }
 
+
+function calculateSquareLayout(alpha, alphay, wx, wy, nz, m) {
+  // Step 1: Calculate exact optimal n'y and n'x using standard formulas
+  const numeratorY = 2 * m * (alpha + wx / 2);
+  const denominatorY = alphay * nz;
+  let nOptY_exact = Math.sqrt(numeratorY / denominatorY);
+
+  const numeratorX = m * alphay;
+  const denominatorX = 2 * nz * (alpha + wx / 2);
+  let nOptX_exact = Math.sqrt(numeratorX / denominatorX);
+
+  // Step 2: Round the exact values to get displayed values (like vertical layout shows)
+  let nOptY_display = Math.round(nOptY_exact);
+  let nOptX_display = Math.round(nOptX_exact);
+
+  // Step 3: Calculate average using DISPLAYED (rounded) values
+  const average = (nOptY_display + nOptX_display) / 2;
+
+  // Step 4: Initialize square layout
+  let squareNy = Math.floor(average);
+  let squareNx = Math.ceil(average);
+
+  // Ensure n'x is even
+  if (squareNx % 2 !== 0) {
+    squareNx = Math.ceil(squareNx / 2) * 2;
+  }
+
+  // Step 5: Count sub-aisles (equals n'x / 2)
+  const subAisles = squareNx / 2;
+
+  // Step 6: Calculate adjustment (half of sub-aisles, rounded to nearest even, preferring up)
+  let adjustment = subAisles / 2;
+  adjustment = Math.ceil(adjustment / 2) * 2;
+
+  // Step 7: Apply adjustments to maintain the sum
+  squareNy = squareNy + adjustment;
+  squareNx = squareNx - adjustment;
+
+  // Ensure n'x remains even and positive
+  if (squareNx % 2 !== 0) {
+    squareNx = Math.ceil(squareNx / 2) * 2;
+  }
+  if (squareNx < 2) {
+    squareNx = 2;
+  }
+
+  // Step 8: Verify the constraint is met (nx * ny * nz >= m)
+  // If not, adjust both values while trying to maintain balance
+  while (squareNx * squareNy * nz < m) {
+    if (squareNy <= squareNx) {
+      squareNy += 1;
+    } else {
+      squareNx += 2; // Keep n'x even
+    }
+  }
+
+  return { nOptX: squareNx, nOptY: squareNy };
+}
+
   return { nOptX: finalNx, nOptY: finalNy };
 }
 
@@ -465,16 +586,34 @@ document.getElementById('warehouseForm').addEventListener('submit', function(e) 
   const aisleCount = parseInt(document.getElementById('aisleCount').value);
   const orientation = document.querySelector('input[name="orientation"]:checked').value;
 
-  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+  let nOptX, nOptY;
+  if (orientation === 'square') {
+    const result = calculateSquareLayout(alpha, alphay, wx, wy, nz, m);
+    nOptX = result.nOptX;
+    nOptY = result.nOptY;
+  } else {
+    const result = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+    nOptX = result.nOptX;
+    nOptY = result.nOptY;
+  }
 
   // Store parameters for zoom redrawing
   currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount, orientation };
   zoomLevel = 1; // Reset zoom level
 
-  const orientDesc = orientation === 'vertical' ? 'Vertical' : 'Horizontal';
+  const orientDesc = orientation === 'vertical' ? 'Vertical' : orientation === 'horizontal' ? 'Horizontal' : 'Square';
+
+  // Swap display values for horizontal orientation
+  let displayNy = nOptY;
+  let displayNx = nOptX;
+  if (orientation === 'horizontal') {
+    displayNy = nOptX;
+    displayNx = nOptY;
+  }
+
   document.getElementById('optimalResults').innerHTML =
-    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
-     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}<br>
+    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${displayNy}<br>
+     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${displayNx}<br>
      <b>Display Mode:</b> ${orientDesc}`;
 
   drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount, orientation);
@@ -494,9 +633,12 @@ function drawWarehouse(alpha, alphay, wx, wy, nz, nx, ny, aisleCount, orientatio
   if (orientation === 'vertical') {
     // VERTICAL MODE - use existing logic
     drawWarehouseVertical(ctx, alphaPixels, alphayPixels, wxPixels, wyPixels, nx, ny, aisleCount, canvas.width, canvas.height);
-  } else {
+  } else if (orientation === 'horizontal') {
     // HORIZONTAL MODE - use new logic with swapped dimensions
     drawWarehouseHorizontal(ctx, alphaPixels, alphayPixels, wxPixels, wyPixels, nx, ny, aisleCount, canvas.width, canvas.height);
+  } else if (orientation === 'square') {
+    // SQUARE MODE - use balanced dimensions
+    drawWarehouseSquare(ctx, alphaPixels, alphayPixels, wxPixels, wyPixels, nx, ny, aisleCount, canvas.width, canvas.height);
   }
 }
 
@@ -683,6 +825,15 @@ function drawWarehouseHorizontal(ctx, alphaPixels, alphayPixels, wxPixels, wyPix
   ctx.restore();
 }
 
+
+function drawWarehouseSquare(ctx, alphaPixels, alphayPixels, wxPixels, wyPixels, nx, ny, aisleCount, canvasWidth, canvasHeight) {
+  // SQUARE LAYOUT: Use vertical drawing method with balanced n'x and n'y
+  // The square layout calculation already adjusted nx and ny to create a more square shape
+  // So we can use the standard vertical drawing logic
+
+  drawWarehouseVertical(ctx, alphaPixels, alphayPixels, wxPixels, wyPixels, nx, ny, aisleCount, canvasWidth, canvasHeight);
+}
+
 function drawRowHorizontal(ctx, y, alphaPixels, alphayPixels, displayNx, displayNy, wyPixels, aisleCount, offsetX, leftCols, rightCols) {
   if (aisleCount === 1) {
     // left columns
@@ -723,23 +874,39 @@ window.onload = function() {
   const aisleCount = parseInt(document.getElementById('aisleCount').value);
   const orientation = document.querySelector('input[name="orientation"]:checked').value;
 
-  const { nOptX, nOptY } = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+  let nOptX, nOptY;
+  if (orientation === 'square') {
+    const result = calculateSquareLayout(alpha, alphay, wx, wy, nz, m);
+    nOptX = result.nOptX;
+    nOptY = result.nOptY;
+  } else {
+    const result = calculateOptimals(alpha, alphay, wx, wy, nz, m);
+    nOptX = result.nOptX;
+    nOptY = result.nOptY;
+  }
 
   // Store parameters for zoom redrawing
   currentParams = { alpha, alphay, wx, wy, nz, nx: nOptX, ny: nOptY, aisleCount, orientation };
 
-  const orientDesc = orientation === 'vertical' ? 'Vertical' : 'Horizontal';
+  const orientDesc = orientation === 'vertical' ? 'Vertical' : orientation === 'horizontal' ? 'Horizontal' : 'Square';
+  
+  // Swap display values for horizontal orientation
+  let displayNy = nOptY;
+  let displayNx = nOptX;
+  if (orientation === 'horizontal') {
+    displayNy = nOptX;
+    displayNx = nOptY;
+  }
+  
   document.getElementById('optimalResults').innerHTML =
-    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${nOptY}<br>
-     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${nOptX}<br>
+    `<b>Optimal Vertical (n'<sub>y</sub>):</b> ${displayNy}<br>
+     <b>Optimal Horizontal (n'<sub>x</sub>):</b> ${displayNx}<br>
      <b>Display Mode:</b> ${orientDesc}`;
   
   drawWarehouse(alpha, alphay, wx, wy, nz, nOptX, nOptY, aisleCount, orientation);
 };
 </script>
 </body>
-
-
 
   <!-- footer section -->
   <footer class="footer_section">
