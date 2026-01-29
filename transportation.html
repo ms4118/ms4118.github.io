@@ -130,20 +130,4 @@
             <span> Pull inventory control - Economic order quantity (EOQ)</span>
             <span class="course-btn" id="step1" data-index="1">Watch Tutorial</span>
           </h5>
-          <div class="form-content">
-            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="D" placeholder="Please enter: Annual demand (D) in units">
-            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="S" placeholder="Please enter: Procurement cost (S) in Dollars per order">
-
-            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="C" placeholder="Please enter: Value of item (C) in Dollars per unit">
-            <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=1"
-              onblur="if(this.value<0)this.value=1" id="I" placeholder="Please enter: Carrying cost (I) as a percent per year">
-            <button class="submit-button" id="button_EOQ">Solve Problem</button>
-            <py-script>
-              def on_eoq(event):
-                D = float(Element("D").element.value)
-                S = float(Element("S").element.value)
-                C = float(Element("C").element.value)
-                I = float(Element("I").element.value)
+        
