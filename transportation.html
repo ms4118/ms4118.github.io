@@ -198,7 +198,7 @@
          </h5>        
          <body>
       <form id="TransportationForm">
-      <div class="form-content">
-        <input class="input-content" type="number" onkeyup="if(this.value<0)this.value=0.01"
-           onblur="if(this.value<0)this.value=0.01" id="rows" placeholder="Please Input: probability (n=1) here " style="width: 250px;">
-      </div>
+      <div class="input-group">
+      <label for="alphay">Space Capacity (Cubic feet) of Compartment C</label>
+      <input type="number" id="alphay" value="0.01" step="any" max="1" required>
+    </div>
