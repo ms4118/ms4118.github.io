@@ -316,9 +316,6 @@
         </label>
       </div>
   
-      
-<div class="row section-container">
-  
       <div class="result-box">
         <div class="title2">OUTPUT</div>
         <div class="table-out-put">
@@ -329,4 +326,42 @@
             </div>
         </div>
     </div>
-       
+
+    <script>
+        // Update output text based on selected radio buttons
+        const updateOutput = () => {
+            const selected1 = document.querySelector('input[name="orientation1"]:checked').value;
+            const selected2 = document.querySelector('input[name="orientation2"]:checked').value;
+            const selected3 = document.querySelector('input[name="orientation3"]:checked').value;
+
+            document.getElementById('instant_result').textContent = 
+                `1st Truck: ${selected1}, 2nd Truck: ${selected2}, 3rd Truck: ${selected3}`;
+
+            // Example logic to display optimized transportation cost
+            const optimizedCost = calculateOptimizedCost(selected1, selected2, selected3);
+            if (optimizedCost > 0) {
+                document.getElementById('h2').style.display = 'block'; // Show the heading when there's a cost
+                document.getElementById('out2').textContent = `Optimized Cost: $${optimizedCost}`;
+            } else {
+                document.getElementById('h2').style.display = 'none';
+                document.getElementById('out2').textContent = ''; // Clear any previous cost
+            }
+        };
+
+        // Example function to calculate optimized transportation cost
+        const calculateOptimizedCost = (loc1, loc2, loc3) => {
+            // Add your logic to calculate the cost based on selected locations
+            return 100; // Replace with actual calculation based on input
+        };
+
+        // Attach event listeners to all radio buttons to update output
+        const radios = document.querySelectorAll('input[type="radio"]');
+        radios.forEach(radio => {
+            radio.addEventListener('change', updateOutput);
+        });
+
+        // Initial call to display the default selected values
+        updateOutput();
+    </script>
+</body>
+</html>
