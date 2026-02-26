@@ -316,8 +316,6 @@
             profit = max(profits)
 
             return profit
-
-            print(f"Profit generated: {max_profit}")  
           
           def on_TT(event):
              PrA_0 = float(Element("PrA_0").element.value)
@@ -339,7 +337,8 @@
              result += f"Profit generated: {max_profit}"
 
              Element("out_TT").element.innerHTML = result
-          
+
+          Element("button_TT").element.onclick = on_TT         
            </py-script>
         </div>
       </div>
