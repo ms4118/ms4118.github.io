@@ -287,7 +287,24 @@
            # Profit for 0 trucks to A and 4 trucks to B
            profit = P_B * {(1 - PrB_0) + (1 - PrB_0 - PrB_1) + (1 - PrB_0 - PrB_1 - PrB_2) + (1 - PrB_0 - PrB_1 - PrB_2 - PrB_3)}
 
+           # Profit for 1 truck to A and 3 trucks to B
+           profit_1_A_3_B = P_A * (1 - PrA_0) + P_B * {(1 - PrB_0) + (1 - PrB_0 - PrB_1) + (1 - PrB_0 - PrB_1 - PrB_2)}
+  
+           # Profit for 2 trucks to A and 2 trucks to B
+           profit_2_A_2_B = P_A * {(1 - PrA_0) + (1 - PrA_0 - PrA_1)} + P_B * {(1 - PrB_0) + (1 - PrB_0 - PrB_1)}
+
+           # Profit for 3 trucks to A and 1 truck to B
+           profit_3_A_1_B = P_A * {(1 - PrA_0) + (1 - PrA_0 - PrA_1) + (1 - PrA_0 - PrA_1 - PrA_2)} + P_B * (1 - PrB_0)
+
+           # Profit for 4 trucks to A and 0 trucks to B
+           profit_4_A_0_B = P_A * {(1 - PrA_0) + (1 - PrA_0 - PrA_1) + (1 - PrA_0 - PrA_1 - PrA_2) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3)}
+
+           profits = [profit_0_A_4_B, profit_1_A_3_B, profit_2_A_2_B, profit_3_A_1_B, profit_4_A_0_B]
+
+           profit = max(profits)
+
            return profit
+         
           
           def on_TT(event):
              PrA_0 = float(Element("PrA_0").element.value)
