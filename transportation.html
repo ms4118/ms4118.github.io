@@ -305,7 +305,7 @@
 
            return profit    
 
-         def on_TT(event):
+        def on_TT(event):
            PrA_0 = float(Element("PrA_0").element.value)
            PrA_1 = float(Element("PrA_1").element.value)
            PrA_2 = float(Element("PrA_2").element.value)
@@ -321,11 +321,12 @@
 
            profit = calculate_profit(PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, P_B)
 
-          result = ""          
-          result += f"Profit generated: {max_profit}"
+           result = ""          
+           result += f"Profit generated: {max_profit}"
 
-          Element("out_TT").element.innerHTML = result
-          
+           Element("out_TT").element.innerHTML = result
+
+        Element("button_EOQ").element.onclick = on_TT          
         </py-script>
         </div>
       </div>
