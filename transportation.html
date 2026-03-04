@@ -265,6 +265,8 @@
           def on_TT(event):
             result = f"Profit generated for location A: $3000"   
 
+            Element("out_TT").element.innerHTML = result
+          
           Element("button_TT").element.onclick = on_TT           
         </py-script>
         </div>
