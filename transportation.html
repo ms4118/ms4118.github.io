@@ -285,6 +285,16 @@
 
           
           def on_TT(event):
+            PrA_0 = float(Element("PrA_0").element.value)
+            PrA_1 = float(Element("PrA_1").element.value)
+            PrA_2 = float(Element("PrA_2").element.value)
+            PrA_3 = float(Element("PrA_3").element.value)
+            PrA_4 = float(Element("PrA_4").element.value) 
+            P_A = float(Element("P_A").element.value)
+
+            # Calculate profit A
+            profit_A = calculate_profit(PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, P_A)
+          
             result = f"Profit generated for location A: {profit_A}"   
 
             Element("out_TT").element.innerHTML = result
