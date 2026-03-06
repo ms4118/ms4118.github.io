@@ -288,14 +288,10 @@
             probability_0_A_4_B = (1 - PrB_0) + (1 - PrB_0 - PrB_1) + (1 - PrB_0 - PrB_1 - PrB_2) + (1 - PrB_0 - PrB_1 - PrB_2 - PrB_3)   
           
             probability_1_A_3_B = (1 - PrB_0) + (1 - PrB_0 - PrB_1) + (1 - PrB_0 - PrB_1 - PrB_2)
-
-            probability_2_A_2_B = (1 - PrB_0) + (1 - PrB_0 - PrB_1)
           
             profit_0_A_4_B = P_B * probability_0_A_4_B
           
             profit_1_A_3_B = P_A * (1 - PrA_0) + P_B * probability_1_A_3_B
-
-            profit_2_A_2_B = P_A * {(1 - PrA_0) + (1 - PrA_0 - PrA_1)} + P_B * probability_2_A_2_B
           
             # Return only profit A
             return profit_1_A_3_B         
