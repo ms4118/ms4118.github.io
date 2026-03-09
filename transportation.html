@@ -349,6 +349,14 @@
           </div>
         </div>
 
+        <script>
+        // Ensure the button click does not reload the page
+        document.getElementById("button_TT").addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent default behavior
+            // Call the Python function
+            pyodide.runPython('solve()');
+        });
+    </script>
 
         <!-- jQery -->
 <!-- <script src="js/jquery-3.4.1.min.js"></script> -->
