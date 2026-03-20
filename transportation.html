@@ -376,48 +376,114 @@
           </div>
         </div>
 
-<!-- JavaScript to toggle visibility of probability rows based on #numTrucks -->
-  <script>
-    (function() {
-      const numInput = document.getElementById('numTrucks');
-      const maxN = 4;
+ <script>
+  (function(){
+    const maxN = 4;
+    const numInput = document.getElementById('numTrucks');
 
-      // Helper to set visibility and disabled state for a given input id
-      function setVisible(id, visible) {
-        const el = document.getElementById(id);
-        if(!el) return;
-        // try to find the label preceding it
-        const label = el.previousElementSibling && el.previousElementSibling.tagName.toLowerCase() === 'label' ? el.previousElementSibling : null;
-        if(visible) {
-          el.style.display = '';
-          if(label) label.style.display = '';
-          el.disabled = false;
+    function toNum(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
+
+    // Show/hide rows according to N
+    function setVisibility(N){
+      for (let i=0;i<=maxN;i++){
+        const el = document.getElementById('PrB_' + i);
+        const lab = el && el.previousElementSibling && el.previousElementSibling.tagName.toLowerCase() === 'label' ? el.previousElementSibling : null;
+        const show = i <= N;
+        if (el) { el.style.display = show ? '' : 'none'; }
+        if (lab) { lab.style.display = show ? '' : 'none'; }
+      }
+    }
+
+    // clamp and set value with rounding
+    function setVal(id, v, disabled){
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (v < 0) v = 0;
+      if (v > 1) v = 1;
+      el.value = Math.round(v * 10000) / 10000;
+      el.disabled = !!disabled;
+      if (disabled) el.classList.add('auto-disabled'); else el.classList.remove('auto-disabled');
+    }
+
+    // compute PrB_N = 1 - sum(PrB_0..PrB_{N-1})
+    function updatePrBLast(N){
+      if (N < 0) return;
+      let sumPrev = 0;
+      for (let i = 0; i < N; i++){
+        const el = document.getElementById('PrB_' + i);
+        if (!el) continue;
+        sumPrev += toNum(el.value);
+      }
+      let lastVal = 1 - sumPrev;
+      // clamp
+      if (lastVal < 0) lastVal = 0;
+      if (lastVal > 1) lastVal = 1;
+      setVal('PrB_' + N, lastVal, true);
+
+      // warning if total != 1 (after clamping)
+      const warnEl = document.getElementById('B_warn');
+      const total = sumPrev + lastVal;
+      if (warnEl) {
+        if (Math.abs(total - 1) > 1e-6) {
+          warnEl.style.display = '';
+          warnEl.innerText = `Note: probabilities auto-normalized. Sum = ${total.toFixed(4)} (clamped). Please check earlier inputs.`;
         } else {
-          el.style.display = 'none';
-          if(label) label.style.display = 'none';
-          el.disabled = true;
+          warnEl.style.display = 'none';
+          warnEl.innerText = '';
         }
       }
+    }
 
-      function updateRows() {
-        let n = parseInt(numInput.value);
-        if (isNaN(n)) n = 1;
-        if (n < 0) n = 0;
-        if (n > maxN) n = maxN;
-
-        for (let i = 0; i <= maxN; i++) {
-          const show = (i <= n);
-          setVisible('PrA_' + i, show);
-          setVisible('PrB_' + i, show);
-        }
+    // attach listeners to editable inputs (0..N-1)
+    function attachPrBListeners(N){
+      // remove previous listeners by cloning nodes
+      for (let i=0;i<=maxN;i++){
+        const el = document.getElementById('PrB_' + i);
+        if (!el) continue;
+        const newEl = el.cloneNode(true);
+        el.parentNode.replaceChild(newEl, el);
       }
+      // add listeners to indices 0..N-1
+      for (let i=0;i<N;i++){
+        const el = document.getElementById('PrB_' + i);
+        if (!el) continue;
+        el.disabled = false;
+        el.classList.remove('auto-disabled');
+        el.addEventListener('input', function(){ updatePrBLast(N); });
+      }
+      // ensure last index N is visible & disabled
+      const lastEl = document.getElementById('PrB_' + N);
+      if (lastEl) {
+        lastEl.disabled = true;
+        lastEl.classList.add('auto-disabled');
+        lastEl.style.display = '';
+        const lab = lastEl.previousElementSibling;
+        if (lab && lab.tagName && lab.tagName.toLowerCase() === 'label') lab.style.display = '';
+      }
+      // hide indices > N
+      for (let i=N+1;i<=maxN;i++){
+        const el = document.getElementById('PrB_' + i);
+        if (el) { el.style.display = 'none'; el.disabled = true; const lab = el.previousElementSibling; if (lab && lab.tagName && lab.tagName.toLowerCase()==='label') lab.style.display='none'; }
+      }
+      // initialize last value
+      updatePrBLast(N);
+    }
 
-      // initialize
-      updateRows();
-      numInput.addEventListener('input', updateRows);
-      numInput.addEventListener('change', updateRows);
-    })();
-  </script>        
+    function onNumChange(){
+      let N = parseInt(numInput.value);
+      if (isNaN(N)) N = 0;
+      if (N < 0) N = 0;
+      if (N > maxN) N = maxN;
+      setVisibility(N);
+      attachPrBListeners(N);
+    }
+
+    numInput.addEventListener('input', onNumChange);
+    numInput.addEventListener('change', onNumChange);
+    // initialize on load
+    onNumChange();
+  })();
+  </script>       
 
         <script>
         // Ensure the button click does not reload the page
