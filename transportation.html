@@ -376,6 +376,49 @@
           </div>
         </div>
 
+<!-- JavaScript to toggle visibility of probability rows based on #numTrucks -->
+  <script>
+    (function() {
+      const numInput = document.getElementById('numTrucks');
+      const maxN = 4;
+
+      // Helper to set visibility and disabled state for a given input id
+      function setVisible(id, visible) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        // try to find the label preceding it
+        const label = el.previousElementSibling && el.previousElementSibling.tagName.toLowerCase() === 'label' ? el.previousElementSibling : null;
+        if(visible) {
+          el.style.display = '';
+          if(label) label.style.display = '';
+          el.disabled = false;
+        } else {
+          el.style.display = 'none';
+          if(label) label.style.display = 'none';
+          el.disabled = true;
+        }
+      }
+
+      function updateRows() {
+        let n = parseInt(numInput.value);
+        if (isNaN(n)) n = 1;
+        if (n < 0) n = 0;
+        if (n > maxN) n = maxN;
+
+        for (let i = 0; i <= maxN; i++) {
+          const show = (i <= n);
+          setVisible('PrA_' + i, show);
+          setVisible('PrB_' + i, show);
+        }
+      }
+
+      // initialize
+      updateRows();
+      numInput.addEventListener('input', updateRows);
+      numInput.addEventListener('change', updateRows);
+    })();
+  </script>        
+
         <script>
         // Ensure the button click does not reload the page
         document.getElementById("button_TT").addEventListener("click", function(event) {
