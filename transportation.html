@@ -427,6 +427,7 @@
 <script>
   (function(){
     const maxN = 10;
+    const RESET_VALUE = 0.01;
     const numInput = document.getElementById('numTrucks');
 
     function toNum(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
@@ -435,8 +436,8 @@
     function setVisibility(N){
       ['A','B'].forEach(prefix => {
         for (let i=0;i<=maxN;i++){
-          const el = document.getElementById(prefix + 'r' /*dummy*/); // noop to satisfy linter
-          const input = document.getElementById(prefix === 'A' ? ('PrA_' + i) : ('PrB_' + i));
+          const id = prefix === 'A' ? ('PrA_' + i) : ('PrB_' + i);
+          const input = document.getElementById(id);
           if (!input) continue;
           const label = input.previousElementSibling && input.previousElementSibling.tagName.toLowerCase() === 'label' ? input.previousElementSibling : null;
           const show = i <= N;
@@ -521,11 +522,25 @@
       updateLastFor(prefix, N);
     }
 
+    // Reset editable inputs 0..N-1 to RESET_VALUE
+    function resetEditableInputs(prefix, N){
+      for (let i=0;i<N;i++){
+        const el = document.getElementById(prefix + '_' + i);
+        if (!el) continue;
+        el.value = Math.round(RESET_VALUE * 10000) / 10000;
+      }
+    }
+
     function onNumChange(){
       let N = parseInt(numInput.value);
       if (isNaN(N)) N = 0;
       if (N < 0) N = 0;
       if (N > maxN) N = maxN;
+
+      // reset editable probabilities to RESET_VALUE before attaching listeners
+      resetEditableInputs('PrA', N);
+      resetEditableInputs('PrB', N);
+
       setVisibility(N);
       attachListenersFor('PrA', N);
       attachListenersFor('PrB', N);
@@ -536,9 +551,8 @@
     // initialize
     onNumChange();
   })();
-  </script>    
-  
-
+  </script>
+   
         <script>
         // Ensure the button click does not reload the page
         document.getElementById("button_TT").addEventListener("click", function(event) {
