@@ -424,31 +424,32 @@
           </div>
         </div>
 
-<!-- JavaScript: visibility + auto-compute last visible probability (1 - sum previous) -->
-  <script>
+<script>
   (function(){
     const maxN = 10;
     const numInput = document.getElementById('numTrucks');
 
     function toNum(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
 
-    // show/hide rows according to N
-    function setVisibility(N) {
-      for (let i=0;i<=maxN;i++){
-        const a = document.getElementById('PrA_' + i);
-        const b = document.getElementById('PrB_' + i);
-        const la = a && a.previousElementSibling && a.previousElementSibling.tagName.toLowerCase() === 'label' ? a.previousElementSibling : null;
-        const lb = b && b.previousElementSibling && b.previousElementSibling.tagName.toLowerCase() === 'label' ? b.previousElementSibling : null;
-        const show = i <= N;
-        if (a) { a.style.display = show ? '' : 'none'; if (la) la.style.display = show ? '' : 'none'; }
-        if (b) { b.style.display = show ? '' : 'none'; if (lb) lb.style.display = show ? '' : 'none'; }
-      }
+    // Show/hide rows 0..N
+    function setVisibility(N){
+      ['A','B'].forEach(prefix => {
+        for (let i=0;i<=maxN;i++){
+          const el = document.getElementById(prefix + 'r' /*dummy*/); // noop to satisfy linter
+          const input = document.getElementById(prefix === 'A' ? ('PrA_' + i) : ('PrB_' + i));
+          if (!input) continue;
+          const label = input.previousElementSibling && input.previousElementSibling.tagName.toLowerCase() === 'label' ? input.previousElementSibling : null;
+          const show = i <= N;
+          input.style.display = show ? '' : 'none';
+          if (label) label.style.display = show ? '' : 'none';
+        }
+      });
     }
 
-    // clamp and set value with a short rounding
+    // clamp and set value with rounding and disabled flag
     function setVal(id, v, disabled){
       const el = document.getElementById(id);
-      if(!el) return;
+      if (!el) return;
       if (v < 0) v = 0;
       if (v > 1) v = 1;
       el.value = Math.round(v * 10000) / 10000;
@@ -456,59 +457,68 @@
       if (disabled) el.classList.add('auto-disabled'); else el.classList.remove('auto-disabled');
     }
 
-    // compute last visible probability for prefix (PrA or PrB)
-    function updateLast(prefix, N) {
-      // sum 0..N-1
+    // compute last for given prefix ('PrA' or 'PrB') and visible N
+    function updateLastFor(prefix, N){
+      if (N < 0) return;
       let sumPrev = 0;
-      for (let i=0;i<N;i++){
-        const el = document.getElementById(prefix + '_' + i);
-        if (!el) continue;
-        sumPrev += toNum(el.value);
-      }
-      const lastId = prefix + '_' + N;
-      let lastVal = 1 - sumPrev;
-      if (lastVal < 0) lastVal = 0;
-      if (lastVal > 1) lastVal = 1;
-      setVal(lastId, lastVal, true);
-
-      // warning element
-      const warnId = prefix === 'PrA' ? 'A_warn' : 'B_warn';
-      const warnEl = document.getElementById(warnId);
-      const total = sumPrev + lastVal;
-      if (Math.abs(total - 1) > 1e-6) {
-        warnEl.style.display = '';
-        warnEl.innerText = `Note: probabilities auto-normalized. Sum = ${total.toFixed(4)} (clamped). Please check inputs.`;
-      } else {
-        warnEl.style.display = 'none';
-        warnEl.innerText = '';
-      }
-    }
-
-    // attach input listeners on editable inputs (0..N-1) so updating them recomputes the last
-    function attachListeners(prefix, N) {
-      for (let i=0;i<=maxN;i++){
-        const el = document.getElementById(prefix + '_' + i);
-        if (!el) continue;
-        // remove all previous listeners by cloning the node (simplest way)
-        const newEl = el.cloneNode(true);
-        el.parentNode.replaceChild(newEl, el);
-      }
       for (let i=0;i<N;i++){
         const id = prefix + '_' + i;
         const el = document.getElementById(id);
         if (!el) continue;
+        sumPrev += toNum(el.value);
+      }
+      let lastVal = 1 - sumPrev;
+      if (lastVal < 0) lastVal = 0;
+      if (lastVal > 1) lastVal = 1;
+      setVal(prefix + '_' + N, lastVal, true);
+
+      // warning if total != 1 (after clamping)
+      const warnEl = document.getElementById(prefix === 'PrA' ? 'A_warn' : 'B_warn');
+      const total = sumPrev + lastVal;
+      if (warnEl) {
+        if (Math.abs(total - 1) > 1e-6) {
+          warnEl.style.display = '';
+          warnEl.innerText = `Note: probabilities auto-normalized. Sum = ${total.toFixed(4)} (clamped). Please check earlier inputs.`;
+        } else {
+          warnEl.style.display = 'none';
+          warnEl.innerText = '';
+        }
+      }
+    }
+
+    // attach listeners for a prefix, 0..N-1 editable; index N auto
+    function attachListenersFor(prefix, N){
+      // remove previous listeners by cloning nodes for that prefix
+      for (let i=0;i<=maxN;i++){
+        const el = document.getElementById(prefix + '_' + i);
+        if (!el) continue;
+        const newEl = el.cloneNode(true);
+        el.parentNode.replaceChild(newEl, el);
+      }
+      // add input listeners to indices 0..N-1
+      for (let i=0;i<N;i++){
+        const el = document.getElementById(prefix + '_' + i);
+        if (!el) continue;
         el.disabled = false;
         el.classList.remove('auto-disabled');
-        el.addEventListener('input', function(){ updateLast(prefix, N); });
+        el.addEventListener('input', function(){ updateLastFor(prefix, N); });
       }
-      // hide/disable indices > N
+      // ensure last is visible and disabled
+      const lastEl = document.getElementById(prefix + '_' + N);
+      if (lastEl) {
+        lastEl.disabled = true;
+        lastEl.classList.add('auto-disabled');
+        lastEl.style.display = '';
+        const lab = lastEl.previousElementSibling;
+        if (lab && lab.tagName && lab.tagName.toLowerCase() === 'label') lab.style.display = '';
+      }
+      // hide indices > N
       for (let i=N+1;i<=maxN;i++){
         const el = document.getElementById(prefix + '_' + i);
-        if (el) { el.disabled = true; el.style.display = 'none'; const lab = el.previousElementSibling; if (lab && lab.tagName.toLowerCase()==='label') lab.style.display='none'; }
+        if (el) { el.style.display = 'none'; el.disabled = true; const lab = el.previousElementSibling; if (lab && lab.tagName && lab.tagName.toLowerCase()==='label') lab.style.display='none'; }
       }
-      // ensure last index is visible (it will be auto-filled & disabled)
-      const lastEl = document.getElementById(prefix + '_' + N);
-      if (lastEl) { lastEl.disabled = true; lastEl.classList.add('auto-disabled'); lastEl.style.display=''; const lab = lastEl.previousElementSibling; if (lab && lab.tagName.toLowerCase()==='label') lab.style.display=''; }
+      // initialize last value
+      updateLastFor(prefix, N);
     }
 
     function onNumChange(){
@@ -516,22 +526,17 @@
       if (isNaN(N)) N = 0;
       if (N < 0) N = 0;
       if (N > maxN) N = maxN;
-
       setVisibility(N);
-
-      // For both prefixes, attach listeners to editable ones and compute last
-      attachListeners('PrA', N);
-      attachListeners('PrB', N);
-      updateLast('PrA', N);
-      updateLast('PrB', N);
+      attachListenersFor('PrA', N);
+      attachListenersFor('PrB', N);
     }
 
-    // initialize
     numInput.addEventListener('input', onNumChange);
     numInput.addEventListener('change', onNumChange);
+    // initialize
     onNumChange();
   })();
-  </script>     
+  </script>    
   
 
         <script>
