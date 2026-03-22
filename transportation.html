@@ -376,28 +376,31 @@
           </div>
         </div>
 
- <script>
+<!-- JavaScript: visibility + auto-compute last visible probability (1 - sum previous) -->
+  <script>
   (function(){
     const maxN = 4;
     const numInput = document.getElementById('numTrucks');
 
     function toNum(v){ const x = parseFloat(v); return isNaN(x) ? 0 : x; }
 
-    // Show/hide rows according to N
-    function setVisibility(N){
+    // show/hide rows according to N
+    function setVisibility(N) {
       for (let i=0;i<=maxN;i++){
-        const el = document.getElementById('PrB_' + i);
-        const lab = el && el.previousElementSibling && el.previousElementSibling.tagName.toLowerCase() === 'label' ? el.previousElementSibling : null;
+        const a = document.getElementById('PrA_' + i);
+        const b = document.getElementById('PrB_' + i);
+        const la = a && a.previousElementSibling && a.previousElementSibling.tagName.toLowerCase() === 'label' ? a.previousElementSibling : null;
+        const lb = b && b.previousElementSibling && b.previousElementSibling.tagName.toLowerCase() === 'label' ? b.previousElementSibling : null;
         const show = i <= N;
-        if (el) { el.style.display = show ? '' : 'none'; }
-        if (lab) { lab.style.display = show ? '' : 'none'; }
+        if (a) { a.style.display = show ? '' : 'none'; if (la) la.style.display = show ? '' : 'none'; }
+        if (b) { b.style.display = show ? '' : 'none'; if (lb) lb.style.display = show ? '' : 'none'; }
       }
     }
 
-    // clamp and set value with rounding
+    // clamp and set value with a short rounding
     function setVal(id, v, disabled){
       const el = document.getElementById(id);
-      if (!el) return;
+      if(!el) return;
       if (v < 0) v = 0;
       if (v > 1) v = 1;
       el.value = Math.round(v * 10000) / 10000;
@@ -405,68 +408,59 @@
       if (disabled) el.classList.add('auto-disabled'); else el.classList.remove('auto-disabled');
     }
 
-    // compute PrB_N = 1 - sum(PrB_0..PrB_{N-1})
-    function updatePrBLast(N){
-      if (N < 0) return;
+    // compute last visible probability for prefix (PrA or PrB)
+    function updateLast(prefix, N) {
+      // sum 0..N-1
       let sumPrev = 0;
-      for (let i = 0; i < N; i++){
-        const el = document.getElementById('PrB_' + i);
+      for (let i=0;i<N;i++){
+        const el = document.getElementById(prefix + '_' + i);
         if (!el) continue;
         sumPrev += toNum(el.value);
       }
+      const lastId = prefix + '_' + N;
       let lastVal = 1 - sumPrev;
-      // clamp
       if (lastVal < 0) lastVal = 0;
       if (lastVal > 1) lastVal = 1;
-      setVal('PrB_' + N, lastVal, true);
+      setVal(lastId, lastVal, true);
 
-      // warning if total != 1 (after clamping)
-      const warnEl = document.getElementById('B_warn');
+      // warning element
+      const warnId = prefix === 'PrA' ? 'A_warn' : 'B_warn';
+      const warnEl = document.getElementById(warnId);
       const total = sumPrev + lastVal;
-      if (warnEl) {
-        if (Math.abs(total - 1) > 1e-6) {
-          warnEl.style.display = '';
-          warnEl.innerText = `Note: probabilities auto-normalized. Sum = ${total.toFixed(4)} (clamped). Please check earlier inputs.`;
-        } else {
-          warnEl.style.display = 'none';
-          warnEl.innerText = '';
-        }
+      if (Math.abs(total - 1) > 1e-6) {
+        warnEl.style.display = '';
+        warnEl.innerText = `Note: probabilities auto-normalized. Sum = ${total.toFixed(4)} (clamped). Please check inputs.`;
+      } else {
+        warnEl.style.display = 'none';
+        warnEl.innerText = '';
       }
     }
 
-    // attach listeners to editable inputs (0..N-1)
-    function attachPrBListeners(N){
-      // remove previous listeners by cloning nodes
+    // attach input listeners on editable inputs (0..N-1) so updating them recomputes the last
+    function attachListeners(prefix, N) {
       for (let i=0;i<=maxN;i++){
-        const el = document.getElementById('PrB_' + i);
+        const el = document.getElementById(prefix + '_' + i);
         if (!el) continue;
+        // remove all previous listeners by cloning the node (simplest way)
         const newEl = el.cloneNode(true);
         el.parentNode.replaceChild(newEl, el);
       }
-      // add listeners to indices 0..N-1
       for (let i=0;i<N;i++){
-        const el = document.getElementById('PrB_' + i);
+        const id = prefix + '_' + i;
+        const el = document.getElementById(id);
         if (!el) continue;
         el.disabled = false;
         el.classList.remove('auto-disabled');
-        el.addEventListener('input', function(){ updatePrBLast(N); });
+        el.addEventListener('input', function(){ updateLast(prefix, N); });
       }
-      // ensure last index N is visible & disabled
-      const lastEl = document.getElementById('PrB_' + N);
-      if (lastEl) {
-        lastEl.disabled = true;
-        lastEl.classList.add('auto-disabled');
-        lastEl.style.display = '';
-        const lab = lastEl.previousElementSibling;
-        if (lab && lab.tagName && lab.tagName.toLowerCase() === 'label') lab.style.display = '';
-      }
-      // hide indices > N
+      // hide/disable indices > N
       for (let i=N+1;i<=maxN;i++){
-        const el = document.getElementById('PrB_' + i);
-        if (el) { el.style.display = 'none'; el.disabled = true; const lab = el.previousElementSibling; if (lab && lab.tagName && lab.tagName.toLowerCase()==='label') lab.style.display='none'; }
+        const el = document.getElementById(prefix + '_' + i);
+        if (el) { el.disabled = true; el.style.display = 'none'; const lab = el.previousElementSibling; if (lab && lab.tagName.toLowerCase()==='label') lab.style.display='none'; }
       }
-      // initialize last value
-      updatePrBLast(N);
+      // ensure last index is visible (it will be auto-filled & disabled)
+      const lastEl = document.getElementById(prefix + '_' + N);
+      if (lastEl) { lastEl.disabled = true; lastEl.classList.add('auto-disabled'); lastEl.style.display=''; const lab = lastEl.previousElementSibling; if (lab && lab.tagName.toLowerCase()==='label') lab.style.display=''; }
     }
 
     function onNumChange(){
@@ -474,16 +468,23 @@
       if (isNaN(N)) N = 0;
       if (N < 0) N = 0;
       if (N > maxN) N = maxN;
+
       setVisibility(N);
-      attachPrBListeners(N);
+
+      // For both prefixes, attach listeners to editable ones and compute last
+      attachListeners('PrA', N);
+      attachListeners('PrB', N);
+      updateLast('PrA', N);
+      updateLast('PrB', N);
     }
 
+    // initialize
     numInput.addEventListener('input', onNumChange);
     numInput.addEventListener('change', onNumChange);
-    // initialize on load
     onNumChange();
   })();
-  </script>       
+  </script>     
+  
 
         <script>
         // Ensure the button click does not reload the page
