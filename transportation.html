@@ -399,6 +399,20 @@
               max_profit = max(profits)
               best_m = profits.index(max_profit)  # first index with max value
               return profits, best_m, max_profit             
+
+             def on_TT(event):   
+               PrA = [float(value_of_input(f"PrA_{i}")) for i in range(0, T+1)]
+               PrB = [float(value_of_input(f"PrB_{i}")) for i in range(0, T+1)]
+               P_A = float(value_of_input("P_A"))
+               P_B = float(value_of_input("P_B"))
+                
+            profits = calculate_profit(PrA, PrB, P_A, P_B)
+
+            result = f"Maximum profit generated: {profits}"
+            
+            Element("out_TT").element.innerHTML = result   
+          
+          Element("button_TT").element.onclick = on_TT  
         </py-script>
         </div>
       </div>
