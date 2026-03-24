@@ -358,15 +358,15 @@
              Compute expected profits for all allocations m = 0..T (m trucks to A, T-m to B).
 
              Parameters:
-               - PrA: list of length T+1 with PMF for successes at A (PrA[0]..PrA[T]).
-               - PrB: list of length T+1 with PMF for successes at B (PrB[0]..PrB[T]).
-               - P_A: profit per successful truck at A.
-               - P_B: profit per successful truck at B.
+                 PrA: list of length T+1 with PMF for successes at A (PrA[0]..PrA[T]).
+                 PrB: list of length T+1 with PMF for successes at B (PrB[0]..PrB[T]).
+                 P_A: profit per successful truck at A.
+                 P_B: profit per successful truck at B.
 
              Returns:
-               - profits: list of length T+1 where profits[m] is expected profit when sending m trucks to A.
-               - best_m: an integer m (0..T) giving the allocation with maximum expected profit (ties -> first max).
-               - max_profit: the maximum expected profit (profits[best_m]).
+                 profits: list of length T+1 where profits[m] is expected profit when sending m trucks to A.
+                 best_m: an integer m (0..T) giving the allocation with maximum expected profit (ties -> first max).
+                 max_profit: the maximum expected profit (profits[best_m]).
              """
              if len(PrA) != len(PrB):
                  raise ValueError("PrA and PrB must have the same length (T+1).")
@@ -401,15 +401,18 @@
               return profits, best_m, max_profit             
 
              def on_TT(event):   
+               T = get_T_from_ui()
                PrA = [float(value_of_input(f"PrA_{i}")) for i in range(0, T+1)]
                PrB = [float(value_of_input(f"PrB_{i}")) for i in range(0, T+1)]
                P_A = float(value_of_input("P_A"))
                P_B = float(value_of_input("P_B"))
-                
-            profits = calculate_profit(PrA, PrB, P_A, P_B)
 
-            result = f"Maximum profit generated: {profits}"
-            
+               profits, best_m, max_profit = calculate_profits_for_T(PrA, PrB, P_A, P_B)
+
+               result = ""
+               result += f"Profits by m: {profits}"
+               result += f"Best allocation: send {best_m} to A ({T-best_m} to B) with expected profit {max_profit:.4f}"
+                   
             Element("out_TT").element.innerHTML = result   
           
           Element("button_TT").element.onclick = on_TT  
