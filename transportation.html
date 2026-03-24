@@ -349,19 +349,15 @@
              return expect
 
 
-         def calculate_profits_for_T(PrA: List[float],
-                                     PrB: List[float],
-                                     P_A: float,
-                                     P_B: float
-                                    ) -> Tuple[List[float], int, float]:
+         def calculate_profits_for_T(PrA, PrB, P_A, P_B):
              """
              Compute expected profits for all allocations m = 0..T (m trucks to A, T-m to B).
 
              Parameters:
-                 PrA: list of length T+1 with PMF for successes at A (PrA[0]..PrA[T]).
-                 PrB: list of length T+1 with PMF for successes at B (PrB[0]..PrB[T]).
-                 P_A: profit per successful truck at A.
-                 P_B: profit per successful truck at B.
+                 PrA (float): list of length T+1 with PMF for successes at A (PrA[0]..PrA[T]).
+                 PrB (float): list of length T+1 with PMF for successes at B (PrB[0]..PrB[T]).
+                 P_A (int): profit per successful truck at A.
+                 P_B (int): profit per successful truck at B.
 
              Returns:
                  profits: list of length T+1 where profits[m] is expected profit when sending m trucks to A.
