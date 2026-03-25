@@ -336,102 +336,95 @@
           from typing import List, Tuple
 
           def expected_from_pmf(pmf: List[float]) -> float:
-              """
-              Compute expectation E[X] for a discrete RV X with PMF pmf[0..T]
-              using the tail-sum formula: E[X] = sum_{k=1..T} P(X >= k).
-              """
               if not pmf:
                   return 0.0
-              T = len(pmf) - 1
-              cum = 0.0     # cumulative sum F(k-1) as we iterate
-              expect = 0.0
-              for k in range(1, T + 1):
-                  cum += pmf[k - 1]    # cum = sum_{i=0..k-1} pmf[i] = F(k-1)
-                  expect += (1.0 - cum)  # P(X >= k) = 1 - F(k-1)
+          T = len(pmf) - 1
+          cum = 0.0
+          expect = 0.0
+          for k in range(1, T + 1):
+              cum += pmf[k - 1]
+              expect += (1.0 - cum)
           return expect
 
-
-          def calculate_profits_for_T(PrA: List[float],
-                                      PrB: List[float],
-                                      P_A: float,
-                                      P_B: float
-                                      ) -> Tuple[List[float], int, float]:
-              """
-              Compute expected profits for all allocations m = 0..T (m trucks to A, T-m to B).
-
-          Parameters:
-            - PrA: list of length T+1 with PMF for successes at A (PrA[0]..PrA[T]).
-            - PrB: list of length T+1 with PMF for successes at B (PrB[0]..PrB[T]).
-            - P_A: profit per successful truck at A.
-            - P_B: profit per successful truck at B.
-
-          Returns:
-            - profits: list of length T+1 where profits[m] is expected profit when sending m trucks to A.
-            - best_m: an integer m (0..T) giving the allocation with maximum expected profit (ties -> first max).
-            - max_profit: the maximum expected profit (profits[best_m]).
-          """
-          if len(PrA) != len(PrB):
-              raise ValueError("PrA and PrB must have the same length (T+1).")
-
-          T = len(PrA) - 1
-
-          # Validation
           def validate_pmf(pmf: List[float], name: str):
               if any(x is None for x in pmf):
                   raise ValueError(f"{name} contains None entries.")
               if any((x < 0.0 or x > 1.0) for x in pmf):
                   raise ValueError(f"{name} contains probabilities outside [0,1].")
-              s = sum(pmf)
-              if abs(s - 1.0) > 1e-6:
+          s = sum(pmf)
+          if abs(s - 1.0) > 1e-6:
                   raise ValueError(f"{name} does not sum to 1 (sum = {s}).")
-         validate_pmf(PrA, "PrA")
-         validate_pmf(PrB, "PrB")
 
-         # Compute expected successes via tail-sum
-         E_A = expected_from_pmf(PrA)
-         E_B = expected_from_pmf(PrB)
+          def expected_profit_exact(PrA: List[float], PrB: List[float], P_A: float, P_B: float, m: int) -> float:
+              T = len(PrA) - 1
+              profit = 0.0
+              for i in range(0, T + 1):
+                  pa = PrA[i]
+                  if pa == 0.0:
+                      continue
+              for j in range(0, T + 1):
+                     pb = PrB[j]
+                     if pb == 0.0:
+                         continue
+                     profit += pa * pb * (P_A * min(i, m) + P_B * min(j, T - m))
+              return profit
 
-         profits: List[float] = []
-         for m in range(0, T + 1):
-             realized_A = min(float(m), E_A)
-             realized_B = min(float(T - m), E_B)
-             profit_m = P_A * realized_A + P_B * realized_B
-             profits.append(profit_m)
+          def compute_profits(PrA: List[float], PrB: List[float], P_A: float, P_B: float, method: str = "approx") -> Tuple[List[float], int, float]:
+              if len(PrA) != len(PrB):
+                  raise ValueError("PrA and PrB must have the same length (T+1).")
+              T = len(PrA) - 1
+              validate_pmf(PrA, "PrA")
+              validate_pmf(PrB, "PrB")
+              profits: List[float] = [0.0] * (T + 1)
+              if method == "approx":
+                  E_A = expected_from_pmf(PrA)
+                  E_B = expected_from_pmf(PrB)
+                  for m in range(0, T + 1):
+                      profits[m] = P_A * min(float(m), E_A) + P_B * min(float(T - m), E_B)
+              elif method == "exact":
+                  for m in range(0, T + 1):
+                      profits[m] = expected_profit_exact(PrA, PrB, P_A, P_B, m)
+              else:
+                  raise ValueError("method must be 'approx' or 'exact'.")
+              max_profit = max(profits)
+              best_m = profits.index(max_profit)
+              return profits, best_m, max_profit
 
-         max_profit = max(profits)
-         best_m = profits.index(max_profit)  # first index with max value
-         return profits, best_m, max_profit
+          # UI handler using Element(...) as in your codebase
+          def on_TT(event=None):
+              try:
+                  # Read T (total number of trucks)
+                  T = int(Element("T").element.value)  # input named "T"
+                  if T < 0:
+                      raise ValueError("T must be nonnegative")
 
+           # Read PMFs for A and B; inputs must be named "PrA_0".."PrA_T" and "PrB_0".."PrB_T"
+           PrA = []
+           PrB = []
+           for k in range(0, T + 1):
+               PrA.append(float(Element(f"PrA_{k}").element.value))
+               PrB.append(float(Element(f"PrB_{k}").element.value))
 
-         # Example UI handler (server-side pseudo-code). Replace get_T_from_ui()/value_of_input()
-         # with your framework-specific functions (e.g., request.form[...] in Flask).
-         def on_TT_event(get_T_from_ui, value_of_input, set_output):
-             """
-             get_T_from_ui: callable -> int (reads T)
-             value_of_input: callable(str) -> str/number (reads input value by name/id)
-             set_output: callable(str) -> None (writes result to output element)
-             """
-             T = int(get_T_from_ui())
-             PrA = [float(value_of_input(f"PrA_{i}")) for i in range(0, T + 1)]
-             PrB = [float(value_of_input(f"PrB_{i}")) for i in range(0, T + 1)]
-             P_A = float(value_of_input("P_A"))
-             P_B = float(value_of_input("P_B"))
+            P_A = float(Element("P_A").element.value)
+            P_B = float(Element("P_B").element.value)
 
-             # Compute
-             profits, best_m, max_profit = calculate_profits_for_T(PrA, PrB, P_A, P_B)
+            method = Element("method").element.value.strip().lower()  # "approx" or "exact"
 
-             # Build result string
-             lines = []
-             lines.append("Profits by m:")
-             for m, p in enumerate(profits):
-                 marker = " (best)" if m == best_m else ""
-                 lines.append(f" m={m}: {p:.6f}{marker}")
-             lines.append(f"Best allocation: send {best_m} to A and {T - best_m} to B -> expected profit {max_profit:.4f}")
-             result = "\n".join(lines)
-      
-            Element("out_TT").element.innerHTML = result   
-          
-          Element("button_TT").element.onclick = on_TT  
+            profits, best_m, max_profit = compute_profits(PrA, PrB, P_A, P_B, method=method)
+
+            # Present results
+            profits_str = ", ".join(f"m={m}: {p:.4f}" for m, p in enumerate(profits))
+            result = (
+                f"T={T}, method={method}\n"
+                f"Profits by m: {profits_str}\n"
+                f"Best allocation: send {best_m} to A and {T - best_m} to B -> expected profit {max_profit:.4f}"
+            )
+        except Exception as e:
+            result = f"Error: {e}"
+
+        Element("out_TT").element.innerHTML = result
+
+    Element("button_TT").element.onclick = on_TT
         </py-script>
         </div>
       </div>
