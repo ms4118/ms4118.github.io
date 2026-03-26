@@ -350,8 +350,12 @@
                     cum += pmf[k - 1]        # cum = sum_{i=0..k-1} pmf[i]
                     marg.append(P * (1.0 - cum))
                 return marg           
+
+          def on_TT(event):   
+                
+             result = f"Maximum profit generated: {marg}"
                   
-         Element("out_TT").element.innerHTML = marg
+         Element("out_TT").element.innerHTML = result
 
      Element("button_TT").element.onclick = on_TT
         </py-script>
