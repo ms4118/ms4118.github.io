@@ -333,14 +333,27 @@
           
         <button class="submit-button" id="button_TT">Solve Problem</button>
         <py-script>
-         
-           
-                  
-                 
-          
-        Element("out_TT").element.innerHTML = result
+         from typing import List, Tuple
 
-    Element("button_TT").element.onclick = on_TT
+         def tail_sum_marginals(pmf: List[float], P: float) -> List[float]:
+             """
+             Given pmf[0..T] (length T+1) and per-success profit P,
+             return marginals for trucks 1..T:
+               marg[k-1] = P * (1 - sum_{i=0..k-1} pmf[i])
+             """
+             T = len(pmf) - 1
+                if T <= 0:
+                    return []
+                marg = []
+                cum = 0.0
+                for k in range(1, T + 1):
+                    cum += pmf[k - 1]        # cum = sum_{i=0..k-1} pmf[i]
+                    marg.append(P * (1.0 - cum))
+                return marg           
+                  
+         Element("out_TT").element.innerHTML = marg
+
+     Element("button_TT").element.onclick = on_TT
         </py-script>
         </div>
       </div>
