@@ -381,13 +381,6 @@
         max_p = max(profits)
         best_ms = [m for m, p in enumerate(profits) if abs(p - max_p) < 1e-12]
         return best_ms, max_p
-          
-       if __name__ == "__main__":
-           # Example (T = 3) from earlier
-           PrA = [0.10, 0.20, 0.30, 0.40]  # PrA_0..PrA_3
-           PrB = [0.05, 0.25, 0.35, 0.35]  # PrB_0..PrB_3
-           P_A = 100.0
-           P_B = 80.0
 
           margA = tail_sum_marginals(PrA, P_A)
           margB = tail_sum_marginals(PrB, P_B)
