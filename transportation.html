@@ -351,9 +351,39 @@
                     marg.append(P * (1.0 - cum))
                 return marg           
 
-          def on_TT(event):   
-                
-             result = f"Maximum profit generated: {marg}"
+         def profits_for_allocations(margA: List[float], margB: List[float]) -> List[float]:
+             """
+             Given margA and margB (each length T), return profits[m] for m=0..T,
+             where sending m trucks to A and T-m to B yields:
+               profit(m) = sum_{k=1..m} margA[k-1] + sum_{k=1..T-m} margB[k-1]
+             """
+             if len(margA) != len(margB):
+                 raise ValueError("margA and margB must have the same length.")
+             T = len(margA)
+             # prefix sums for quick first-k sums
+             prefA = [0.0] * (T + 1)
+             prefB = [0.0] * (T + 1)
+             for i in range(T):
+                 prefA[i + 1] = prefA[i] + margA[i]
+                 prefB[i + 1] = prefB[i] + margB[i]
+             profits = []
+             for m in range(0, T + 1):
+                 profit = prefA[m] + prefB[T - m]
+                 profits.append(profit)
+             return profits
+
+        def best_allocations(profits: List[float]) -> Tuple[List[int], float]:
+        """
+        Return list of m values that maximize profits and the max profit.
+        """
+        if not profits:
+            return [], 0.0
+        max_p = max(profits)
+        best_ms = [m for m, p in enumerate(profits) if abs(p - max_p) < 1e-12]
+        return best_ms, max_p
+          
+        def on_TT(event):       
+             result = f"Maximum profit generated: {profits}"
                   
          Element("out_TT").element.innerHTML = result
 
