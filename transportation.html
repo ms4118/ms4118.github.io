@@ -333,95 +333,11 @@
           
         <button class="submit-button" id="button_TT">Solve Problem</button>
         <py-script>
-          from typing import List, Tuple
-
-          def expected_from_pmf(pmf: List[float]) -> float:
-              if not pmf:
-                  return 0.0
-          T = len(pmf) - 1
-          cum = 0.0
-          expect = 0.0
-          for k in range(1, T + 1):
-              cum += pmf[k - 1]
-              expect += (1.0 - cum)
-          return expect
-
-          def validate_pmf(pmf: List[float], name: str):
-              if any(x is None for x in pmf):
-                  raise ValueError(f"{name} contains None entries.")
-              if any((x < 0.0 or x > 1.0) for x in pmf):
-                  raise ValueError(f"{name} contains probabilities outside [0,1].")
-          s = sum(pmf)
-          if abs(s - 1.0) > 1e-6:
-                  raise ValueError(f"{name} does not sum to 1 (sum = {s}).")
-
-          def expected_profit_exact(PrA: List[float], PrB: List[float], P_A: float, P_B: float, m: int) -> float:
-              T = len(PrA) - 1
-              profit = 0.0
-              for i in range(0, T + 1):
-                  pa = PrA[i]
-                  if pa == 0.0:
-                      continue
-              for j in range(0, T + 1):
-                     pb = PrB[j]
-                     if pb == 0.0:
-                         continue
-                     profit += pa * pb * (P_A * min(i, m) + P_B * min(j, T - m))
-              return profit
-
-          def compute_profits(PrA: List[float], PrB: List[float], P_A: float, P_B: float, method: str = "approx") -> Tuple[List[float], int, float]:
-              if len(PrA) != len(PrB):
-                  raise ValueError("PrA and PrB must have the same length (T+1).")
-              T = len(PrA) - 1
-              validate_pmf(PrA, "PrA")
-              validate_pmf(PrB, "PrB")
-              profits: List[float] = [0.0] * (T + 1)
-              if method == "approx":
-                  E_A = expected_from_pmf(PrA)
-                  E_B = expected_from_pmf(PrB)
-                  for m in range(0, T + 1):
-                      profits[m] = P_A * min(float(m), E_A) + P_B * min(float(T - m), E_B)
-              elif method == "exact":
-                  for m in range(0, T + 1):
-                      profits[m] = expected_profit_exact(PrA, PrB, P_A, P_B, m)
-              else:
-                  raise ValueError("method must be 'approx' or 'exact'.")
-              max_profit = max(profits)
-              best_m = profits.index(max_profit)
-              return profits, best_m, max_profit
-
-          # UI handler using Element(...) as in your codebase
-          def on_TT(event=None):
-              try:
-                  # Read T (total number of trucks)
-                  T = int(Element("T").element.value)  # input named "T"
-                  if T < 0:
-                      raise ValueError("T must be nonnegative")
-
-           # Read PMFs for A and B; inputs must be named "PrA_0".."PrA_T" and "PrB_0".."PrB_T"
-           PrA = []
-           PrB = []
-           for k in range(0, T + 1):
-               PrA.append(float(Element(f"PrA_{k}").element.value))
-               PrB.append(float(Element(f"PrB_{k}").element.value))
-
-            P_A = float(Element("P_A").element.value)
-            P_B = float(Element("P_B").element.value)
-
-            method = Element("method").element.value.strip().lower()  # "approx" or "exact"
-
-            profits, best_m, max_profit = compute_profits(PrA, PrB, P_A, P_B, method=method)
-
-            # Present results
-            profits_str = ", ".join(f"m={m}: {p:.4f}" for m, p in enumerate(profits))
-            result = (
-                f"T={T}, method={method}\n"
-                f"Profits by m: {profits_str}\n"
-                f"Best allocation: send {best_m} to A and {T - best_m} to B -> expected profit {max_profit:.4f}"
-            )
-        except Exception as e:
-            result = f"Error: {e}"
-
+         
+           
+                  
+                 
+          
         Element("out_TT").element.innerHTML = result
 
     Element("button_TT").element.onclick = on_TT
