@@ -402,6 +402,10 @@
             probability_9_A_1_B = (1 - PrA_0) + (1 - PrA_0 - PrA_1) + (1 - PrA_0 - PrA_1 - PrA_2) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6 - PrA_7) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6 - PrA_7 - PrA_8)
 
             probability_10_A_0_B = (1 - PrA_0) + (1 - PrA_0 - PrA_1) + (1 - PrA_0 - PrA_1 - PrA_2) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6 - PrA_7) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6 - PrA_7 - PrA_8) + (1 - PrA_0 - PrA_1 - PrA_2 - PrA_3 - PrA_4 - PrA_5 - PrA_6 - PrA_7 - PrA_8 - PrA_9)          
+
+            # Enforce rule: if PrA_10 == 0.0 (i.e. only 9 trucks available), set the 10-A / 0-B case probability to 0
+            if PrA_10 == 0.0:
+                probability_10_A_0_B = 0.0
           
             profit_0_A_10_B = P_B * probability_0_A_10_B
           
