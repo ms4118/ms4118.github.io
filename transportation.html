@@ -423,9 +423,9 @@
 
             profit_9_A_1_B = P_A * probability_9_A_1_B + P_B * (1 - PrB_0)
 
-            profit_10_A_0_B =  P_A * probability_10_A_0_B
+            profit_10_A_0_B = P_A * probability_10_A_0_B
           
-            profits = [profit_0_A_5_B, profit_1_A_4_B, profit_2_A_3_B, profit_3_A_2_B, profit_4_A_1_B, profit_5_A_0_B] 
+            profits = [profit_0_A_10_B, profit_1_A_9_B, profit_2_A_8_B, profit_3_A_7_B, profit_4_A_6_B, profit_5_A_5_B, profit_6_A_4_B, profit_7_A_3_B, profit_8_A_2_B, profit_9_A_1_B, profit_10_A_0_B]
 
             profit = max(profits)
           
@@ -439,6 +439,11 @@
             PrA_3 = float(Element("PrA_3").element.value)  
             PrA_4 = float(Element("PrA_4").element.value)
             PrA_5 = float(Element("PrA_5").element.value)
+            PrA_6 = float(Element("PrA_6").element.value)
+            PrA_7 = float(Element("PrA_7").element.value)   
+            PrA_8 = float(Element("PrA_8").element.value)  
+            PrA_9 = float(Element("PrA_9").element.value)
+            PrA_10 = float(Element("PrA_10").element.value)
             P_A = float(Element("P_A").element.value) 
             PrB_0 = float(Element("PrB_0").element.value) 
             PrB_1 = float(Element("PrB_1").element.value) 
@@ -446,10 +451,15 @@
             PrB_3 = float(Element("PrB_3").element.value)     
             PrB_4 = float(Element("PrB_4").element.value)       
             PrB_5 = float(Element("PrB_5").element.value)
+            PrB_6 = float(Element("PrB_6").element.value) 
+            PrB_7 = float(Element("PrB_7").element.value) 
+            PrB_8 = float(Element("PrB_8").element.value)     
+            PrB_9 = float(Element("PrB_9").element.value)       
+            PrB_10 = float(Element("PrB_10").element.value)
             P_B = float(Element("P_B").element.value)     
           
             # Calculate profit A
-            profit = calculate_profit(PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, P_B)
+            profit = calculate_profit(PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)
 
             result = f"Maximum profit generated: {profit}"
             
