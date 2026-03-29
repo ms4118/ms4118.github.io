@@ -407,25 +407,7 @@
             # Enforce rule: if PrA_10 == 0.0 (i.e. only 9 trucks available), set the 10-A / 0-B case probability to 0
             if numTrucks == 9:
                 profit_10_A_0_B = 0
-           elif numTrucks == 8:
-                profit_10_A_0_B = 1
-           elif numTrucks == 7:
-                profit_10_A_0_B = 2
-           elif numTrucks == 6:
-                profit_10_A_0_B = 3
-           elif numTrucks == 5:   
-                profit_10_A_0_B = 4
-           elif numTrucks == 4:
-                profit_10_A_0_B = 5
-           elif numTrucks == 3:
-                profit_10_A_0_B = 6
-           elif numTrucks == 2:
-                profit_10_A_0_B = 7
-           elif numTrucks == 1:
-                profit_10_A_0_B = 8
-           else: 
-                profit_10_A_0_B = 9
-          
+           
             profit_0_A_10_B = P_B * probability_0_A_10_B
           
             profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
