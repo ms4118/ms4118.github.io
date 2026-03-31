@@ -546,12 +546,8 @@
             profits = [profit_0_A_10_B, profit_1_A_9_B, profit_2_A_8_B, profit_3_A_7_B, profit_4_A_6_B, profit_5_A_5_B, profit_6_A_4_B, profit_7_A_3_B, profit_8_A_2_B, profit_9_A_1_B, profit_10_A_0_B]
 
             profit = max(profits)
-            best_index = profits.index(max_profit)  # best_index = number of trucks to A
-
-            # Number of trucks to B = total_trucks - best_index
-            trucks_to_B = numTrucks - best_index
-          
-            return profit, best_index, trucks_to_B          
+                   
+            return profit         
           
           
           def on_TT(event):   
@@ -582,10 +578,9 @@
             P_B = float(Element("P_B").element.value)     
           
             # Calculate profit A
-            best_index, trucks_to_B, profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)
+            profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)
 
             result = f"Maximum profit generated: {profit}"
-            result += f"Number of Vehicle Allocation: {best_index} trucks to location A and {trucks_to_B} trucks to location B"
           
             Element("out_TT").element.innerHTML = result   
           
