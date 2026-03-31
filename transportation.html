@@ -549,24 +549,6 @@
                    
             return profit         
           
-
-         def calculate_best(numTrucks):
-           """
-           Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
-           Assumes profit_... variables are defined in the global scope.
-           """
-           profits = []
-           for a in range(numTrucks + 1):
-               b = numTrucks - a
-               # Retrieve the profit variable by its name
-               profit_var = globals().get(f"profit_{a}_A_{b}_B")
-               # If the variable doesn't exist, treat as 0 (should not happen if calculate_profit created them)
-               profits.append(profit_var if profit_var is not None else 0)
-           best_a = profits.index(max(profits))
-           best_b = numTrucks - best_a
-          
-           return best_a, best_b
-          
           
           def on_TT(event):   
             numTrucks = int(float(Element("numTrucks").element.value))
@@ -596,12 +578,9 @@
             P_B = float(Element("P_B").element.value)     
           
             # Calculate profit A
-            profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)
-
-            best_a, best_b = calculate_best(numTrucks)            
+            profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)           
           
             result = f"Maximum profit generated: {profit}"
-            result += f"Number of Vehicle Allocation: {best_a} trucks to location A and {best_b} trucks to location B"
           
             Element("out_TT").element.innerHTML = result   
           
