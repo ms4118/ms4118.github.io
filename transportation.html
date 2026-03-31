@@ -544,10 +544,17 @@
                 profit_1_A_9_B = P_A * (1 - PrA_0)
           
             profits = [profit_0_A_10_B, profit_1_A_9_B, profit_2_A_8_B, profit_3_A_7_B, profit_4_A_6_B, profit_5_A_5_B, profit_6_A_4_B, profit_7_A_3_B, profit_8_A_2_B, profit_9_A_1_B, profit_10_A_0_B]
+            for a in range(numTrucks + 1):
+                b = numTrucks - a
+                profit_var = globals().get(f"profit_{a}_A_{b}_B")  # get variable by name
+                profits.append(profit_var)
 
+            best_a = profits.index(max(profits))
+            best_b = numTrucks - best_a     
+          
             profit = max(profits)
           
-            return profit   
+            return profit, best_a, best_b   
 
           
           def on_TT(event):   
@@ -579,9 +586,9 @@
           
             # Calculate profit A
             profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)
-
+   
             result = f"Maximum profit generated: {profit}"
-            result += f"Optimal Number Allocation"
+            result += f"Number of Vehicle Allocation: {best_a} trucks to location A and {best_b} trucks to location B"
           
             Element("out_TT").element.innerHTML = result   
           
