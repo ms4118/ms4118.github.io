@@ -567,8 +567,10 @@
             Assumes profit_... variables have been stored globally by calculate_profit().
             """
             profits = []
-            profit_var = globals().get(f"profit_{a}_A_{b}_B")
-            profits.append(profit_var if profit_var is not None else -float('inf'))
+            for a in range(numTrucks + 1):
+                b = numTrucks - a          
+                profit_var = globals().get(f"profit_{a}_A_{b}_B")
+                profits.append(profit_var if profit_var is not None else -float('inf'))
             best_a = profits.index(max(profits))
             best_b = numTrucks - best_a
           
