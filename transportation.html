@@ -566,7 +566,7 @@
             Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
             Assumes profit_... variables have been stored globally by calculate_profit().
             """
-            profits = [30]
+            profits = []
             for a in range(numTrucks + 1):
                 b = numTrucks - a          
                 profit_var = globals().get(f"profit_{a}_A_{b}_B")
