@@ -561,14 +561,12 @@
             return profit         
 
 
-          def calculate_best(numTrucks):
+          def calculate_best(profit, numTrucks):
             """
             Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
             Assumes profit_... variables have been stored globally by calculate_profit().
             """
-            profits = [profit_0_A_10_B, profit_1_A_9_B, profit_2_A_8_B, profit_3_A_7_B, profit_4_A_6_B, profit_5_A_5_B, profit_6_A_4_B, profit_7_A_3_B, profit_8_A_2_B, profit_9_A_1_B, profit_10_A_0_B]
-          
-            best_a = profits.index(max(profits))
+            best_a = profits.index(profit)
             best_b = numTrucks - best_a
           
             return best_a, best_b
@@ -604,7 +602,7 @@
             # Calculate profit A
             profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)           
  
-            best_a, best_b = calculate_best(numTrucks)
+            best_a, best_b = calculate_best(profit, numTrucks)
           
             result = f"Maximum profit generated: {profit}.  "
             result += f"Number of Vehicle Allocation: {best_a} trucks to location A and {best_b} trucks to location B"
