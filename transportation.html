@@ -563,12 +563,13 @@
 
 
            def calculate_best(profits, numTrucks):
-            """
-            Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
-            """
-            best_a = profits.index(max(profits))
-            best_b = numTrucks - best_a
-            return best_a, best_b
+               """
+               Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
+               """
+               best_a = profits.index(max(profits))
+               best_b = numTrucks - best_a
+          
+               return best_a, best_b
           
           
           def on_TT(event):   
