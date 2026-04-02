@@ -559,9 +559,18 @@
 
             profit = max(profits)
                    
-            return profit      
+            return profit, profits    
 
 
+           def calculate_best(profits, numTrucks):
+            """
+            Find the allocation (trucks to A, trucks to B) that gives the maximum profit.
+            """
+            best_a = profits.index(max(profits))
+            best_b = numTrucks - best_a
+            return best_a, best_b
+          
+          
           def on_TT(event):   
             numTrucks = int(float(Element("numTrucks").element.value))
             PrA_0 = float(Element("PrA_0").element.value)  
@@ -590,9 +599,12 @@
             P_B = float(Element("P_B").element.value)     
           
             # Calculate profit A
-            profit = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)           
+            profit, profits = calculate_profit(numTrucks, PrA_0, PrA_1, PrA_2, PrA_3, PrA_4, PrA_5, PrA_6, PrA_7, PrA_8, PrA_9, PrA_10, P_A, PrB_0, PrB_1, PrB_2, PrB_3, PrB_4, PrB_5, PrB_6, PrB_7, PrB_8, PrB_9, PrB_10, P_B)           
+
+            best_a, best_b = calculate_best(profits, numTrucks)
           
             result = f"Maximum profit generated: {profit}.  "
+            result += f"Number of Vehicle Allocation: {best_a} trucks to location A and {best_b} trucks to location B"
           
             Element("out_TT").element.innerHTML = result   
           
