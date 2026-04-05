@@ -423,7 +423,7 @@
                profit_9_A_1_B = P_A * probability_9_A_1_B
                # profit_10_A_0_B stays 0 (already reset)
 
-            elif numTrucks == 8:
+            if numTrucks == 8:
                # Your existing code for numTrucks == 8
                # Then set profit variables for 8 trucks:
                profit_0_A_10_B = P_B * probability_0_A_10_B
@@ -437,7 +437,7 @@
                profit_8_A_2_B = P_A * probability_8_A_2_B_1 + P_B * probability_8_A_2_B_2
                # profit_9_A_1_B and profit_10_A_0_B stay 0
 
-            elif numTrucks == 7:
+            if numTrucks == 7:
                # Similar pattern – set profit_0_A_10_B ... profit_7_A_3_B, others 0
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
@@ -449,7 +449,7 @@
                profit_7_A_3_B = P_A * probability_7_A_3_B_1 + P_B * probability_7_A_3_B_2
                # profit_8_A_2_B ... profit_10_A_0_B stay 0
 
-            elif numTrucks == 6:
+            if numTrucks == 6:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
                profit_2_A_8_B = P_A * probability_2_A_8_B_1 + P_B * probability_2_A_8_B_2
@@ -458,7 +458,7 @@
                profit_5_A_5_B = P_A * probability_5_A_5_B_1 + P_B * probability_5_A_5_B_2
                profit_6_A_4_B = P_A * probability_6_A_4_B_1 + P_B * probability_6_A_4_B_2
           
-            elif numTrucks == 5:
+            if numTrucks == 5:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
                profit_2_A_8_B = P_A * probability_2_A_8_B_1 + P_B * probability_2_A_8_B_2
@@ -466,31 +466,27 @@
                profit_4_A_6_B = P_A * probability_4_A_6_B_1 + P_B * probability_4_A_6_B_2
                profit_5_A_5_B = P_A * probability_5_A_5_B_1 + P_B * probability_5_A_5_B_2
           
-            elif numTrucks == 4:
+            if numTrucks == 4:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
                profit_2_A_8_B = P_A * probability_2_A_8_B_1 + P_B * probability_2_A_8_B_2
                profit_3_A_7_B = P_A * probability_3_A_7_B_1 + P_B * probability_3_A_7_B_2
                profit_4_A_6_B = P_A * probability_4_A_6_B_1 + P_B * probability_4_A_6_B_2
           
-            elif numTrucks == 3:
+            if numTrucks == 3:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
                profit_2_A_8_B = P_A * probability_2_A_8_B_1 + P_B * probability_2_A_8_B_2
                profit_3_A_7_B = P_A * probability_3_A_7_B_1 + P_B * probability_3_A_7_B_2
           
-            elif numTrucks == 2:
+            if numTrucks == 2:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0) + P_B * probability_1_A_9_B
                profit_2_A_8_B = P_A * probability_2_A_8_B_1 + P_B * probability_2_A_8_B_2
           
-             elif numTrucks == 1:
+             if numTrucks == 1:
                profit_0_A_10_B = P_B * probability_0_A_10_B
                profit_1_A_9_B = P_A * (1 - PrA_0)        
-          
-             else:
-               # Optional: handle numTrucks == 10 or invalid
-               pass
           
              profits = [profit_0_A_10_B, profit_1_A_9_B, profit_2_A_8_B, profit_3_A_7_B, profit_4_A_6_B, profit_5_A_5_B, profit_6_A_4_B, profit_7_A_3_B, profit_8_A_2_B, profit_9_A_1_B, profit_10_A_0_B]
 
