@@ -616,43 +616,6 @@
           </div>
         </div>
 
-        <script>
-          // handlers for each numTrucks value
-const handlers = {
-  0: function() {
-    // code for numTrucks == 0
-    console.log('running handler for 0');
-    // ... your logic here ...
-  },
-  1: function() {
-    console.log('running handler for 1');
-  },
-  2: function() {
-    console.log('running handler for 2');
-  },
-  // ...
-  9: function() {
-    console.log('running handler for 9');
-    // code specific to numTrucks == 9
-  }
-};
-
-// run the appropriate handler
-function runForNumTrucks(numTrucks) {
-  const h = handlers[numTrucks];
-  if (typeof h === 'function') {
-    h();
-  } else {
-    // default behaviour if no handler provided
-    console.warn('No handler for numTrucks =', numTrucks);
-  }
-}
-
-// usage
-const num = parseInt(document.getElementById('numTrucks').value, 10);
-runForNumTrucks(num);   
-<script>
-
 <script>
   (function(){
     const maxN = 10;
