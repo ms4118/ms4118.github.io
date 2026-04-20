@@ -795,6 +795,59 @@
         });
     </script>
 
+         <!-- jQery -->
+<!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+<!-- bootstrap js -->
+<script src="js/bootstrap.js"></script>
+<script>
+  $(function () {
+    var steps = [
+      {
+        element: '#step1', 
+        intro: '<div class="tip-box"><img src="./images/intro/step21.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom-right-aligned'
+      },
+      {
+        element: '#step2', 
+        intro: '<div class="tip-box"><img src="./images/intro/step22.jpg" style="width:100%;height:auto;"></div>',
+        tooltipClass: 'step-tooltip',
+        // position: 'bottom'
+      },
+    ]
+
+    $(".course-btn").click(function () {
+      var offset = $(this).offset();
+      console.log("offset:", offset, $(this).index)
+
+      var index = Number($(this).data("index"))
+
+      $('body').find('.step-helperLayer').remove();
+
+      // more decoration here
+      var sw = $(window).width();
+      var w = $(this).width();
+      var h = $(this).height();
+      $('body').append(`<div class="step-helperLayer" style="width:${w}px;height:${h}px;top:${offset.top}px;left:${offset.left}px;box-shadow:rgba(33, 33, 33, 0.8) 0px 0px 1px 2px, rgba(33, 33, 33, 0.5) 0px 0px 0px 5000px"></div>`);
+      var stepfixedDom = $(`<div class='step-fixed-container' style="top:${offset.top + h}px;right:${sw - offset.left - w / 2}px"></div>`)
+
+      var stepImg = $(`${steps[index - 1].intro}`);
+      var sanjiaox = $(`<div class="triangle-up"></div>`)
+      var closeDom = $(`<div class="close-btn"><img src="./images/close.png" /></div>`)
+
+      // add stepfixedDom 
+      stepfixedDom.append(stepImg);
+      stepfixedDom.append(sanjiaox);
+      stepfixedDom.append(closeDom);
+      $('body').append(stepfixedDom)
+    })
+
+    $('body').on('click', '.step-fixed-container .close-btn', function () {
+      $('body').find('.step-helperLayer').remove();
+      $('body').find('.step-fixed-container').remove();
+    });
+  })
+</script>
        
 </body>
 
